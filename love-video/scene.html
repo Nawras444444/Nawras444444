@@ -1,0 +1,218 @@
+<!doctype html><html><head><meta charset="utf-8">
+<style>
+html,body{margin:0;background:#000}
+#s{display:block;width:1080px;height:1920px}
+text{font-family:'Inter Display',Inter,'DejaVu Sans','WenQuanYi Zen Hei',sans-serif;font-weight:800}
+</style></head><body>
+<svg id="s" viewBox="0 0 1080 1920" xmlns="http://www.w3.org/2000/svg"></svg>
+<canvas id="m" width="10" height="10" style="display:none"></canvas>
+<script>
+const COR="#FF6B5B",TEAL="#0F4C5C",CREAM="#FFF4E6",GOLD="#F4B942",TOTAL=34;
+const C=x=>Math.min(1,Math.max(0,x));
+const E=x=>1-Math.pow(1-C(x),3);                 // ease out
+const IO=x=>{x=C(x);return x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2};
+const EB=x=>{if(x<=0)return 0;if(x>=1)return 1;return 1+2.7*Math.pow(x-1,3)+1.7*Math.pow(x-1,2)}; // back
+const P=(t,a,d=.45)=>EB((t-a)/d);                 // pop
+const L=(t,a,b)=>C((t-a)/(b-a));
+const R=i=>{const s=Math.sin(i*127.1+311.7)*43758.5453;return s-Math.floor(s)};
+const W=1080;
+const HEART="M0 30C-60-20-30-60 0-25C30-60 60-20 0 30Z";
+const heart=(x,y,s,f=COR,rot=0,o=1)=>s>0.001?`<path d="${HEART}" transform="translate(${x},${y}) rotate(${rot}) scale(${s})" fill="${f}" opacity="${o}"/>`:"";
+const txt=(x,y,s,t,c=TEAL,a="middle",o=1,ex="")=>o>0.001?`<text x="${x}" y="${y}" font-size="${s}" fill="${c}" text-anchor="${a}" opacity="${o}" ${ex}>${t}</text>`:"";
+const pin=(x,y,s,f)=>s>0.001?`<g transform="translate(${x},${y}) scale(${s})"><path d="M0 0C-45-50-45-95 0-95C45-95 45-50 0 0Z" fill="${f}"/><circle cy="-65" r="14" fill="${CREAM}"/></g>`:"";
+function clock(x,y,r,aH,aM,col,s=1,lab=""){
+  if(s<=0.001)return"";
+  return `<g transform="translate(${x},${y}) scale(${s})"><circle r="${r}" fill="${CREAM}" stroke="${col}" stroke-width="${r*.11}"/>
+  ${[0,90,180,270].map(a=>`<line y1="${-r*.82}" y2="${-r*.7}" stroke="${TEAL}" stroke-width="${r*.06}" transform="rotate(${a})"/>`).join("")}
+  <line y2="${-r*.5}" stroke="${TEAL}" stroke-width="${r*.11}" stroke-linecap="round" transform="rotate(${aH})"/>
+  <line y2="${-r*.72}" stroke="${COR}" stroke-width="${r*.07}" stroke-linecap="round" transform="rotate(${aM})"/>
+  <circle r="${r*.09}" fill="${TEAL}"/>${lab?txt(0,r+r*.55,r*.36,lab):""}</g>`;
+}
+function ring(x,y,t,t0,col=COR,max=380){const k=L(t,t0,t0+.9);return k>0&&k<1?`<circle cx="${x}" cy="${y}" r="${40+E(k)*max}" fill="none" stroke="${col}" stroke-width="${14*(1-k)+1}" opacity="${1-k}"/>`:""}
+
+/* ---------------- SCENES (absolute time t) ---------------- */
+function s1(t){
+  const clip=E((t-.3)/1.5)*W;
+  const hp=P(t,2.58,.5), pulse=1+.07*Math.sin((t-2.58)*14)*C(1-(t-2.58)/3);
+  let fl="";for(let i=0;i<7;i++){const k=L(t,2.9+i*.12,4.6);if(k>0)fl+=heart(540+(R(i)-.5)*620,650-k*420,.5+R(i+9)*.5,i%2?GOLD:COR,(R(i)-.5)*40,1-k)}
+  return `<clipPath id="c1"><rect width="${clip}" height="1200"/></clipPath>
+  <path d="M230 800Q540 250 850 800" fill="none" stroke="${GOLD}" stroke-width="14" stroke-linecap="round" stroke-dasharray="2 30" clip-path="url(#c1)"/>
+  ${pin(230,800,P(t,.2)*1.7,TEAL)}${pin(850,800,P(t,.7)*1.7,COR)}
+  ${txt(230,885,54,"ALG",TEAL,"middle",C((t-.3)*3))}${txt(850,885,54,"NYC",COR,"middle",C((t-.8)*3))}
+  ${clock(230,500,78,(t*8)%360-70,(t*96)%360,TEAL,P(t,1.3,.5))}
+  ${clock(850,500,78,(t*8)%360+130,(t*96)%360+200,COR,P(t,1.7,.5))}
+  ${txt(230,700,0,"")}
+  ${ring(540,540,t,2.58)}${heart(540,540,hp*3.6*pulse)}${fl}`;
+}
+function s2(t){
+  const px=-900+E((t-3.9)/.9)*1050, wob=Math.sin(t*3)*.8*E((t-3.9)/.9);
+  const n=Math.max(0,Math.ceil(10*(1-L(t,4.14,8.0)))), bd=Math.abs(Math.sin((t-4.9)*9))*46*E((t-4.9)/.2)*C(1-(t-4.9)/2.2);
+  // plane along sine path
+  const pp=L(t,5.2,8.2), pxp=100+pp*880, pyp=1000-Math.sin(pp*Math.PI*2)*45-pp*30, ang=Math.atan2(-Math.cos(pp*Math.PI*2)*45*Math.PI*2/880*880/880-30/880*880,880)*0;
+  let trail="";for(let i=0;i<24;i++){const q=pp-i*.012;if(q>0)trail+=`<circle cx="${100+q*880}" cy="${1000-Math.sin(q*Math.PI*2)*45-q*30}" r="${7-i*.22}" fill="${GOLD}" opacity="${1-i/24}"/>`}
+  const rk=L(t,6.7,7.9); let ticks="";for(let i=0;i<=22;i++){const x=100+i*40;if((x-100)/880<=rk)ticks+=`<line x1="${x}" x2="${x}" y1="1110" y2="${i%5==0?1070:1088}" stroke="${TEAL}" stroke-width="${i%5==0?8:5}" stroke-linecap="round"/>`}
+  return `<g transform="translate(${px},230) rotate(${wob})">
+    <rect width="780" height="320" rx="34" fill="${TEAL}"/><rect x="560" y="20" width="5" height="280" fill="${CREAM}" opacity=".35" stroke-dasharray="14 12"/>
+    ${txt(44,78,34,"BOARDING PASS",GOLD,"start")}${txt(44,185,86,"HOME ✈ YOU",CREAM,"start")}${txt(44,270,32,"GATE 7 · SEAT 12A",CREAM,"start",.8)}
+    ${txt(670,200,130,"✈",COR)}</g>
+  <g transform="translate(120,${760-bd})"><rect width="230" height="170" rx="20" fill="${COR}"/><rect x="72" y="-36" width="86" height="42" rx="12" fill="none" stroke="${COR}" stroke-width="14"/>
+    <rect x="44" width="16" height="170" fill="${CREAM}" opacity=".5"/><rect x="170" width="16" height="170" fill="${CREAM}" opacity=".5"/></g>
+  ${txt(760,860,230,n,COR,"middle",P(t,4.3,.3))}${txt(760,935,44,"DAYS TO GO",TEAL,"middle",C((t-4.5)*3))}
+  ${trail}${pp>0&&pp<1?txt(pxp,pyp+30,100,"✈",COR,"middle",1,`transform="rotate(${-8+Math.sin(pp*Math.PI*2)*-10} ${pxp} ${pyp})"`):""}
+  <line x1="100" x2="${100+rk*880}" y1="1110" y2="1110" stroke="${TEAL}" stroke-width="8" stroke-linecap="round"/>${ticks}
+  ${txt(100,1165,34,"0",TEAL,"middle",rk>0?1:0)}${txt(980,1165,34,"KM",TEAL,"middle",rk>.97?1:0)}
+  ${ring(540,1090,t,7.98,GOLD,260)}${heart(540,1020,P(t,7.98,.5)*1.8)}`;
+}
+function s3(t){
+  const B=[["Hello",200,330],["Bonjour",880,300],["مرحبا",170,650],["Hola",910,640],["你好",540,250],["Ciao",540,480]];
+  const f=E(L(t,11.8,12.9)), sc=1-C((t-12.7)*4);
+  let o="";
+  B.forEach((w,i)=>{
+    const x=w[1]+(540-w[1])*f, y=w[2]+(560-w[2])*f+Math.sin(t*3+i*1.3)*14*(1-f);
+    const k=P(t,9.25+i*.14,.5)*sc; if(k<=0.001)return;
+    const col=i%2?COR:TEAL;
+    o+=`<g transform="translate(${x},${y}) scale(${k})"><rect x="-130" y="-62" width="260" height="124" rx="44" fill="${col}"/><path d="M-30 60L-58 106L14 60Z" fill="${col}"/>${txt(0,18,56,w[0],CREAM)}</g>`;
+  });
+  // table
+  const tk=P(t,10.5,.5);
+  let plates="";[[400,870],[680,870],[460,930],[620,930]].forEach((q,i)=>{const k=P(t,10.9+i*.1,.35);if(k>0)plates+=`<circle cx="${q[0]}" cy="${q[1]}" r="${34*k}" fill="${CREAM}" stroke="${TEAL}" stroke-width="7"/><circle cx="${q[0]}" cy="${q[1]}" r="${14*k}" fill="${GOLD}"/>`});
+  return `<ellipse cx="540" cy="900" rx="${360*tk}" ry="${110*tk}" fill="${GOLD}"/><ellipse cx="540" cy="${900+26*tk}" rx="${360*tk}" ry="${40*tk}" fill="#d99a1f" opacity=".5"/>${plates}
+  ${o}${ring(540,560,t,12.98)}${heart(540,560,P(t,12.98,.5)*3.9*(1+.06*Math.sin((t-13)*13)))}`;
+}
+function s4(t){
+  const st=(x,y,t0,tx,rot=-12,col=COR)=>{const k=E((t-t0)/.14);if(k<=0)return"";
+    const sh=t>t0&&t<t0+.25?(R(t*50)-.5)*8:0;
+    return `<g transform="translate(${x+sh},${y}) rotate(${rot}) scale(${1+(1-k)*2})" opacity="${k}"><circle r="92" fill="none" stroke="${col}" stroke-width="10" stroke-dasharray="16 9"/>${txt(0,16,46,tx,col)}</g>`};
+  const nd=Math.floor(L(t,15.1,16.3)*10); let stack="";
+  for(let i=0;i<nd;i++)stack+=`<rect x="${360+(i%2)*10}" y="${1090-i*18}" width="360" height="15" rx="4" fill="${i%2?GOLD:TEAL}"/>`;
+  const hk=P(t,15.9,.4), hs=L(t,16.0,17.2), flip=(t>17.2?180:0)+IO(L(t,17.0,17.5))*0;
+  const pk=P(t,18.5,.4), pk2=P(t,18.75,.4), ap=P(t,19.3,.35);
+  const person=(x,y,s,c)=>s>0.001?`<g transform="translate(${x},${y}) scale(${s})"><circle cy="-48" r="30" fill="${c}"/><path d="M-50 40Q-50-8 0-8Q50-8 50 40Z" fill="${c}"/></g>`:"";
+  return `<g transform="translate(540,520) rotate(${Math.sin(t*2)*1.2})"><rect x="-290" y="-330" width="580" height="660" rx="34" fill="${TEAL}"/>
+   ${txt(0,-240,58,"PASSPORT",GOLD)}<circle cy="-40" r="120" fill="none" stroke="${GOLD}" stroke-width="6" opacity=".45"/><path d="M-120-40H120M0-160V80M-84-125Q0-40-84 45M84-125Q0-40 84 45" stroke="${GOLD}" stroke-width="4" fill="none" opacity=".35"/></g>
+  ${st(400,590,14.3,"VISA")}${st(690,640,15.2,"OK",8,GOLD)}${st(660,360,17.3,"VISA",-18)}${st(380,330,17.8,"✓",10,GOLD)}${st(540,500,18.3,"OK",-6)}
+  ${stack}
+  ${hk>0?`<g transform="translate(930,760) scale(${hk})"><g transform="rotate(${hs<1?0:180*E((t-17.2)/.5)})"><path d="M-48-70H48L6-4L48 70H-48L-6-4Z" fill="none" stroke="${COR}" stroke-width="12" stroke-linejoin="round"/><path d="M-38 70H38L10 24H-10Z" fill="${GOLD}" opacity="${1-hs*.9}"/><path d="M-30-62H30L5-18H-5Z" fill="${GOLD}" opacity="${.1+hs*.9}"/></g></g>`:""}
+  ${person(160,1000,pk*1.2,TEAL)}${person(920,1000,pk2*1.2,COR)}
+  ${ring(540,500,t,19.3)}${heart(540,480,ap*4.6,COR,-12)}${txt(540,610,0,"")}`;
+}
+function s5(t){
+  const ka=P(t,20.3,.5), kb=P(t,20.75,.5), br=L(t,23.66,25.7), tk=P(t,22.6,.5);
+  // bridge bricks along bezier
+  const A=[400,330],Cc=[540,60],Bb=[680,330]; let bricks="";
+  const N=9;for(let i=0;i<N;i++){const u=(i+.5)/N, k=P(t,23.7+i*.2,.35); if(k<=0)continue;
+    const x=(1-u)*(1-u)*A[0]+2*(1-u)*u*Cc[0]+u*u*Bb[0], y=(1-u)*(1-u)*A[1]+2*(1-u)*u*Cc[1]+u*u*Bb[1];
+    const dx=2*(1-u)*(Cc[0]-A[0])+2*u*(Bb[0]-Cc[0]), dy=2*(1-u)*(Cc[1]-A[1])+2*u*(Bb[1]-Cc[1]); const a=Math.atan2(dy,dx)*180/Math.PI;
+    bricks+=`<g transform="translate(${x},${y}) rotate(${a}) scale(${k})"><rect x="-27" y="-16" width="54" height="32" rx="7" fill="${i%2?GOLD:COR}"/></g>`}
+  const dr=E((t-21.9)/1.0)*1;
+  let pl="";[[400,850],[680,850],[460,915],[620,915],[540,880]].forEach((q,i)=>{const k=P(t,22.8+i*.08,.35);if(k>0)pl+=`<circle cx="${q[0]}" cy="${q[1]}" r="${32*k}" fill="${CREAM}" stroke="${TEAL}" stroke-width="7"/>`});
+  return `<clipPath id="c5"><rect width="1080" height="${dr*700}" y="400"/></clipPath>
+  <path d="M230 440Q300 700 540 870" fill="none" stroke="${TEAL}" stroke-width="10" stroke-dasharray="3 22" stroke-linecap="round" clip-path="url(#c5)" opacity=".7"/>
+  <path d="M850 440Q780 700 540 870" fill="none" stroke="${COR}" stroke-width="10" stroke-dasharray="3 22" stroke-linecap="round" clip-path="url(#c5)" opacity=".7"/>
+  <ellipse cx="230" cy="330" rx="${175*ka}" ry="${115*ka}" fill="${TEAL}"/><ellipse cx="850" cy="330" rx="${175*kb}" ry="${115*kb}" fill="${COR}"/>
+  ${txt(230,346,44,"FAMILY A",CREAM,"middle",ka>.8?1:0)}${txt(850,346,44,"FAMILY B",CREAM,"middle",kb>.8?1:0)}
+  ${[0,1,2].map(i=>P(t,21.42+i*.1,.4)>0?`<polygon points="${150+i*80},430 ${190+i*80},430 ${170+i*80},395" fill="${GOLD}" opacity=".9" transform="scale(${P(t,21.42+i*.1,.4)})" style="transform-origin:${170+i*80}px 430px"/>`:"").join("")}
+  ${[0,1,2].map(i=>{const k=P(t,21.55+i*.1,.4);return k>0?`<circle cx="${770+i*80}" cy="415" r="${20*k}" fill="${GOLD}"/>`:""}).join("")}
+  ${bricks}
+  <ellipse cx="540" cy="${880}" rx="${300*tk}" ry="${95*tk}" fill="${GOLD}"/>${pl}
+  ${txt(540,1040,56,"ONE TABLE",TEAL,"middle",C((t-22.6)*4))}`;
+}
+function s6(t){
+  const cs=["ALG","PAR","NYC","DXB","TYO","MTL"], conv=E(L(t,27.6,30.3));
+  const pos=[[200,280],[540,280],[880,280],[200,640],[540,640],[880,640]];
+  let o="",ln="";
+  const dl=E(L(t,26.8,28.3));
+  [[0,1],[1,2],[3,4],[4,5],[0,3],[1,4],[2,5]].forEach(p=>{ln+=`<line x1="${pos[p[0]][0]}" y1="${pos[p[0]][1]}" x2="${pos[p[0]][0]+(pos[p[1]][0]-pos[p[0]][0])*dl}" y2="${pos[p[0]][1]+(pos[p[1]][1]-pos[p[0]][1])*dl}" stroke="${GOLD}" stroke-width="7" stroke-dasharray="2 18" stroke-linecap="round"/>`});
+  cs.forEach((c,i)=>{
+    const k=P(t,26.45+i*.1,.45);
+    const aM=((i*70+30)*(1-conv)+(t-26)*(90+i*20)*(1-conv)+0), aH=(i*57+20)*(1-conv)+ 60*conv;
+    o+=clock(pos[i][0],pos[i][1],118,aH,aM*1+ (conv>0.999?0:0) + (conv>=1?0:0)+ (-60)*conv,i%2?COR:TEAL,k,c);
+  });
+  return `${ln}${o}${ring(540,460,t,30.3,COR,420)}${heart(540,460,P(t,30.3,.5)*2.6*(1+.05*Math.sin((t-30.3)*12)))}`;
+}
+function s7(t){
+  const bk=P(t,31.15,.7), pul=1+.04*Math.sin((t-31.3)*8);
+  let cf="";for(let i=0;i<26;i++){const k=L(t,31.25,33.6+R(i)*.4), a=R(i)*Math.PI*2, d=(150+R(i+5)*520)*E(k);
+    if(k>0&&k<1)cf+=heart(540+Math.cos(a)*d,540+Math.sin(a)*d+k*k*160,.45+R(i+20)*.6,[COR,GOLD,TEAL][i%3],(R(i)-.5)*90,1-k*k)}
+  return `<g transform="translate(540,540) scale(${bk*pul})"><circle r="260" fill="${COR}"/><circle r="260" fill="none" stroke="${GOLD}" stroke-width="12" transform="scale(1.1)"/>${heart(0,-12,4.4,CREAM)}</g>
+  ${ring(540,540,t,31.2,GOLD,520)}${cf}
+  ${txt(540,960,52,"LOVE KNOWS NO BORDERS",COR,"middle",C((t-32.3)*3),`letter-spacing="3"`)}`;
+}
+
+/* scenes: [start, fn] ; wipe boundaries = starts */
+const SC=[[0,s1],[3.8,s2],[8.8,s3],[13.8,s4],[19.9,s5],[26.3,s6],[30.8,s7]];
+
+/* ---------------- background ---------------- */
+function bg(t){
+  let rays="";const n=14;for(let i=0;i<n;i++){const a=i*360/n+t*4;rays+=`<path d="M540 640L${540+Math.cos((a-6)*Math.PI/180)*1500} ${640+Math.sin((a-6)*Math.PI/180)*1500}L${540+Math.cos((a+6)*Math.PI/180)*1500} ${640+Math.sin((a+6)*Math.PI/180)*1500}Z" fill="${GOLD}" opacity=".13"/>`}
+  const br=1+.015*Math.sin(t*2);
+  const arcs=(x,y,sx,sy)=>[ [COR,520],[GOLD,430],[TEAL,340],[CREAM,250] ].map(a=>`<circle cx="${x}" cy="${y}" r="${a[1]*br}" fill="${a[0]}"/>`).join("");
+  return `<rect width="1080" height="1920" fill="${CREAM}"/>
+  <g>${rays}</g>
+  <g clip-path="url(#cl)">${arcs(1080,0)}</g>
+  <g clip-path="url(#cl)">${arcs(0,1920)}</g>`;
+}
+
+/* ---------------- captions ---------------- */
+let WORDS=null,SEGS=[];
+const mctx=document.getElementById("m").getContext("2d");
+function build(words){
+  WORDS=words.map(w=>({w:w[0].trim(),a:w[1],b:w[2]}));
+  let cur=[];
+  WORDS.forEach((w,i)=>{cur.push(w);const nx=WORDS[i+1];
+    if(!nx||/[.!?]$/.test(w.w)||nx.a-w.b>.65){SEGS.push(cur);cur=[]}});
+  SEGS.forEach(sg=>{
+    for(const fs of [78,70,62]){
+      mctx.font=`800 ${fs}px 'Inter Display',Inter,sans-serif`;
+      const lines=[[]];let wd=0;
+      sg.forEach(w=>{const ww=mctx.measureText(w.w+" ").width; if(wd+ww>900&&lines[lines.length-1].length){lines.push([]);wd=0}lines[lines.length-1].push(w);wd+=ww});
+      sg.fs=fs;sg.lines=lines.map(l=>({words:l,width:l.reduce((s,w)=>s+mctx.measureText(w.w+" ").width,0)}));
+      if(lines.length<=3)break;
+    }
+    sg.t0=sg[0].a-.08;sg.t1=sg[sg.length-1].b+.35;
+  });
+}
+function captions(t){
+  const sg=SEGS.find(s=>t>=s.t0&&t<s.t1);if(!sg)return"";
+  const fin=E((t-sg.t0)/.25), fout=1-C((t-(sg.t1-.2))/.2);
+  const fs=sg.fs, lh=fs*1.24, y0=1380-(sg.lines.length-1)*lh/2; mctx.font=`800 ${fs}px 'Inter Display',Inter,sans-serif`;
+  let o="";
+  sg.lines.forEach((ln,li)=>{
+    let x=540-ln.width/2;
+    ln.words.forEach(w=>{
+      const ww=mctx.measureText(w.w+" ").width;
+      const done=t>=w.b, active=t>=w.a&&t<w.b+.12, vis=t>=w.a-.05;
+      const k=EB((t-(w.a-.02))/.22);
+      const col=active?COR:(done?TEAL:TEAL);
+      const op=(vis?1:.22)*fin*fout;
+      const sc=active?1+.06*Math.sin(C((t-w.a)/.25)*Math.PI):1;
+      const cx=x+ww/2-mctx.measureText(" ").width/2, y=y0+li*lh+(vis?0:10);
+      o+=`<g transform="translate(${cx},${y}) scale(${sc})"><text x="0" y="0" font-size="${fs}" text-anchor="middle" fill="${CREAM}" stroke="${CREAM}" stroke-width="18" stroke-linejoin="round" opacity="${op}">${w.w}</text><text x="0" y="0" font-size="${fs}" text-anchor="middle" fill="${col}" opacity="${op}">${w.w}</text></g>`;
+      x+=ww;
+    });
+  });
+  return o;
+}
+
+/* ---------------- wipe (70s stripe) ---------------- */
+function wipe(t){
+  const cols=[COR,GOLD,TEAL];let o="";
+  SC.slice(1).forEach(([b])=>{
+    cols.forEach((c,i)=>{
+      const s=b-.4+.05*i, u=(t-s)/.8; if(u<=0||u>=1)return;
+      let x; if(u<.3)x=-W+W*E(u/.3); else if(u<.7)x=0; else x=W*IO((u-.7)/.3);
+      o+=`<rect x="${x}" y="${i*640}" width="${W}" height="641" fill="${c}"/>`;
+    });
+  });
+  return o;
+}
+
+function badge(t){const k=E(t/.6);return `<g opacity="${k}" transform="translate(0,${(1-k)*-40})"><rect x="130" y="165" width="820" height="112" rx="56" fill="#FFF4E6" opacity=".92"/>${txt(540,215,40,"LOVE ACROSS BORDERS",TEAL,"middle",1,`letter-spacing="8"`)}<rect x="440" y="238" width="200" height="8" rx="4" fill="${COR}"/><rect x="440" y="254" width="200" height="8" rx="4" fill="${GOLD}"/></g>`}
+function draw(t){
+  let si=0;SC.forEach((s,i)=>{if(t>=s[0]+.05)si=i});
+  const sc=SC[si];
+  const intro=E(t/.5);
+  document.getElementById("s").innerHTML=`<defs><clipPath id="cl"><rect width="1080" height="1920"/></clipPath></defs>${bg(t)}<g opacity="${intro}" transform="translate(540,114) scale(.93) translate(-540,0)">${sc[1](t)}</g>${badge(t)}${captions(t)}${wipe(t)}`;
+}
+window.init=async w=>{await document.fonts.load("800 78px 'Inter Display'");await document.fonts.load("800 78px Inter");await document.fonts.ready;build(w);window.ready=true};
+</script></body></html>
