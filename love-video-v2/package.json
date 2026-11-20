@@ -1,0 +1,20 @@
+{
+  "name": "love-video-v2",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@fontsource/lora": "^5.3.0",
+    "@fontsource/poppins": "^5.3.0",
+    "animejs": "^4.5.0",
+    "d3": "^7.9.2",
+    "topojson-client": "^3.1.0",
+    "world-atlas": "^2.0.2"
+  }
+}
