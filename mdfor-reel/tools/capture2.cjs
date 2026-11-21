@@ -1,0 +1,20 @@
+const { chromium } = require('playwright');
+(async () => {
+  const b = await chromium.launch();
+  const p = await b.newPage({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 2 });
+  await p.goto('https://mdfor.dev/', { waitUntil: 'networkidle' });
+  await p.waitForTimeout(1200);
+  await p.getByRole('button', { name: 'Outline', exact: true }).click();
+  await p.waitForTimeout(800);
+  await p.mouse.move(700, 880);
+  await p.waitForTimeout(500);
+  await p.screenshot({ path: 'assets/shots/outline_clean.png' });
+  await p.keyboard.press('Escape');
+  await p.waitForTimeout(400);
+  await p.getByRole('button', { name: 'Toggle theme' }).click();
+  await p.mouse.move(700, 880);
+  await p.waitForTimeout(900);
+  await p.screenshot({ path: 'assets/shots/dark_clean.png' });
+  await b.close();
+  console.log('ok');
+})().catch(e => { console.error('FAILED', e.message); process.exit(1); });

@@ -1,0 +1,176 @@
+{
+ "url": "https://mdfor.dev",
+ "title": "Online Markdown Editor with Live Preview | mdfor.dev",
+ "description": "A fast, private online markdown editor with instant live preview. Your content stays on your device and is never sent anywhere.",
+ "themeColor": [
+  "#faf7f1",
+  "#1b1916"
+ ],
+ "text_colors": [
+  [
+   "#2c2722",
+   167
+  ],
+  [
+   "#a99e8d",
+   123
+  ],
+  [
+   "#6b6256",
+   23
+  ],
+  [
+   "#b25a37",
+   5
+  ],
+  [
+   "#032f62",
+   5
+  ],
+  [
+   "#005cc5",
+   4
+  ],
+  [
+   "#d73a49",
+   2
+  ],
+  [
+   "#fffdf8",
+   2
+  ],
+  [
+   "#ffffff",
+   1
+  ],
+  [
+   "#1a7f37",
+   1
+  ]
+ ],
+ "background_colors": [
+  [
+   "#f1ebe0",
+   52
+  ],
+  [
+   "#faf7f1",
+   49
+  ],
+  [
+   "#fffdf8",
+   1
+  ],
+  [
+   "#b25a37",
+   0
+  ],
+  [
+   "#e7dfd0",
+   0
+  ]
+ ],
+ "font_families": [
+  [
+   "JetBrains Mono",
+   154
+  ],
+  [
+   "Hanken Grotesk",
+   101
+  ],
+  [
+   "math",
+   32
+  ],
+  [
+   "Fraunces Variable",
+   17
+  ],
+  [
+   "KaTeX_Main",
+   17
+  ],
+  [
+   "KaTeX_Math",
+   14
+  ]
+ ],
+ "font_weights": [
+  [
+   "JetBrains Mono 400",
+   151
+  ],
+  [
+   "Hanken Grotesk 400",
+   71
+  ],
+  [
+   "math 400",
+   32
+  ],
+  [
+   "Fraunces Variable 600",
+   17
+  ],
+  [
+   "KaTeX_Main 400",
+   17
+  ],
+  [
+   "KaTeX_Math 400",
+   14
+  ],
+  [
+   "Hanken Grotesk 500",
+   13
+  ],
+  [
+   "Hanken Grotesk 700",
+   12
+  ],
+  [
+   "Hanken Grotesk 600",
+   5
+  ],
+  [
+   "JetBrains Mono 500",
+   3
+  ],
+  [
+   "KaTeX_Size2 400",
+   1
+  ]
+ ],
+ "css_vars": {
+  "--bg-primary": "#faf7f1",
+  "--bg-secondary": "#f1ebe0",
+  "--bg-tertiary": "#e7dfd0",
+  "--bg-surface": "#fffdf8",
+  "--text-primary": "#2c2722",
+  "--text-secondary": "#6b6256",
+  "--text-muted": "#a99e8d",
+  "--border-color": "#e6ddcd",
+  "--border-hover": "#d4c9b5",
+  "--accent": "#b25a37",
+  "--accent-muted": "#8f6b52",
+  "--accent-glow": "#b25a371f",
+  "--shadow-sm": "0 1px 2px #2c27220a",
+  "--shadow-md": "0 4px 12px -2px #2c272214",
+  "--shadow-lg": "0 8px 24px -4px #2c27221a",
+  "--code-bg": "#f1ebe0",
+  "--blockquote-border": "#d4c9b5",
+  "--link-color": "#b25a37",
+  "--alert-note": "#0969da",
+  "--alert-tip": "#1a7f37",
+  "--alert-important": "#8250df",
+  "--alert-warning": "#9a6700",
+  "--alert-caution": "#cf222e",
+  "--selection-bg": "#b25a372e",
+  "--selection-fg": "#2c2722",
+  "--font-display": "\"Fraunces Variable\", \"Fraunces\", Georgia, \"Times New Roman\", serif",
+  "--font-sans": "\"Hanken Grotesk\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+  "--font-mono": "\"JetBrains Mono\", \"SF Mono\", \"Fira Code\", Consolas, monospace"
+ },
+ "wordmark": null
+}
