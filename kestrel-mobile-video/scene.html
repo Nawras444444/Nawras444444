@@ -1,0 +1,487 @@
+<!doctype html><html><head><meta charset="utf-8">
+<style>
+@font-face{font-family:KHead;src:url(file:///usr/share/fonts/opentype/inter/InterDisplay-Black.otf);font-weight:900}
+@font-face{font-family:KHeadXB;src:url(file:///usr/share/fonts/opentype/inter/InterDisplay-ExtraBold.otf);font-weight:800}
+@font-face{font-family:KText;src:url(file:///usr/share/fonts/opentype/inter/Inter-SemiBold.otf);font-weight:600}
+@font-face{font-family:KMono;src:url(file:///usr/share/fonts/truetype/jetbrains-mono/JetBrainsMono-Medium.ttf);font-weight:500}
+@font-face{font-family:KMonoB;src:url(file:///usr/share/fonts/truetype/jetbrains-mono/JetBrainsMono-Bold.ttf);font-weight:700}
+html,body{margin:0;background:#F4F1EA}canvas{display:block}
+</style></head><body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script>
+/* =====================================================================
+   KESTREL MOBILE — 70 s motion graphics, 1080x1920 @ 30 fps
+   draw(t) renders the frame at time t (seconds). Deterministic.
+
+   CLIENT FIGURES: leave as null to render bracketed placeholders.
+   Fill in only with approved, verified numbers, then re-render.
+   ===================================================================== */
+const CONFIG={
+  speedMbps:null,        // e.g. 940   -> Scene 4 gauge readout
+  priceText:null,        // e.g. '€20' -> Scene 7 price
+  offerTerms:null,       // e.g. '50% off for 3 months' -> Scene 7 third check
+  url:null               // e.g. 'kestrel.example' -> Scene 8
+};
+const PH={speed:'[X]',price:'[€XX]',offer:'[Offer terms]',url:'[kestrel-url.example]'};
+
+const W=1080,H=1920,cv=document.getElementById('c'),ctx=cv.getContext('2d');
+const BONE='#F4F1EA',INK='#111214',ORANGE='#FF5B1F',STEEL='#8A8F98';
+const HEAD='KHead',HEADXB='KHeadXB',TEXT='KText',MONO='KMono',MONOB='KMonoB';
+const SAFE=90;
+
+/* ---------- helpers ---------- */
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const lerp=(a,b,t)=>a+(b-a)*t;
+const P=(t,a,b)=>clamp((t-a)/(b-a));
+const E={
+  lin:x=>x,
+  out:x=>1-Math.pow(1-x,3),
+  out4:x=>1-Math.pow(1-x,4),
+  expo:x=>x>=1?1:1-Math.pow(2,-10*x),
+  in:x=>x*x*x,
+  io:x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2,
+  back:(x,c=1.4)=>1+(c+1)*Math.pow(x-1,3)+c*Math.pow(x-1,2),
+};
+function rnd(i){const s=Math.sin(i*127.1+311.7)*43758.5453;return s-Math.floor(s)}
+function font(fam,size,w){return `${w||''} ${size}px ${fam}`.trim()}
+function text(s,x,y,size,o={}){
+  ctx.save();ctx.translate(x,y);if(o.rot)ctx.rotate(o.rot);
+  const sc=o.scale??1;ctx.scale(sc,sc);ctx.globalAlpha*=(o.a??1);
+  ctx.font=font(o.f||HEAD,size,o.w);ctx.textAlign=o.align||'center';ctx.textBaseline=o.base||'alphabetic';
+  ctx.letterSpacing=(o.ls??0)+'px';ctx.fillStyle=o.c||INK;ctx.fillText(s,0,0);ctx.restore();
+}
+function tw(s,size,f=HEAD,ls=0){ctx.save();ctx.font=font(f,size);ctx.letterSpacing=ls+'px';const w=ctx.measureText(s).width;ctx.restore();return w}
+function rrect(x,y,w,h,r){ctx.beginPath();ctx.roundRect(x,y,w,h,r)}
+function circle(x,y,r,c){ctx.beginPath();ctx.arc(x,y,Math.max(0,r),0,Math.PI*2);ctx.fillStyle=c;ctx.fill()}
+// deterministic "rolling digits" that settle on the final string
+function rolling(final,t,t0,t1,len){
+  if(t>=t1)return final;
+  const n=len||3;let s='';const k=Math.floor(t*30);
+  for(let i=0;i<n;i++)s+=Math.floor(rnd(k*7+i*13)*10);
+  return s;
+}
+// count-up toward a number, or roll then land on the placeholder
+function readout(val,ph,t,t0,t1,fmt=v=>String(v)){
+  if(val==null)return t<t0?'000':rolling(ph,t,t0,t1,3);
+  if(typeof val==='string')return t<t1?rolling(val,t,t0,t1,3):val;
+  return fmt(Math.round(val*E.out4(P(t,t0,t1))));
+}
+
+/* ---------- the mark: dot + three wing arcs ---------- */
+// arc geometry in mark-local units (scale s). Each arc: radius, start, end (radians), offset
+const ARCS=[
+  {r:92, a0:Math.PI*0.98,a1:Math.PI*1.42,ox:0,  oy:0},
+  {r:158,a0:Math.PI*0.98,a1:Math.PI*1.60,ox:-6, oy:6},
+  {r:224,a0:Math.PI*0.98,a1:Math.PI*1.78,ox:-12,oy:12},
+];
+const MARK_STROKE=40;
+function drawArc(i,cx,cy,s,rot,alpha,col){
+  const A=ARCS[i];ctx.save();ctx.translate(cx,cy);ctx.rotate(rot);ctx.globalAlpha*=alpha;
+  ctx.beginPath();ctx.arc(A.ox*s,A.oy*s,A.r*s,A.a0,A.a1);ctx.lineCap='round';
+  ctx.lineWidth=MARK_STROKE*s;ctx.strokeStyle=col||ORANGE;ctx.stroke();ctx.restore();
+}
+// arcs spin in from edges (dir=+1) or with reversed spin (dir=-1)
+function markAssemble(t,t0,cx,cy,s,dir=1){
+  const from=[[-700,-260],[0,-1250],[760,180]]; // left, top, right edges (relative)
+  for(let i=0;i<3;i++){
+    const st=t0+i*0.16,p=P(t,st,st+1.25);if(p<=0)continue;
+    const e=E.back(p,1.25),m=E.out4(p);
+    const dx=lerp(from[i][0],0,m),dy=lerp(from[i][1],0,m);
+    const rot=dir*lerp(-Math.PI*1.5,0,e); // 270 degrees, overshoot then settle
+    drawArc(i,cx+dx,cy+dy,s,rot,clamp(p*4));
+  }
+  // lock pulse
+  const lp=P(t,t0+1.62,t0+2.0);
+  if(lp>0&&lp<1){ctx.save();ctx.globalAlpha=(1-lp)*0.35;ctx.beginPath();ctx.arc(cx,cy,(250+lp*120)*s,0,Math.PI*2);
+    ctx.lineWidth=4;ctx.strokeStyle=ORANGE;ctx.stroke();ctx.restore();}
+}
+function markStatic(cx,cy,s){for(let i=0;i<3;i++)drawArc(i,cx,cy,s,0,1)}
+
+/* ---------- small UI chrome ---------- */
+function chrome(t,dark){
+  const sc=SCENES.findIndex(x=>t>=x[0]&&t<x[1]);const idx=Math.max(0,sc)+1;
+  ctx.save();ctx.globalAlpha=0.75;
+  text(String(idx).padStart(2,'0')+' / 08',W-SAFE,SAFE+40,26,{f:MONO,align:'right',c:dark?'#C9C6BE':STEEL,ls:2});
+  ctx.restore();
+}
+const SCENES=[[0,6],[6,14],[14,22],[22,32],[32,42],[42,52],[52,62],[62,70.01]];
+
+/* =============================== SCENE 1 =============================== */
+function s1(t){
+  ctx.fillStyle=BONE;ctx.fillRect(0,0,W,H);
+  const cx=W/2,lineY=1010;
+  // dot pulse 0-1.2
+  let dotR=18;
+  if(t<1.25){const p=t/1.25;dotR=18*(E.back(clamp(t/0.35),2.2))*(1+0.18*Math.sin(p*Math.PI*4)*(1-p));}
+  // stretch into line 1.2-1.75
+  const sp=E.out4(P(t,1.2,1.75));
+  // snap back 5.25-5.55 (ease-in = fast exit)
+  const sb=E.in(P(t,5.25,5.55));
+  const half=lerp(0,400,sp)*(1-sb);
+  const th=lerp(dotR*2,8,sp);const thick=lerp(th,dotR*2,sb);
+  if(half<1){circle(cx,lineY,sb>0?18:dotR,INK)}
+  else{rrect(cx-half-thick/2,lineY-thick/2,half*2+thick,thick,thick/2);ctx.fillStyle=INK;ctx.fill();}
+  // typewriter "LAG." 3 frames per char from 1.9 s
+  const word='LAG.';const t0=1.9,cps=0.1;
+  const shrink=E.in(P(t,4.55,5.2));
+  if(t>=t0&&shrink<1){
+    const n=Math.min(word.length,Math.floor((t-t0)/cps)+1);
+    const size=380;ctx.save();ctx.translate(cx,lineY-70);ctx.scale(1-shrink,1-shrink);
+    ctx.translate(0,shrink*-0);
+    const full=tw(word,size,HEAD,-18);const vis=word.slice(0,n);
+    // left-anchored typing, centred on final width
+    text(vis,-full/2,0,size,{align:'left',ls:-18});
+    // cursor block
+    const blink=(Math.floor(t*30/8)%2===0)||n<word.length;
+    if(blink&&t<4.4){const cxw=-full/2+tw(vis,size,HEAD,-18)+14;ctx.fillStyle=ORANGE;ctx.fillRect(cxw,-size*0.72,22,size*0.74);}
+    ctx.restore();
+  }
+  // collapsed word becomes a dot travelling into the line centre
+  if(shrink>0&&t<5.6){const y=lerp(lineY-200,lineY,E.io(P(t,4.9,5.3)));circle(cx,y,18*E.out(P(t,4.85,5.0))*(1-P(t,5.3,5.4)),INK)}
+  // small mono label
+  text('ms ▸ latency',cx,lineY+110,28,{f:MONO,c:STEEL,a:P(t,2.6,3.0)*(1-P(t,4.6,4.9)),ls:4});
+}
+
+/* =============================== SCENE 2 =============================== */
+function s2(t){
+  ctx.fillStyle=BONE;ctx.fillRect(0,0,W,H);
+  const bars=[['VIDEO',62],['FILE',88],['CALL',41]];
+  const x0=SAFE+60,bw=W-2*(SAFE+60),y0=700,gap=210,bh=34;
+  const out=E.in(P(t,13.55,13.95));
+  bars.forEach(([lab,pct],i)=>{
+    const st=6.35+i*0.28;const a=E.out(P(t,st,st+0.4));if(a<=0)return;
+    const y=y0+i*gap+(1-a)*40;const ox=-out*(W+200)*(1+i*0.15);
+    ctx.save();ctx.translate(ox,0);ctx.globalAlpha=a;
+    text(lab,x0,y-28,34,{f:MONOB,align:'left',ls:6});
+    // fill grows with ease-out then holds with jitter
+    const g=E.out(P(t,st+0.1,st+1.9));
+    const stall=t>st+1.9;
+    const jit=stall?(Math.sin(t*41+i*3)*0.5+Math.sin(t*23.3+i)*0.5)*0.004:0;
+    const f=clamp(pct/100*g+jit);
+    let shown=Math.round(pct*g);
+    text(shown+'%',x0+bw,y-28,34,{f:MONO,align:'right',c:stall?ORANGE:INK});
+    rrect(x0,y,bw,bh,bh/2);ctx.fillStyle='rgba(138,143,152,0.22)';ctx.fill();
+    rrect(x0,y,Math.max(bh,bw*f),bh,bh/2);ctx.fillStyle=INK;ctx.fill();
+    // stalled spinner at bar head
+    if(stall){const hx=x0+bw*f-bh/2,hy=y+bh/2;ctx.save();ctx.translate(hx,hy);ctx.rotate(t*5+i);ctx.beginPath();ctx.arc(0,0,8,0,Math.PI*1.4);ctx.lineWidth=4;ctx.lineCap='round';ctx.strokeStyle=BONE;ctx.stroke();ctx.restore()}
+    ctx.restore();
+  });
+  // corner counter: ticks slowly, stutters, then freezes at "waiting" (~8.3 s)
+  const ca=E.out(P(t,6.5,6.9))*(1-out);
+  if(ca>0){
+    const frozen=8.3;const tt=Math.min(t,frozen)-6.5;
+    let v=Math.max(0,tt)*0.9;                // slow tick
+    v+=Math.floor(Math.max(0,tt)*3)%3===0?0:-0.04; // stutter
+    const s=Math.max(0,v).toFixed(2).padStart(5,'0');
+    ctx.save();ctx.globalAlpha=ca;
+    text('ELAPSED',W-SAFE,y0+3*gap+40,26,{f:MONO,align:'right',c:STEEL,ls:4});
+    const flick=t>frozen&&(Math.floor(t*30/12)%2===0);
+    text('00:'+s,W-SAFE,y0+3*gap+100,58,{f:MONOB,align:'right',c:flick?STEEL:INK});
+    ctx.restore();
+  }
+}
+
+/* =============================== SCENE 3 =============================== */
+function wordmark(t,t0,cx,y,size,opts={}){
+  // "Kestrel" assembled from letter tiles sliding in from the left
+  const word='Kestrel',ls=-size*0.045;const total=tw(word,size,HEAD,ls);
+  let x=cx-total/2;
+  for(let i=0;i<word.length;i++){
+    const ch=word[i];const w=tw(ch,size,HEAD,ls);
+    const st=t0+i*0.07,p=P(t,st,st+0.42);if(p<=0){x+=w;continue}
+    const e=E.expo(p);const dx=lerp(-140,0,e);
+    // tile
+    const tileA=(1-P(t,st+0.18,st+0.5));
+    if(tileA>0&&!opts.noTiles){ctx.save();ctx.globalAlpha=tileA*clamp(p*3);ctx.fillStyle=i%2?INK:ORANGE;
+      ctx.fillRect(x+dx-4,y-size*0.78,w+8,size*0.98);ctx.restore();}
+    ctx.save();ctx.beginPath();ctx.rect(x-6,y-size,w+12,size*1.3);ctx.clip();
+    text(ch,x+dx,y,size,{align:'left',ls,a:clamp(p*2.5),c:INK});ctx.restore();
+    x+=w;
+  }
+  // MOBILE in mono, tracked, letter by letter
+  const m='MOBILE',ms=size*0.27,mls=size*0.11;const mt=tw(m,ms,MONOB,mls)-mls;
+  let mx=cx-mt/2;const my=y+size*0.5;
+  for(let i=0;i<m.length;i++){const st=t0+0.55+i*0.06,p=E.out(P(t,st,st+0.3));
+    text(m[i],mx,my+(1-p)*18,ms,{f:MONOB,align:'left',a:p,c:INK});mx+=tw(m[i],ms,MONOB,0)+mls}
+  return {total};
+}
+function s3(t){
+  ctx.fillStyle=BONE;ctx.fillRect(0,0,W,H);
+  const mx=W/2+60,my=820,s=1.25;
+  markAssemble(t,14.05,mx,my,s,1);
+  // dot sits at the wing root once locked
+  const dp=P(t,15.55,15.85);if(dp>0)circle(mx+18*s,my+8*s,20*s*E.back(dp,2),INK);
+  wordmark(t,16.0,W/2,1170,200);
+}
+
+/* =============================== SCENE 4 =============================== */
+function phoneScreen(g,t,w,h){
+  // draws the phone screen content into offscreen ctx g (flat), size w x h
+  g.fillStyle='#17181B';g.fillRect(0,0,w,h);
+  g.textBaseline='alphabetic';
+  // status bar
+  g.font=font(MONOB,26);g.fillStyle='#D8D5CD';g.letterSpacing='3px';g.textAlign='left';g.fillText('KESTREL 5G',44,78);
+  for(let i=0;i<4;i++){g.fillStyle=i<4?ORANGE:'#444';g.fillRect(w-150+i*22,78-12-i*8,14,12+i*8)}
+  // gauge
+  const cx=w/2,cy=h*0.38,R=w*0.36;const a0=Math.PI*0.75,a1=Math.PI*2.25;
+  const k=E.io(P(t,23.9,26.4));const target=0.84;const v=k*target+(t>26.4?Math.sin((t-26.4)*9)*0.006*Math.exp(-(t-26.4)*2):0);
+  g.lineCap='round';
+  g.beginPath();g.arc(cx,cy,R,a0,a1);g.lineWidth=34;g.strokeStyle='#2A2C31';g.stroke();
+  if(v>0.001){g.beginPath();g.arc(cx,cy,R,a0,a0+(a1-a0)*v);g.strokeStyle=ORANGE;g.stroke();}
+  // ticks
+  for(let i=0;i<=20;i++){const a=a0+(a1-a0)*i/20;const r1=R-40,r2=R-(i%5===0?72:56);g.beginPath();g.moveTo(cx+Math.cos(a)*r1,cy+Math.sin(a)*r1);g.lineTo(cx+Math.cos(a)*r2,cy+Math.sin(a)*r2);g.lineWidth=i%5===0?5:3;g.strokeStyle=i/20<=v?'#E8E5DD':'#55585F';g.stroke()}
+  // needle
+  const na=a0+(a1-a0)*v;g.beginPath();g.moveTo(cx-Math.cos(na)*24,cy-Math.sin(na)*24);g.lineTo(cx+Math.cos(na)*(R-84),cy+Math.sin(na)*(R-84));g.lineWidth=9;g.strokeStyle=BONE;g.stroke();
+  g.beginPath();g.arc(cx,cy,20,0,7);g.fillStyle=ORANGE;g.fill();g.beginPath();g.arc(cx,cy,8,0,7);g.fillStyle='#17181B';g.fill();
+  // readout
+  const num=readout(CONFIG.speedMbps,PH.speed,t,24.1,26.6);
+  g.textAlign='center';g.letterSpacing='-2px';g.font=font(MONOB,140);g.fillStyle=BONE;g.fillText(num,cx,cy+R+135);
+  g.letterSpacing='8px';g.font=font(MONO,34);g.fillStyle=STEEL;g.fillText('MBPS',cx+4,cy+R+192);
+  // little sparkline at the bottom
+  g.beginPath();for(let i=0;i<=60;i++){const x=60+(w-120)*i/60;const p=clamp((t-23.9)*0.5-i/60*0.6+0.3);const y=h-125-p*(34+24*rnd(i))*E.out(P(t,24,27));i?g.lineTo(x,y):g.moveTo(x,y)}
+  g.lineWidth=4;g.strokeStyle=ORANGE;g.lineJoin='round';g.stroke();
+  g.font=font(MONO,22);g.letterSpacing='3px';g.fillStyle='#6A6E76';g.textAlign='left';g.fillText('THROUGHPUT',60,h-90);
+}
+const off=document.createElement('canvas');off.width=520;off.height=1060;const og=off.getContext('2d');
+function s4(t){
+  ctx.fillStyle=BONE;ctx.fillRect(0,0,W,H);
+  // speed lines in background
+  const sl=P(t,24,26.6)*(1-P(t,30.8,31.6));
+  if(sl>0){ctx.save();for(let i=0;i<14;i++){const y=380+rnd(i)*1050;const len=120+rnd(i+3)*380;const sp=900+rnd(i+5)*900;const x=((W+len)-((t*sp+rnd(i+9)*3000)%(W+len*2)));
+    ctx.globalAlpha=sl*0.28;ctx.fillStyle=STEEL;ctx.fillRect(x,y,len,3)}ctx.restore();}
+  const rise=E.out4(P(t,22.0,23.25));const tilt=lerp(0.32,0.13,E.out(P(t,22.0,24.0)));
+  const exit=E.in(P(t,31.55,31.98));
+  const pw=520,ph=1060,cx=W/2,cy=lerp(H+700,850,rise)+exit*1400;
+  // soft shadow
+  ctx.save();ctx.globalAlpha=0.22*rise;const sg=ctx.createRadialGradient(cx+40,cy+ph/2+40,10,cx+40,cy+ph/2+40,360);sg.addColorStop(0,'rgba(17,18,20,1)');sg.addColorStop(1,'rgba(17,18,20,0)');
+  ctx.fillStyle=sg;ctx.translate(0,0);ctx.beginPath();ctx.ellipse(cx+40,cy+ph/2+50,330,70,0,0,7);ctx.fill();ctx.restore();
+  // pseudo-3D tilt: rotate + skew, with a thickness layer
+  ctx.save();ctx.translate(cx,cy);ctx.rotate(-tilt*0.55);ctx.transform(1,tilt*0.35,-tilt*0.5,1,0,0);
+  // thickness (side) layers
+  for(let k=7;k>=1;k--){rrect(-pw/2+k*3.2,-ph/2+k*3.0,pw,ph,70);ctx.fillStyle=k>2?'#000':'#2A2B2F';ctx.fill()}
+  rrect(-pw/2,-ph/2,pw,ph,70);ctx.fillStyle=INK;ctx.fill();
+  phoneScreen(og,t,off.width,off.height);
+  ctx.save();rrect(-pw/2+18,-ph/2+18,pw-36,ph-36,54);ctx.clip();ctx.drawImage(off,-pw/2+18,-ph/2+18,pw-36,ph-36);
+  // glare
+  const gl=ctx.createLinearGradient(-pw/2,-ph/2,pw/2,ph/2);gl.addColorStop(0,'rgba(255,255,255,0.10)');gl.addColorStop(0.45,'rgba(255,255,255,0)');ctx.fillStyle=gl;ctx.fillRect(-pw/2,-ph/2,pw,ph);
+  ctx.restore();
+  // camera pill
+  rrect(-60,-ph/2+34,120,28,14);ctx.fillStyle='#000';ctx.fill();
+  ctx.restore();
+  // label
+  const la=E.out(P(t,26.7,27.2))*(1-exit);
+  ctx.save();ctx.globalAlpha=la;
+  const lab='MEASURED ON KESTREL 5G';const lw=tw(lab,30,MONO,5);
+  circle(W/2-lw/2-22,1478-10,9,ORANGE);
+  text(lab,W/2+10,1478,30,{f:MONO,c:INK,ls:5});
+  ctx.restore();
+  // headline readout
+  const ha=E.out(P(t,26.6,27.1))*(1-exit);
+  if(ha>0){const num=CONFIG.speedMbps==null?PH.speed:String(CONFIG.speedMbps);text(num+' Mbps',W/2,250+(1-ha)*30,104,{a:ha,ls:-4})}
+}
+
+/* =============================== SCENE 5 =============================== */
+const GX=7,GY=8,gx=i=>150+i*130,gy=j=>480+j*120;
+const HUB=[3,4];
+const ROUTES={
+  A0:[[3,4],[4,3],[5,2],[6,1]],
+  A1:[[3,4],[4,4],[5,3],[5,2],[6,1]],
+  A2:[[3,4],[4,4],[5,3],[6,2],[6,1]],
+  B0:[[3,4],[2,5],[1,6],[0,7]],
+  B1:[[3,4],[2,5],[1,5],[0,6],[0,7]],
+};
+// timeline: [route, drawStart, retireStart]
+const RT=[['A0',33.0,34.75],['B0',33.25,36.75],['A1',34.95,38.75],['B1',36.95,99],['A2',38.95,99]];
+const FAILS=[[[4,3],34.6],[[1,6],36.6],[[5,2],38.6]];
+function pathLen(r){let L=0;for(let i=1;i<r.length;i++)L+=Math.hypot(gx(r[i][0])-gx(r[i-1][0]),gy(r[i][1])-gy(r[i-1][1]));return L}
+function strokePath(r,prog,col,lw,dash){
+  const L=pathLen(r);ctx.save();ctx.beginPath();r.forEach((p,i)=>i?ctx.lineTo(gx(p[0]),gy(p[1])):ctx.moveTo(gx(p[0]),gy(p[1])));
+  ctx.lineWidth=lw;ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle=col;
+  if(dash)ctx.setLineDash(dash);else{ctx.setLineDash([L*prog,L*2]);}
+  ctx.stroke();ctx.restore();
+}
+function pointAt(r,d){for(let i=1;i<r.length;i++){const ax=gx(r[i-1][0]),ay=gy(r[i-1][1]),bx=gx(r[i][0]),by=gy(r[i][1]);const l=Math.hypot(bx-ax,by-ay);if(d<=l)return[lerp(ax,bx,d/l),lerp(ay,by,d/l)];d-=l}const e=r[r.length-1];return[gx(e[0]),gy(e[1])]}
+function s5(t){
+  ctx.fillStyle=BONE;ctx.fillRect(0,0,W,H);
+  const out=E.in(P(t,41.6,41.98));
+  ctx.save();ctx.translate(W/2,950);ctx.scale(1-out*0.08,1-out*0.08);ctx.translate(-W/2,-950);ctx.globalAlpha=1-out;
+  // faint mesh
+  const ma=E.out(P(t,32.3,33.0))*0.13;
+  if(ma>0){ctx.save();ctx.globalAlpha*=ma;ctx.strokeStyle=STEEL;ctx.lineWidth=2;ctx.beginPath();
+    for(let i=0;i<GX;i++)for(let j=0;j<GY;j++){if(i<GX-1){ctx.moveTo(gx(i),gy(j));ctx.lineTo(gx(i+1),gy(j))}if(j<GY-1){ctx.moveTo(gx(i),gy(j));ctx.lineTo(gx(i),gy(j+1))}}
+    ctx.stroke();ctx.restore();}
+  // routes
+  for(const [k,ds,rs] of RT){
+    const r=ROUTES[k];const dp=E.io(P(t,ds,ds+0.8));if(dp<=0)continue;
+    const ret=P(t,rs,rs+0.3);
+    if(ret>0){strokePath(r,1,`rgba(138,143,152,${0.55*(1-ret*0.4)})`,5,[2,14]);continue}
+    strokePath(r,dp,ORANGE,10);
+    // data packets once drawn
+    if(dp>=1){const L=pathLen(r);for(let q=0;q<3;q++){const d=((t-ds-0.8)*420+q*L/3)%L;const [px,py]=pointAt(r,d);circle(px,py,7,INK)}}
+  }
+  // nodes
+  for(let i=0;i<GX;i++)for(let j=0;j<GY;j++){
+    const d=Math.hypot(i-HUB[0],j-HUB[1]);const st=32.0+d*0.07;const p=E.back(P(t,st,st+0.35),2);if(p<=0)continue;
+    let col=INK,r=9;
+    const f=FAILS.find(F=>F[0][0]===i&&F[0][1]===j);
+    if(f&&t>=f[1]){const k=P(t,f[1],f[1]+0.25);col=k<1?(Math.floor(t*30)%2?ORANGE:STEEL):STEEL;r=9+4*(1-k);
+      const rp=P(t,f[1],f[1]+0.6);if(rp<1){ctx.save();ctx.globalAlpha*=(1-rp)*0.6;ctx.beginPath();ctx.arc(gx(i),gy(j),12+rp*50,0,7);ctx.lineWidth=3;ctx.strokeStyle=STEEL;ctx.stroke();ctx.restore()}
+      // little x
+      if(k>=1){ctx.save();ctx.strokeStyle=STEEL;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(gx(i)-18,gy(j)-18);ctx.lineTo(gx(i)-28,gy(j)-28);ctx.stroke();ctx.restore()}
+    }
+    circle(gx(i),gy(j),r*p,col);
+  }
+  // destinations
+  [[6,1,'YOU'],[0,7,'YOU']].forEach(([i,j,l],n)=>{const p=E.back(P(t,32.5+n*0.1,32.9+n*0.1),2);if(p<=0)return;
+    ctx.save();ctx.beginPath();ctx.arc(gx(i),gy(j),26*p,0,7);ctx.lineWidth=6;ctx.strokeStyle=INK;ctx.stroke();ctx.restore();
+    text(l,gx(i)+(i>3?-44:44),gy(j)+10,26,{f:MONOB,align:i>3?'right':'left',a:p,ls:3});});
+  // hub
+  const hp=E.back(P(t,32.4,32.8),2.2);
+  if(hp>0){const pulse=(t-32.4)%1.0;ctx.save();ctx.globalAlpha*=(1-pulse)*0.4;ctx.beginPath();ctx.arc(gx(3),gy(4),30+pulse*70,0,7);ctx.lineWidth=4;ctx.strokeStyle=ORANGE;ctx.stroke();ctx.restore();
+    circle(gx(3),gy(4),30*hp,ORANGE);circle(gx(3),gy(4),10*hp,BONE)}
+  // reroute flash at each heal
+  ctx.restore();
+  // headline
+  const ha=E.out(P(t,32.6,33.1))*(1-out);
+  if(ha>0){text('Adapts in',SAFE,250+(1-ha)*30,104,{align:'left',a:ha,ls:-4});text('real time.',SAFE,360+(1-ha)*30,104,{align:'left',a:ha,ls:-4,c:INK});
+    // live status
+    const healed=FAILS.filter(f=>t>=f[1]+1.1).length;const failing=FAILS.some(f=>t>=f[1]&&t<f[1]+1.1);
+    text(failing?'● REROUTING…':'● ALL ROUTES OK',SAFE,1425,28,{f:MONOB,align:'left',a:ha,c:failing?ORANGE:INK,ls:3});
+    text('REROUTES '+String(healed).padStart(2,'0'),W-SAFE,1425,28,{f:MONO,align:'right',a:ha,c:STEEL,ls:3});
+  }
+}
+
+/* =============================== SCENE 6 =============================== */
+const CUTS=[42,42+10/3,42+20/3];
+function card(i,t,ct){
+  const bg=[INK,BONE,ORANGE][i],fg=[BONE,INK,INK][i];
+  const wipe=E.expo(P(t,ct,ct+0.28));const y=(1-wipe)*H;
+  ctx.save();ctx.translate(0,y);ctx.fillStyle=bg;ctx.fillRect(0,0,W,H+4);
+  const lt=t-ct;
+  text(['01 / CALL','02 / STREAM','03 / UPLOAD'][i],SAFE,SAFE+40,26,{f:MONO,align:'left',c:i===0?'#C9C6BE':INK,ls:3});
+  // icon
+  const ix=W/2,iy=760;
+  if(i===0){// orange circle with clear voice rings
+    const p=E.back(P(lt,0.05,0.4),1.8);
+    for(let k=0;k<3;k++){const ph=((lt*0.8)+k/3)%1;ctx.save();ctx.globalAlpha=(1-ph)*0.55*clamp(lt*3);ctx.beginPath();ctx.arc(ix,iy,170+ph*190,0,7);ctx.lineWidth=6;ctx.strokeStyle=ORANGE;ctx.stroke();ctx.restore()}
+    circle(ix,iy,170*p,ORANGE);
+    // voice bars inside
+    for(let k=0;k<5;k++){const hgt=(30+50*Math.abs(Math.sin(lt*6+k*1.3)))*p;rrect(ix-88+k*40-8,iy-hgt/2,16,hgt,8);ctx.fillStyle=INK;ctx.fill()}
+  }else if(i===1){// ink bar with play triangle; progress never stalls
+    const p=E.out4(P(lt,0.05,0.4));const bw=760*p,bh=300;
+    rrect(ix-bw/2,iy-bh/2,bw,bh,40);ctx.fillStyle=INK;ctx.fill();
+    if(p>0.6){ctx.save();ctx.translate(ix,iy-20);const s=E.back(P(lt,0.25,0.55),2);ctx.scale(s,s);ctx.beginPath();ctx.moveTo(-40,-56);ctx.lineTo(64,0);ctx.lineTo(-40,56);ctx.closePath();ctx.fillStyle=ORANGE;ctx.lineJoin='round';ctx.lineWidth=14;ctx.strokeStyle=ORANGE;ctx.stroke();ctx.fill();ctx.restore();
+      const pr=clamp((lt-0.3)/3.0);rrect(ix-320,iy+100,640,10,5);ctx.fillStyle='#3A3C42';ctx.fill();rrect(ix-320,iy+100,640*pr,10,5);ctx.fillStyle=ORANGE;ctx.fill();circle(ix-320+640*pr,iy+105,14,BONE)}
+  }else{// stack of paper lines rising, then done
+    for(let k=0;k<5;k++){const st=0.08+k*0.12,p=E.back(P(lt,st,st+0.35),1.6);if(p<=0)continue;const yy=iy+150-k*70-(1-p)*80;const wv=[520,600,560,640,480][k];
+      ctx.save();ctx.globalAlpha=clamp(p);rrect(ix-wv/2,yy-18,wv,36,18);ctx.fillStyle=INK;ctx.fill();ctx.restore()}
+    const cp=E.out(P(lt,0.9,1.3));if(cp>0){// arrow up -> check
+      ctx.save();ctx.translate(ix,iy-260);circle(0,0,58*E.back(clamp(cp*1.4),2),INK);ctx.beginPath();ctx.moveTo(-24,2);ctx.lineTo(-6,20);ctx.lineTo(26,-16);ctx.lineWidth=10;ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle=ORANGE;
+      const L=90;ctx.setLineDash([L*E.out(P(lt,1.1,1.45)),L]);ctx.stroke();ctx.restore()}
+  }
+  // headline lands on the cut
+  const lines=[['Calls that','stay clear.'],['Streams that',"don't stall."],['Uploads','that finish.']][i];
+  lines.forEach((ln,k)=>{const p=P(lt,0.12+k*0.06,0.3+k*0.06);const sc=lerp(1.12,1,E.out4(p));
+    ctx.save();ctx.globalAlpha=p>0?1:0;ctx.translate(SAFE,1220+k*128);ctx.scale(sc,sc);text(ln,0,0,128,{align:'left',c:fg,ls:-5});ctx.restore()});
+  ctx.restore();
+}
+function s6(t){
+  ctx.fillStyle=BONE;ctx.fillRect(0,0,W,H);
+  for(let i=0;i<3;i++){if(t>=CUTS[i]){const next=CUTS[i+1];if(next&&t>=next+0.3)continue;card(i,t,CUTS[i])}}
+}
+
+/* =============================== SCENE 7 =============================== */
+function s7(t){
+  ctx.fillStyle=BONE;ctx.fillRect(0,0,W,H);
+  const p=E.out4(P(t,52.0,52.6));const cx=W/2;const cw=W-2*SAFE,chh=900,cy=420+(1-p)*120;
+  ctx.save();ctx.globalAlpha=clamp(p*1.6);
+  rrect(SAFE,cy,cw,chh,56);ctx.fillStyle=INK;ctx.fill();
+  const x0=SAFE+70;
+  text('KESTREL MOBILE · PLAN',x0,cy+110,28,{f:MONO,align:'left',c:STEEL,ls:4});
+  // price counts into place
+  const price=readout(CONFIG.priceText,PH.price,t,52.6,53.7);
+  const pr=E.out(P(t,52.6,53.0));
+  const isPH=CONFIG.priceText==null&&t>=53.7;
+  const pSize=isPH?200:220;
+  text(price,x0-6,cy+340+(1-pr)*24,pSize,{align:'left',c:BONE,a:pr,ls:-10,f:t<53.7?MONOB:HEAD});
+  text('/ month',x0,cy+420,40,{f:MONO,align:'left',c:'#C9C6BE',a:E.out(P(t,53.4,53.8)),ls:2});
+  // orange rule sweep
+  const rs=E.expo(P(t,53.7,54.3));rrect(x0,cy+470,(cw-140)*rs,6,3);ctx.fillStyle=ORANGE;ctx.fill();
+  // check items stagger 0.2 s
+  const items=['No contract','No activation fee',CONFIG.offerTerms||PH.offer];
+  items.forEach((it,k)=>{const st=53.85+k*0.2;const q=E.out4(P(t,st,st+0.35));if(q<=0)return;const y=cy+590+k*120;
+    ctx.save();ctx.globalAlpha=q;ctx.translate((1-q)*-60,0);
+    circle(x0+28,y-14,28,ORANGE);ctx.beginPath();ctx.moveTo(x0+15,y-14);ctx.lineTo(x0+25,y-4);ctx.lineTo(x0+42,y-24);ctx.lineWidth=7;ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle=INK;ctx.setLineDash([50*E.out(P(t,st+0.1,st+0.35)),60]);ctx.stroke();ctx.setLineDash([]);
+    text(it,x0+86,y,52,{f:TEXT,align:'left',c:(k===2&&!CONFIG.offerTerms)?'#B8B5AD':BONE,ls:-0.5});ctx.restore()});
+  ctx.restore();
+  const out=E.in(P(t,61.6,61.98));if(out>0){ctx.fillStyle=`rgba(244,241,234,${out})`;ctx.fillRect(0,0,W,H)}
+}
+
+/* =============================== SCENE 8 =============================== */
+function s8(t){
+  ctx.fillStyle=BONE;ctx.fillRect(0,0,W,H);
+  const mx=W/2+60,my=760,s=1.1;
+  markAssemble(t,62.0,mx,my,s,-1); // arcs reverse their spin
+  const dotRoot=P(t,63.5,63.8);if(dotRoot>0)circle(mx+18*s,my+8*s,20*s*E.back(dotRoot,2),INK);
+  // wordmark centres and holds
+  const wa=E.out(P(t,63.4,63.9));
+  const size=190,y=1110;
+  const word='Kestrel',ls=-size*0.045;const total=tw(word,size,HEAD,ls);
+  ctx.save();ctx.globalAlpha=wa;text(word,W/2-total/2,y+(1-wa)*24,size,{align:'left',ls});
+  const ms=size*0.27,mls=size*0.11;text('MOBILE',W/2+mls/2,y+size*0.5+(1-wa)*24,ms,{f:MONOB,ls:mls});ctx.restore();
+  // the dot from Scene 1 returns and settles beside the wordmark (as its full stop)
+  const dp=P(t,65.5,66.35);
+  if(dp>0){const ex=W/2+total/2+26,ey=y-14;const sx=W+60,sy=y-420;
+    const e=E.out(dp);const x=lerp(sx,ex,e);const arcY=lerp(sy,ey,E.in(dp))-Math.sin(dp*Math.PI)*60;
+    // squash on landing
+    const land=P(t,66.35,66.6);const sq=land>0&&land<1?Math.sin(land*Math.PI)*0.3:0;
+    ctx.save();ctx.translate(dp<1?x:ex,dp<1?arcY:ey);ctx.scale(1+sq,1-sq);circle(0,0,18,INK);ctx.restore();}
+  // tagline + url
+  const ta=E.lin(P(t,64.2,65.0));text('Stay ahead of the wait.',W/2,1330,70,{a:ta,ls:-2.5});
+  const ua=E.lin(P(t,64.8,65.5));text(CONFIG.url||PH.url,W/2,1410,34,{f:MONO,a:ua,c:STEEL,ls:2});
+}
+
+/* =============================== captions ============================== */
+const CAPS=[
+ [0.55,3.25,'Lag costs you more than you think.'],
+ [6.35,8.75,'Most days, your connection spends its time waiting.'],
+ [8.9,10.65,'On a video. On a file.'],
+ [10.8,13.6,'On a call that you need to hear clearly.'],
+ [14.55,16.35,'Meet Kestrel Mobile.'],
+ [16.5,20.9,'Fast, steady, and built for the way you actually live.'],
+ [22.5,26.55,"Downloads that finish while you're still reaching for your bag."],
+ [26.75,31.1,'Speeds that stay high when the whole street is online.'],
+ [32.6,35.25,'Our network reroutes itself in real time,'],
+ [35.35,38.3,'so the slow moments never reach you.'],
+ [42.3,44.3,'Calls that stay clear.'],
+ [45.6,47.5,'Streams that never stall.'],
+ [48.9,51.75,'Uploads that finish before your coffee cools.'],
+ [52.45,54.6,'No contract. No activation fee.'],
+ [54.75,59.2,'Just [€XX] a month, with [offer] for your first [N] months.'],
+ [62.6,65.4,'Kestrel Mobile. Stay ahead of the wait.'],
+];
+function wrap(s,size,maxW){const words=s.split(' ');const lines=[];let cur='';ctx.font=font(TEXT,size,600);
+  for(const w of words){const tr=cur?cur+' '+w:w;if(ctx.measureText(tr).width>maxW&&cur){lines.push(cur);cur=w}else cur=tr}lines.push(cur);return lines}
+function drawCaption(s){
+  ctx.clearRect(0,0,W,H);
+  const size=46,lh=60,maxW=W-2*SAFE-80;const lines=wrap(s,size,maxW);
+  const bottom=1920-250-40; // above platform UI
+  const boxH=lines.length*lh+36;const y0=bottom-boxH;
+  let bw=0;ctx.font=font(TEXT,size,600);lines.forEach(l=>bw=Math.max(bw,ctx.measureText(l).width));bw+=64;
+  rrect(W/2-bw/2,y0,bw,boxH,22);ctx.fillStyle='rgba(17,18,20,0.86)';ctx.fill();
+  lines.forEach((l,i)=>text(l,W/2,y0+18+lh*i+44,size,{f:TEXT,c:BONE}));
+}
+
+/* ================================ draw ================================ */
+const FN=[s1,s2,s3,s4,s5,s6,s7,s8];
+function draw(t){
+  ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=1;ctx.setLineDash([]);
+  let i=SCENES.findIndex(x=>t>=x[0]&&t<x[1]);if(i<0)i=7;
+  FN[i](t);
+  ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=1;
+  const dark=(i===5&&t<CUTS[1]+0.15);
+  if(i!==5)chrome(t,dark);
+}
+window.CAPS=CAPS;window.draw=draw;window.drawCaption=drawCaption;
+Promise.all([HEAD,HEADXB,TEXT,MONO,MONOB].map(f=>document.fonts.load(`40px ${f}`))).then(()=>{draw(0);window.ready=true});
+</script></body></html>
