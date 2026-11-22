@@ -1,0 +1,464 @@
+[
+  {
+    "id": "man",
+    "label_ar": "رجل",
+    "orange": "icons/orange/man.svg",
+    "charcoal": "icons/charcoal/man.svg",
+    "currentColor": "icons/currentColor/man.svg"
+  },
+  {
+    "id": "woman",
+    "label_ar": "امرأة",
+    "orange": "icons/orange/woman.svg",
+    "charcoal": "icons/charcoal/woman.svg",
+    "currentColor": "icons/currentColor/woman.svg"
+  },
+  {
+    "id": "phone",
+    "label_ar": "هاتف",
+    "orange": "icons/orange/phone.svg",
+    "charcoal": "icons/charcoal/phone.svg",
+    "currentColor": "icons/currentColor/phone.svg"
+  },
+  {
+    "id": "screen",
+    "label_ar": "شاشة",
+    "orange": "icons/orange/screen.svg",
+    "charcoal": "icons/charcoal/screen.svg",
+    "currentColor": "icons/currentColor/screen.svg"
+  },
+  {
+    "id": "window",
+    "label_ar": "نافذة",
+    "orange": "icons/orange/window.svg",
+    "charcoal": "icons/charcoal/window.svg",
+    "currentColor": "icons/currentColor/window.svg"
+  },
+  {
+    "id": "night",
+    "label_ar": "ليل",
+    "orange": "icons/orange/night.svg",
+    "charcoal": "icons/charcoal/night.svg",
+    "currentColor": "icons/currentColor/night.svg"
+  },
+  {
+    "id": "clock",
+    "label_ar": "ساعة",
+    "orange": "icons/orange/clock.svg",
+    "charcoal": "icons/charcoal/clock.svg",
+    "currentColor": "icons/currentColor/clock.svg"
+  },
+  {
+    "id": "time",
+    "label_ar": "وقت",
+    "orange": "icons/orange/time.svg",
+    "charcoal": "icons/charcoal/time.svg",
+    "currentColor": "icons/currentColor/time.svg"
+  },
+  {
+    "id": "mirror",
+    "label_ar": "مرآة",
+    "orange": "icons/orange/mirror.svg",
+    "charcoal": "icons/charcoal/mirror.svg",
+    "currentColor": "icons/currentColor/mirror.svg"
+  },
+  {
+    "id": "shadow",
+    "label_ar": "ظل",
+    "orange": "icons/orange/shadow.svg",
+    "charcoal": "icons/charcoal/shadow.svg",
+    "currentColor": "icons/currentColor/shadow.svg"
+  },
+  {
+    "id": "chair",
+    "label_ar": "مقعد",
+    "orange": "icons/orange/chair.svg",
+    "charcoal": "icons/charcoal/chair.svg",
+    "currentColor": "icons/currentColor/chair.svg"
+  },
+  {
+    "id": "two-chairs",
+    "label_ar": "مقعدان",
+    "orange": "icons/orange/two-chairs.svg",
+    "charcoal": "icons/charcoal/two-chairs.svg",
+    "currentColor": "icons/currentColor/two-chairs.svg"
+  },
+  {
+    "id": "door",
+    "label_ar": "باب مفتوح",
+    "orange": "icons/orange/door.svg",
+    "charcoal": "icons/charcoal/door.svg",
+    "currentColor": "icons/currentColor/door.svg"
+  },
+  {
+    "id": "hand",
+    "label_ar": "يد",
+    "orange": "icons/orange/hand.svg",
+    "charcoal": "icons/charcoal/hand.svg",
+    "currentColor": "icons/currentColor/hand.svg"
+  },
+  {
+    "id": "hands",
+    "label_ar": "يدان",
+    "orange": "icons/orange/hands.svg",
+    "charcoal": "icons/charcoal/hands.svg",
+    "currentColor": "icons/currentColor/hands.svg"
+  },
+  {
+    "id": "dialogue",
+    "label_ar": "حوار",
+    "orange": "icons/orange/dialogue.svg",
+    "charcoal": "icons/charcoal/dialogue.svg",
+    "currentColor": "icons/currentColor/dialogue.svg"
+  },
+  {
+    "id": "thought",
+    "label_ar": "تفكير",
+    "orange": "icons/orange/thought.svg",
+    "charcoal": "icons/charcoal/thought.svg",
+    "currentColor": "icons/currentColor/thought.svg"
+  },
+  {
+    "id": "light",
+    "label_ar": "ضوء",
+    "orange": "icons/orange/light.svg",
+    "charcoal": "icons/charcoal/light.svg",
+    "currentColor": "icons/currentColor/light.svg"
+  },
+  {
+    "id": "eye",
+    "label_ar": "عين",
+    "orange": "icons/orange/eye.svg",
+    "charcoal": "icons/charcoal/eye.svg",
+    "currentColor": "icons/currentColor/eye.svg"
+  },
+  {
+    "id": "wall",
+    "label_ar": "جدار",
+    "orange": "icons/orange/wall.svg",
+    "charcoal": "icons/charcoal/wall.svg",
+    "currentColor": "icons/currentColor/wall.svg"
+  },
+  {
+    "id": "path",
+    "label_ar": "طريق",
+    "orange": "icons/orange/path.svg",
+    "charcoal": "icons/charcoal/path.svg",
+    "currentColor": "icons/currentColor/path.svg"
+  },
+  {
+    "id": "heart",
+    "label_ar": "قلب",
+    "orange": "icons/orange/heart.svg",
+    "charcoal": "icons/charcoal/heart.svg",
+    "currentColor": "icons/currentColor/heart.svg"
+  },
+  {
+    "id": "respect",
+    "label_ar": "احترام",
+    "orange": "icons/orange/respect.svg",
+    "charcoal": "icons/charcoal/respect.svg",
+    "currentColor": "icons/currentColor/respect.svg"
+  },
+  {
+    "id": "boundaries",
+    "label_ar": "حدود",
+    "orange": "icons/orange/boundaries.svg",
+    "charcoal": "icons/charcoal/boundaries.svg",
+    "currentColor": "icons/currentColor/boundaries.svg"
+  },
+  {
+    "id": "choice",
+    "label_ar": "اختيار",
+    "orange": "icons/orange/choice.svg",
+    "charcoal": "icons/charcoal/choice.svg",
+    "currentColor": "icons/currentColor/choice.svg"
+  },
+  {
+    "id": "awareness",
+    "label_ar": "وعي",
+    "orange": "icons/orange/awareness.svg",
+    "charcoal": "icons/charcoal/awareness.svg",
+    "currentColor": "icons/currentColor/awareness.svg"
+  },
+  {
+    "id": "presence",
+    "label_ar": "حضور",
+    "orange": "icons/orange/presence.svg",
+    "charcoal": "icons/charcoal/presence.svg",
+    "currentColor": "icons/currentColor/presence.svg"
+  },
+  {
+    "id": "sleep",
+    "label_ar": "نوم",
+    "orange": "icons/orange/sleep.svg",
+    "charcoal": "icons/charcoal/sleep.svg",
+    "currentColor": "icons/currentColor/sleep.svg"
+  },
+  {
+    "id": "responsibility",
+    "label_ar": "مسؤولية",
+    "orange": "icons/orange/responsibility.svg",
+    "charcoal": "icons/charcoal/responsibility.svg",
+    "currentColor": "icons/currentColor/responsibility.svg"
+  },
+  {
+    "id": "question",
+    "label_ar": "سؤال",
+    "orange": "icons/orange/question.svg",
+    "charcoal": "icons/charcoal/question.svg",
+    "currentColor": "icons/currentColor/question.svg"
+  },
+  {
+    "id": "curiosity",
+    "label_ar": "فضول",
+    "orange": "icons/orange/curiosity.svg",
+    "charcoal": "icons/charcoal/curiosity.svg",
+    "currentColor": "icons/currentColor/curiosity.svg"
+  },
+  {
+    "id": "boredom",
+    "label_ar": "ملل",
+    "orange": "icons/orange/boredom.svg",
+    "charcoal": "icons/charcoal/boredom.svg",
+    "currentColor": "icons/currentColor/boredom.svg"
+  },
+  {
+    "id": "pressure",
+    "label_ar": "ضغط",
+    "orange": "icons/orange/pressure.svg",
+    "charcoal": "icons/charcoal/pressure.svg",
+    "currentColor": "icons/currentColor/pressure.svg"
+  },
+  {
+    "id": "solitude",
+    "label_ar": "وحدة",
+    "orange": "icons/orange/solitude.svg",
+    "charcoal": "icons/charcoal/solitude.svg",
+    "currentColor": "icons/currentColor/solitude.svg"
+  },
+  {
+    "id": "emotion",
+    "label_ar": "مشاعر",
+    "orange": "icons/orange/emotion.svg",
+    "charcoal": "icons/charcoal/emotion.svg",
+    "currentColor": "icons/currentColor/emotion.svg"
+  },
+  {
+    "id": "comparison",
+    "label_ar": "مقارنة",
+    "orange": "icons/orange/comparison.svg",
+    "charcoal": "icons/charcoal/comparison.svg",
+    "currentColor": "icons/currentColor/comparison.svg"
+  },
+  {
+    "id": "image",
+    "label_ar": "صورة",
+    "orange": "icons/orange/image.svg",
+    "charcoal": "icons/charcoal/image.svg",
+    "currentColor": "icons/currentColor/image.svg"
+  },
+  {
+    "id": "fantasy",
+    "label_ar": "خيال",
+    "orange": "icons/orange/fantasy.svg",
+    "charcoal": "icons/charcoal/fantasy.svg",
+    "currentColor": "icons/currentColor/fantasy.svg"
+  },
+  {
+    "id": "communication",
+    "label_ar": "تواصل",
+    "orange": "icons/orange/communication.svg",
+    "charcoal": "icons/charcoal/communication.svg",
+    "currentColor": "icons/currentColor/communication.svg"
+  },
+  {
+    "id": "listening",
+    "label_ar": "استماع",
+    "orange": "icons/orange/listening.svg",
+    "charcoal": "icons/charcoal/listening.svg",
+    "currentColor": "icons/currentColor/listening.svg"
+  },
+  {
+    "id": "consent",
+    "label_ar": "موافقة",
+    "orange": "icons/orange/consent.svg",
+    "charcoal": "icons/charcoal/consent.svg",
+    "currentColor": "icons/currentColor/consent.svg"
+  },
+  {
+    "id": "privacy",
+    "label_ar": "خصوصية",
+    "orange": "icons/orange/privacy.svg",
+    "charcoal": "icons/charcoal/privacy.svg",
+    "currentColor": "icons/currentColor/privacy.svg"
+  },
+  {
+    "id": "pause",
+    "label_ar": "توقف",
+    "orange": "icons/orange/pause.svg",
+    "charcoal": "icons/charcoal/pause.svg",
+    "currentColor": "icons/currentColor/pause.svg"
+  },
+  {
+    "id": "observe",
+    "label_ar": "ملاحظة",
+    "orange": "icons/orange/observe.svg",
+    "charcoal": "icons/charcoal/observe.svg",
+    "currentColor": "icons/currentColor/observe.svg"
+  },
+  {
+    "id": "step",
+    "label_ar": "خطوة",
+    "orange": "icons/orange/step.svg",
+    "charcoal": "icons/charcoal/step.svg",
+    "currentColor": "icons/currentColor/step.svg"
+  },
+  {
+    "id": "activity",
+    "label_ar": "نشاط",
+    "orange": "icons/orange/activity.svg",
+    "charcoal": "icons/charcoal/activity.svg",
+    "currentColor": "icons/currentColor/activity.svg"
+  },
+  {
+    "id": "book",
+    "label_ar": "كتاب",
+    "orange": "icons/orange/book.svg",
+    "charcoal": "icons/charcoal/book.svg",
+    "currentColor": "icons/currentColor/book.svg"
+  },
+  {
+    "id": "support",
+    "label_ar": "دعم",
+    "orange": "icons/orange/support.svg",
+    "charcoal": "icons/charcoal/support.svg",
+    "currentColor": "icons/currentColor/support.svg"
+  },
+  {
+    "id": "specialist",
+    "label_ar": "مختص",
+    "orange": "icons/orange/specialist.svg",
+    "charcoal": "icons/charcoal/specialist.svg",
+    "currentColor": "icons/currentColor/specialist.svg"
+  },
+  {
+    "id": "help",
+    "label_ar": "مساعدة",
+    "orange": "icons/orange/help.svg",
+    "charcoal": "icons/charcoal/help.svg",
+    "currentColor": "icons/currentColor/help.svg"
+  },
+  {
+    "id": "dignity",
+    "label_ar": "كرامة",
+    "orange": "icons/orange/dignity.svg",
+    "charcoal": "icons/charcoal/dignity.svg",
+    "currentColor": "icons/currentColor/dignity.svg"
+  },
+  {
+    "id": "balance",
+    "label_ar": "توازن",
+    "orange": "icons/orange/balance.svg",
+    "charcoal": "icons/charcoal/balance.svg",
+    "currentColor": "icons/currentColor/balance.svg"
+  },
+  {
+    "id": "hope",
+    "label_ar": "أمل",
+    "orange": "icons/orange/hope.svg",
+    "charcoal": "icons/charcoal/hope.svg",
+    "currentColor": "icons/currentColor/hope.svg"
+  },
+  {
+    "id": "understanding",
+    "label_ar": "فهم",
+    "orange": "icons/orange/understanding.svg",
+    "charcoal": "icons/charcoal/understanding.svg",
+    "currentColor": "icons/currentColor/understanding.svg"
+  },
+  {
+    "id": "distance",
+    "label_ar": "مسافة",
+    "orange": "icons/orange/distance.svg",
+    "charcoal": "icons/charcoal/distance.svg",
+    "currentColor": "icons/currentColor/distance.svg"
+  },
+  {
+    "id": "connection",
+    "label_ar": "قرب",
+    "orange": "icons/orange/connection.svg",
+    "charcoal": "icons/charcoal/connection.svg",
+    "currentColor": "icons/currentColor/connection.svg"
+  },
+  {
+    "id": "restart",
+    "label_ar": "بداية جديدة",
+    "orange": "icons/orange/restart.svg",
+    "charcoal": "icons/charcoal/restart.svg",
+    "currentColor": "icons/currentColor/restart.svg"
+  },
+  {
+    "id": "silence",
+    "label_ar": "هدوء",
+    "orange": "icons/orange/silence.svg",
+    "charcoal": "icons/charcoal/silence.svg",
+    "currentColor": "icons/currentColor/silence.svg"
+  },
+  {
+    "id": "notebook",
+    "label_ar": "تدوين",
+    "orange": "icons/orange/notebook.svg",
+    "charcoal": "icons/charcoal/notebook.svg",
+    "currentColor": "icons/currentColor/notebook.svg"
+  },
+  {
+    "id": "settings",
+    "label_ar": "إعدادات",
+    "orange": "icons/orange/settings.svg",
+    "charcoal": "icons/charcoal/settings.svg",
+    "currentColor": "icons/currentColor/settings.svg"
+  },
+  {
+    "id": "play",
+    "label_ar": "تشغيل",
+    "orange": "icons/orange/play.svg",
+    "charcoal": "icons/charcoal/play.svg",
+    "currentColor": "icons/currentColor/play.svg"
+  },
+  {
+    "id": "voice",
+    "label_ar": "تعليق صوتي",
+    "orange": "icons/orange/voice.svg",
+    "charcoal": "icons/charcoal/voice.svg",
+    "currentColor": "icons/currentColor/voice.svg"
+  },
+  {
+    "id": "film",
+    "label_ar": "فيلم",
+    "orange": "icons/orange/film.svg",
+    "charcoal": "icons/charcoal/film.svg",
+    "currentColor": "icons/currentColor/film.svg"
+  },
+  {
+    "id": "real-life",
+    "label_ar": "حياة واقعية",
+    "orange": "icons/orange/real-life.svg",
+    "charcoal": "icons/charcoal/real-life.svg",
+    "currentColor": "icons/currentColor/real-life.svg"
+  },
+  {
+    "id": "self-reflection",
+    "label_ar": "مراجعة النفس",
+    "orange": "icons/orange/self-reflection.svg",
+    "charcoal": "icons/charcoal/self-reflection.svg",
+    "currentColor": "icons/currentColor/self-reflection.svg"
+  },
+  {
+    "id": "notification",
+    "label_ar": "تنبيه",
+    "orange": "icons/orange/notification.svg",
+    "charcoal": "icons/charcoal/notification.svg",
+    "currentColor": "icons/currentColor/notification.svg"
+  }
+]

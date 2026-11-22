@@ -37,10 +37,10 @@ body.render .chrome,body.render .cover,body.render .safe{display:none!important}
 
 .scene{position:absolute;inset:0;visibility:hidden;opacity:0;display:grid;
   padding:var(--safe-t) var(--safe-r) var(--safe-b) var(--safe-l);
-  grid-template-rows:auto auto minmax(0,1fr) 15.5cqh;gap:2.2cqh;
-  --ink:var(--orange);--cap:var(--orange-deep);--ground:var(--white);--grid:rgba(252,119,2,.10);--soft:rgba(252,119,2,.75);
+  grid-template-rows:auto auto minmax(0,1fr) 13.5cqh;gap:1.4cqh;
+  --ink:var(--orange);--cap:var(--orange-deep);--ground:var(--white);--grid:rgba(252,119,2,.10);--soft:rgba(252,119,2,.75);--accent:var(--coal);
   background-color:var(--ground);color:var(--ink)}
-.scene.on-purple{--ink:var(--coal);--cap:var(--coal);--ground:var(--purple);--grid:rgba(41,41,41,.10);--soft:rgba(41,41,41,.72)}
+.scene.on-purple{--ink:var(--coal);--cap:var(--coal);--ground:var(--purple);--grid:rgba(41,41,41,.10);--soft:rgba(41,41,41,.72);--accent:var(--orange)}
 .scene::before{content:"";position:absolute;inset:0;pointer-events:none;
   background-image:linear-gradient(to right,var(--grid) 1px,transparent 1px),linear-gradient(to bottom,var(--grid) 1px,transparent 1px);
   background-size:calc(100% / 6) calc(100% / 12)}
@@ -79,74 +79,32 @@ body.render .chrome,body.render .cover,body.render .safe{display:none!important}
 .cap.m1{opacity:calc(1 - var(--x));clip-path:inset(0 0 0 calc((1 - var(--q)) * 100%))}
 .cap.m2{opacity:calc(var(--q) * (1 - var(--x)));filter:blur(calc((1 - var(--q)) * 9px));transform:scale(calc(.95 + var(--q) * .05));transform-origin:100% 0}
 
-/* arches (portraits) */
-.pair{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;gap:5cqw}
-.arch{position:relative;height:min(94cqh,58cqw);aspect-ratio:3/4;border-radius:50% 50% 0 0/38% 38% 0 0;overflow:hidden;flex:none}
-.arch img{width:100%;height:100%;object-fit:cover;object-position:50% 12%;display:block}
-.on-purple .arch{box-shadow:0 0 0 .7cqw var(--coal)}
-.s1 .arch{height:min(92cqh,40cqw)}
-.glow{position:relative;flex:none;align-self:center;width:min(14cqh,9cqw);aspect-ratio:9/17;border-radius:2cqw;
-  border:.7cqw solid var(--orange);background:rgba(252,119,2,.14);box-shadow:0 0 7cqw rgba(252,119,2,.5),inset 0 0 4cqw rgba(252,119,2,.3)}
-.glow::after{content:"";position:absolute;inset:18% 16%;border-radius:1cqw;background:rgba(252,119,2,.55)}
-
-/* scene 2 balance */
-.beam{position:absolute;bottom:4cqh;left:2cqw;right:2cqw;height:.8cqw;background:var(--ink)}
-.fulcrum{position:absolute;bottom:4cqh;left:50%;width:7cqw;height:6cqw;transform:translate(-50%,100%);background:var(--ink);clip-path:polygon(50% 0,100% 100%,0 100%)}
-.s2 .pair{bottom:calc(4cqh + .8cqw)}
-.s2 .arch{height:min(86cqh,58cqw)}
-
-/* scene 3 list */
-.words{display:grid;grid-template-columns:repeat(2,auto);justify-content:start;gap:0 7cqw}
-.words .h{font-size:12.5cqw;line-height:1.25}
+/* icon compositions (Baynana-Shasha icon set, 64-unit grid) */
+.pos{position:absolute;left:var(--x);top:var(--y);width:var(--w);aspect-ratio:1;transform:translate(-50%,-50%)}
+.pos > .ic,.pos > .wrap{position:absolute;inset:0}
+.ic{display:block;color:var(--ink)}
+.ic svg{width:100%;height:100%;display:block;overflow:visible;stroke-width:2.3}
+.ic.acc{color:var(--accent)}
+.ic.soft{opacity:calc(var(--p) * .6)}
+.l svg{stroke-width:2}
+.glow-ic svg{filter:drop-shadow(0 0 2.4cqw rgba(252,119,2,.65))}
+.sq{position:absolute;inset:0;margin:auto;width:min(100cqw,100cqh);aspect-ratio:1}
+.sq > svg{position:absolute;inset:0;width:100%;height:100%}
 .orbit{transform-origin:200px 200px;transform:rotate(calc(var(--p) * 300deg))}
-
-/* scene 5 mirror */
-.mirror{position:absolute;inset:0;margin:auto;height:98cqh;max-width:96cqw;aspect-ratio:348/495}
-.mirror .half{position:absolute;inset:0;background:url(assets/mirror.png) center/100% 100% no-repeat}
-.mirror .h1{clip-path:inset(0 50.4% 0 0)}
-.mirror .h2{clip-path:inset(0 0 0 50.4%);transform:translateY(3.2%)}
-.mirror svg{position:absolute;inset:0;width:100%;height:100%}
 .reflect{opacity:calc(1 - var(--p))}
-
-/* scene 6 items */
-.items{list-style:none;margin:.6cqh 0 0;padding:0;display:grid;grid-template-columns:repeat(2,max-content);gap:.6cqh 8cqw}
-.items li{display:flex;align-items:center;gap:2cqw;font:400 8cqw/1.3 var(--display)}
-.items svg{width:7cqw;height:7cqw;flex:none;stroke-width:1.8}
-
-/* scene 7 chairs */
-.talk{position:absolute;inset:0;display:grid;place-items:end center}
-.talk svg{width:100cqw;height:auto;max-height:70cqh}
-.bubble{position:absolute;left:50%;top:2%;width:min(52cqw,58cqh);transform:translateX(-50%) scale(calc(.9 + var(--p) * .1));opacity:var(--p)}
-.bubble img{width:100%;display:block}
-.dots{position:absolute;inset:0 0 18% 0;display:flex;justify-content:center;align-items:center;gap:7%}
-.dots i{width:9%;aspect-ratio:1;border-radius:50%;background:var(--white);opacity:calc(.35 + .65 * var(--p))}
-
-/* scene 8 */
-.hands{position:absolute;top:0;right:0;width:min(66cqw,80cqh);aspect-ratio:900/792;border-radius:2.4cqw;overflow:hidden;
-  box-shadow:0 0 0 .7cqw var(--coal);transform:translateX(calc(var(--p) * -4cqw)) translateY(calc(var(--p) * 34cqh)) rotate(calc(var(--p) * -7deg)) scale(calc(1 - var(--p) * .4));
-  transform-origin:100% 0;opacity:calc(1 - var(--p) * .55)}
-.hands img{width:100%;height:100%;object-fit:cover;display:block}
-.way{position:absolute;left:0;bottom:0;width:min(66cqw,94cqh);height:auto}
-.way .draw{stroke-dasharray:1;stroke-dashoffset:calc(1 - var(--p))}
-.steps{display:flex;flex-direction:column}
-.steps .h{font-size:11.5cqw;line-height:1.22}
-
-/* scene 9 */
-.door{position:absolute;top:0;bottom:0;right:12cqw;margin:auto 0;height:98cqh;aspect-ratio:348/666;max-width:60cqw;box-shadow:0 2cqw 0 0 var(--coal)}
-.door img{width:100%;height:100%;display:block}
-.medal{position:absolute;bottom:1cqh;left:4cqw;width:min(50cqh,50cqw);aspect-ratio:1;border-radius:50%;overflow:hidden;box-shadow:0 0 0 1.2cqw var(--white),0 0 0 1.8cqw var(--orange)}
-.medal img{width:100%;height:100%;object-fit:cover;object-position:50% 40%;display:block;transform:scale(1.05)}
-.floor{position:absolute;inset:0;width:100%;height:100%}
-
-/* scene 10 */
-.s10 .pair{justify-content:space-between}
-.s10 .arch{height:min(80cqh,42cqw)}
-.away{position:absolute;left:50%;top:50%;
-  transform:translate(-50%,-50%) translateY(calc(var(--p) * -44cqh)) translateX(calc(var(--p) * 16cqw)) scale(calc(1 - var(--p) * .55));opacity:calc(1 - var(--p) * .75)}
-.away .glow{width:min(18cqh,11cqw);border-color:var(--coal);background:rgba(41,41,41,.12);box-shadow:0 0 5cqw rgba(41,41,41,.25)}
-.away .glow::after{background:rgba(41,41,41,.45)}
-.horizon{position:absolute;bottom:0;left:0;right:0;height:.6cqw;background:var(--ink);opacity:.5}
+.aside{transform:translate(calc(var(--p) * -55%),calc(var(--p) * 70%)) rotate(calc(var(--p) * -24deg)) scale(calc(1 - var(--p) * .35));opacity:calc(1 - var(--p) * .7)}
+.away{transform:translate(calc(var(--p) * 40%),calc(var(--p) * -55%)) scale(calc(1 - var(--p) * .55));opacity:calc(1 - var(--p) * .9)}
+.horizon{position:absolute;bottom:4%;left:0;right:0;height:.6cqw;background:var(--ink);opacity:.45}
 .outro{margin:0;font:700 4.3cqw/1.6 var(--text);color:var(--ink)}
+.words{display:grid;grid-template-columns:repeat(2,max-content);justify-content:start;gap:.4cqh 6cqw}
+.wordrow{display:flex;align-items:center;gap:2.2cqw}
+.wordrow .h{font-size:11.5cqw;line-height:1.25}
+.wordrow .ic{width:10cqw;height:10cqw;flex:none}
+.steps{display:flex;flex-direction:column;gap:.2cqh}
+.steps .wordrow .h{font-size:11cqw}
+.items{list-style:none;margin:.6cqh 0 0;padding:0;display:grid;grid-template-columns:repeat(2,max-content);gap:.8cqh 8cqw}
+.items li{display:flex;align-items:center;gap:2.2cqw;font:400 8cqw/1.3 var(--display)}
+.items .ic{width:9.5cqw;height:9.5cqw;flex:none}
 
 /* safe-area guide (toggle in the panel) */
 .safe{position:absolute;z-index:4;pointer-events:none;inset:var(--safe-t) var(--safe-r) var(--safe-b) var(--safe-l);border:2px dashed #e0245e;border-radius:4px}
@@ -199,208 +157,45 @@ body.render .chrome,body.render .cover,body.render .safe{display:none!important}
 </style>
 
 <div class="stage" id="stage">
-  <!-- 01 -->
   <section class="scene center s1 on-purple" data-scene="0">
-    <div class="copy" style="grid-row:2">
-      <h2 class="h xl fx-up" data-in="1.8" data-dur="1.2" data-slot="h"></h2>
-      <p class="sub fx-fade" data-in="3" data-dur="1.4" data-slot="sub"></p>
-    </div>
-    <div class="art" role="img" aria-label="امرأة ورجل في مساحتين منفصلتين، وبينهما مستطيل ضوئي يشبه شاشة هاتف">
-      <div class="pair">
-        <div class="arch fx-up" data-in="0.3" data-dur="1.4"><img src="assets/woman.png" alt=""></div>
-        <div class="glow fx-scale" data-in="1.2" data-dur="1.6"></div>
-        <div class="arch fx-up" data-in="0.6" data-dur="1.4"><img src="assets/man.png" alt=""></div>
-      </div>
-    </div>
+    <div class="copy" style="grid-row:2"><h2 class="h xl fx-up" data-in="1.8" data-dur="1.2" data-slot="h"></h2><p class="sub fx-fade" data-in="3" data-dur="1.4" data-slot="sub"></p></div>
+    <div class="art" role="img" aria-label="رمز امرأة ورمز رجل في مساحتين منفصلتين، وبينهما هاتف مضيء"><div class="pos" style="--x:20%;--y:55%;--w:min(40cqw,66cqh)"><i class="ic l fx-up" data-ic="woman" data-in="0.3" data-dur="1.4"></i></div><div class="pos" style="--x:50%;--y:50%;--w:min(27cqw,46cqh)"><i class="ic acc glow-ic fx-scale" data-ic="phone" data-in="1.2" data-dur="1.6"></i></div><div class="pos" style="--x:80%;--y:55%;--w:min(40cqw,66cqh)"><i class="ic l fx-up" data-ic="man" data-in="0.6" data-dur="1.4"></i></div></div>
   </section>
-
-  <!-- 02 -->
   <section class="scene center s2" data-scene="1">
-    <div class="copy" style="grid-row:2">
-      <h2 class="h"><span class="fx-up" data-in="0.9" data-dur="1.1" data-slot="h1"></span><span class="fx-up" data-in="3" data-dur="1.1" data-slot="h2"></span></h2>
-    </div>
-    <div class="art" role="img" aria-label="امرأة ورجل في تكوين متوازن على كفتين متساويتين، دون أن يكون أحدهما في موضع اتهام">
-      <div class="beam fx-fade" data-in="0.2" data-dur="1"></div><div class="fulcrum fx-fade" data-in="0.2" data-dur="1"></div>
-      <div class="pair">
-        <div class="arch fx-up" data-in="0.5" data-dur="1.3"><img src="assets/man.png" alt=""></div>
-        <div class="arch fx-up" data-in="0.5" data-dur="1.3"><img src="assets/woman.png" alt=""></div>
-      </div>
-    </div>
+    <div class="copy" style="grid-row:2"><h2 class="h"><span class="fx-up" data-in="0.9" data-dur="1.2" data-slot="h1"></span><span class="fx-up" data-in="3" data-dur="1.2" data-slot="h2"></span></h2></div>
+    <div class="art" role="img" aria-label="ميزان متوازن، وعلى جانبيه رمز رجل ورمز امرأة بالحجم نفسه"><div class="pos" style="--x:50%;--y:50%;--w:min(70cqw,100cqh)"><i class="ic acc l fx-scale" data-ic="balance" data-in="0.2" data-dur="1.3"></i></div><div class="pos" style="--x:13%;--y:62%;--w:min(27cqw,46cqh)"><i class="ic  fx-up" data-ic="man" data-in="0.6" data-dur="1.2"></i></div><div class="pos" style="--x:87%;--y:62%;--w:min(27cqw,46cqh)"><i class="ic  fx-up" data-ic="woman" data-in="0.6" data-dur="1.2"></i></div></div>
   </section>
-
-  <!-- 03 -->
   <section class="scene s3 on-purple" data-scene="2">
-    <div class="copy" style="grid-row:2">
-      <div class="eyebrow fx-fade" data-in="0.2" data-dur="0.8" data-slot="title"></div>
-      <div class="words" data-list="words"></div>
-    </div>
-    <div class="art" role="img" aria-label="نافذة ليلية وهاتف وساعة على مسار دائري بطيء">
-      <svg viewBox="0 0 400 400" width="100%" height="100%" aria-hidden="true">
-        <circle cx="200" cy="200" r="140" class="ink-stroke" stroke-dasharray="4 10" opacity=".55"/>
-        <g class="orbit" data-in="0" data-dur="16" data-ease="lin"><circle cx="200" cy="60" r="7" fill="var(--ink)"/></g>
-        <g class="fx-scale" data-in="0.4" data-dur="1.2">
-          <rect x="160" y="22" width="80" height="92" rx="4" class="ink-stroke" fill="var(--ground)"/>
-          <path d="M200 22v92M160 68h80" class="ink-stroke"/>
-          <path d="M224 34a12 12 0 1 0 8 20a10 10 0 1 1-8-20z" fill="var(--ink)"/>
-        </g>
-        <g class="fx-scale" data-in="0.8" data-dur="1.2">
-          <rect x="296" y="222" width="58" height="100" rx="10" class="ink-stroke" fill="var(--ground)"/>
-          <path d="M318 310h14" class="ink-stroke"/>
-          <rect x="304" y="236" width="42" height="64" rx="3" fill="var(--ink)" opacity=".22"/>
-        </g>
-        <g class="fx-scale" data-in="1.2" data-dur="1.2">
-          <circle cx="92" cy="282" r="44" class="ink-stroke" fill="var(--ground)"/>
-          <path d="M92 282v-26M92 282l18 10" class="ink-stroke"/>
-        </g>
-      </svg>
-    </div>
+    <div class="copy" style="grid-row:2"><div class="eyebrow fx-fade" data-in="0.2" data-dur="0.8" data-slot="title"></div><div class="words" data-list="words"></div></div>
+    <div class="art" role="img" aria-label="ليل وهاتف وساعة على مسار دائري بطيء"><div class="sq"><svg viewBox="0 0 400 400" aria-hidden="true"><circle cx="200" cy="200" r="140" class="ink-stroke" stroke-dasharray="4 10" opacity=".5"/><g class="orbit" data-in="0" data-dur="16" data-ease="lin"><circle cx="200" cy="60" r="8" fill="var(--accent)"/></g></svg><div class="pos" style="--x:50%;--y:15%;--w:32%"><i class="ic acc fx-scale" data-ic="night" data-in="0.4" data-dur="1.2"></i></div><div class="pos" style="--x:80.3%;--y:67.5%;--w:32%"><i class="ic  fx-scale" data-ic="phone" data-in="0.8" data-dur="1.2"></i></div><div class="pos" style="--x:19.7%;--y:67.5%;--w:32%"><i class="ic  fx-scale" data-ic="clock" data-in="1.2" data-dur="1.2"></i></div></div></div>
   </section>
-
-  <!-- 04 -->
   <section class="scene s4" data-scene="3">
-    <div class="copy" style="grid-row:2">
-      <div class="eyebrow fx-fade" data-in="0.2" data-dur="0.8" data-slot="title"></div>
-      <h2 class="h"><span class="fx-up" data-in="1" data-dur="1.2" data-slot="h1"></span><span class="fx-up" data-in="2.4" data-dur="1.2" data-slot="h2"></span></h2>
-    </div>
-    <div class="art" role="img" aria-label="إطار شاشة يعرض جزءًا مضاءً ومرتبًا من مشهد، بينما تبقى بقية تفاصيل الحياة خارج الإطار بخطوط متقطعة">
-      <svg viewBox="0 0 600 440" width="100%" height="100%" aria-hidden="true">
-        <defs><clipPath id="scr"><rect x="150" y="70" width="300" height="196" rx="10"/></clipPath></defs>
-        <g class="fx-fade" data-in="3.5" data-dur="2.5" stroke-dasharray="6 9">
-          <path d="M40 120h120a16 16 0 0 1 16 16v44a16 16 0 0 1-16 16H84l-22 18v-18H40a16 16 0 0 1-16-16v-44a16 16 0 0 1 16-16z" class="ink-stroke"/>
-          <path d="M470 330h40l-6 52h-28zM520 330h40l-6 52h-28z" class="ink-stroke"/>
-          <path d="M30 420V270h70v150" class="ink-stroke"/>
-          <path d="M500 140c16-26 60-18 56 14c-4 24-32 38-56 56c-24-18-52-32-56-56c-4-32 40-40 56-14z" class="ink-stroke"/>
-          <path d="M0 420h600" class="ink-stroke"/>
-        </g>
-        <g class="fx-scale" data-in="0.4" data-dur="1.4">
-          <rect x="150" y="70" width="300" height="196" rx="10" fill="var(--coal)"/>
-          <g clip-path="url(#scr)">
-            <path d="M230 70l-50 196h100z" fill="var(--purple)" opacity=".4"/>
-            <path d="M370 70l-50 196h100z" fill="var(--purple)" opacity=".4"/>
-            <rect x="200" y="200" width="200" height="40" fill="var(--orange)" opacity=".7"/>
-            <rect x="236" y="150" width="40" height="50" fill="var(--orange)"/>
-            <rect x="324" y="150" width="40" height="50" fill="var(--orange)"/>
-            <circle cx="300" cy="110" r="16" fill="var(--purple)"/>
-          </g>
-          <rect x="150" y="70" width="300" height="196" rx="10" class="ink-stroke" stroke-width="7"/>
-          <path d="M300 266v40M250 312h100" class="ink-stroke" stroke-width="7"/>
-        </g>
-      </svg>
-    </div>
+    <div class="copy" style="grid-row:2"><div class="eyebrow fx-fade" data-in="0.2" data-dur="0.8" data-slot="title"></div><h2 class="h"><span class="fx-up" data-in="1" data-dur="1.2" data-slot="h1"></span><span class="fx-up" data-in="2.4" data-dur="1.2" data-slot="h2"></span></h2></div>
+    <div class="art" role="img" aria-label="شاشة تعرض صورة مختارة، وحولها رموز باهتة لما لا تعرضه: الحوار والمشاعر والموافقة والجلوس معًا"><div class="pos" style="--x:50%;--y:48%;--w:min(70cqw,100cqh)"><i class="ic acc l fx-scale" data-ic="screen" data-in="0.4" data-dur="1.4"></i><div class="pos" style="--x:50%;--y:42%;--w:42%"><i class="ic  fx-fade" data-ic="image" data-in="1.2" data-dur="1.2"></i></div></div><div class="pos" style="--x:12%;--y:14%;--w:min(27cqw,46cqh)"><i class="ic soft fx-fade" data-ic="dialogue" data-in="3.5" data-dur="2"></i></div><div class="pos" style="--x:88%;--y:14%;--w:min(27cqw,46cqh)"><i class="ic soft fx-fade" data-ic="heart" data-in="4" data-dur="2"></i></div><div class="pos" style="--x:12%;--y:86%;--w:min(27cqw,46cqh)"><i class="ic soft fx-fade" data-ic="two-chairs" data-in="4.5" data-dur="2"></i></div><div class="pos" style="--x:88%;--y:86%;--w:min(27cqw,46cqh)"><i class="ic soft fx-fade" data-ic="consent" data-in="5" data-dur="2"></i></div></div>
   </section>
-
-  <!-- 05 -->
   <section class="scene s5 on-purple" data-scene="4">
-    <div class="copy" style="grid-row:2">
-      <div class="eyebrow fx-fade" data-in="0.2" data-dur="0.8" data-slot="title"></div>
-      <h2 class="h"><span class="fx-up" data-in="1" data-dur="1.2" data-slot="h1"></span><span class="fx-up" data-in="2.4" data-dur="1.2" data-slot="h2"></span></h2>
-    </div>
-    <div class="art" role="img" aria-label="مرآة مقسومة إلى نصفين، تظهر فيها انعكاسات رمزية مثالية ثم تتلاشى">
-      <div class="mirror fx-scale" data-in="0.3" data-dur="1.4">
-        <div class="half h1"></div><div class="half h2"></div>
-        <svg viewBox="0 0 348 495" aria-hidden="true">
-          <g class="reflect" data-in="4" data-dur="8">
-            <circle cx="174" cy="200" r="30" fill="none" stroke="var(--coal)" stroke-width="3" stroke-dasharray="3 6"/>
-            <path d="M118 318c6-46 34-70 56-70s50 24 56 70" fill="none" stroke="var(--coal)" stroke-width="3" stroke-dasharray="3 6"/>
-            <path d="M128 168l5 10 10 5-10 5-5 10-5-10-10-5 10-5z M222 232l4 8 8 4-8 4-4 8-4-8-8-4 8-4z M206 150l3 6 6 3-6 3-3 6-3-6-6-3 6-3z" fill="var(--coal)"/>
-          </g>
-        </svg>
-      </div>
-    </div>
+    <div class="copy" style="grid-row:2"><div class="eyebrow fx-fade" data-in="0.2" data-dur="0.8" data-slot="title"></div><h2 class="h"><span class="fx-up" data-in="1" data-dur="1.2" data-slot="h1"></span><span class="fx-up" data-in="2.4" data-dur="1.2" data-slot="h2"></span></h2></div>
+    <div class="art" role="img" aria-label="مرآة كبيرة، وحولها رمزا نجمة وصورة مثالية يتلاشيان"><div class="pos" style="--x:50%;--y:50%;--w:min(70cqw,100cqh)"><i class="ic l fx-scale" data-ic="mirror" data-in="0.3" data-dur="1.4"></i></div><div class="pos" style="--x:80%;--y:22%;--w:min(27cqw,46cqh)"><div class="wrap reflect" data-in="4" data-dur="8"><i class="ic acc fx-scale" data-ic="fantasy" data-in="1" data-dur="1.2"></i></div></div><div class="pos" style="--x:20%;--y:30%;--w:min(27cqw,46cqh)"><div class="wrap reflect" data-in="4.5" data-dur="8"><i class="ic acc fx-scale" data-ic="image" data-in="1.4" data-dur="1.2"></i></div></div></div>
   </section>
-
-  <!-- 06 -->
   <section class="scene s6" data-scene="5">
-    <div class="copy" style="grid-row:2">
-      <div class="eyebrow fx-fade" data-in="0.2" data-dur="0.8" data-slot="title"></div>
-      <h2 class="h fx-up" data-in="0.8" data-dur="1.2" data-slot="h"></h2>
-      <ul class="items" data-list="items"></ul>
-    </div>
-    <div class="art" role="img" aria-label="ساعة وهاتف وفقاعة تفكير في مساحة فارغة واسعة">
-      <svg viewBox="0 0 400 400" width="100%" height="100%" aria-hidden="true">
-        <g class="fx-scale" data-in="0.4" data-dur="1.3">
-          <circle cx="130" cy="262" r="68" class="ink-stroke" stroke-width="5"/>
-          <path d="M130 262v-40M130 262l26 16" class="ink-stroke" stroke-width="5"/>
-          <rect x="230" y="196" width="72" height="128" rx="12" class="ink-stroke" stroke-width="5"/>
-          <path d="M256 310h20" class="ink-stroke" stroke-width="5"/>
-        </g>
-        <g class="fx-fade" data-in="1.6" data-dur="1.6">
-          <circle cx="250" cy="166" r="6" fill="var(--ink)"/><circle cx="270" cy="138" r="10" fill="var(--ink)"/>
-          <path d="M262 96c-6-26 26-42 44-26c10-18 44-14 46 8c22 2 28 32 8 42c4 22-24 30-38 18c-14 14-44 8-46-12c-18-2-26-24-14-30z" class="ink-stroke" stroke-width="5"/>
-          <path d="M296 92h8M318 92h8M340 92h8" class="ink-stroke" stroke-width="7"/>
-        </g>
-      </svg>
-    </div>
+    <div class="copy" style="grid-row:2"><div class="eyebrow fx-fade" data-in="0.2" data-dur="0.8" data-slot="title"></div><h2 class="h fx-up" data-in="0.8" data-dur="1.2" data-slot="h"></h2><ul class="items" data-list="items"></ul></div>
+    <div class="art" role="img" aria-label="فقاعة تفكير فيها علامة سؤال، وبجانبها هاتف"><div class="pos" style="--x:58%;--y:45%;--w:min(70cqw,100cqh)"><i class="ic acc l fx-scale" data-ic="thought" data-in="0.4" data-dur="1.3"></i><div class="pos" style="--x:52%;--y:42%;--w:40%"><i class="ic  fx-up" data-ic="question" data-in="1.4" data-dur="1.2"></i></div></div><div class="pos" style="--x:16%;--y:70%;--w:min(27cqw,46cqh)"><i class="ic  fx-scale" data-ic="phone" data-in="1" data-dur="1.2"></i></div></div>
   </section>
-
-  <!-- 07 -->
   <section class="scene center s7 on-purple" data-scene="6">
-    <div class="copy" style="grid-row:2">
-      <h2 class="h fx-up" data-in="2.2" data-dur="1.2" data-slot="h"></h2>
-    </div>
-    <div class="art" role="img" aria-label="مقعدان متقابلان، وبينهما فقاعة حوار بدل الشاشة">
-      <div class="talk">
-        <svg viewBox="0 0 800 380" aria-hidden="true">
-          <g class="fx-side" data-in="0.3" data-dur="1.3">
-            <path d="M150 140v170M150 250h130v60M150 250v60" class="ink-stroke" stroke-width="10"/>
-            <path d="M138 250h154" class="ink-stroke" stroke-width="13"/>
-          </g>
-          <g class="fx-side" data-in="0.5" data-dur="1.3">
-            <path d="M650 140v170M650 250H520v60M650 250v60" class="ink-stroke" stroke-width="10"/>
-            <path d="M662 250H508" class="ink-stroke" stroke-width="13"/>
-          </g>
-          <path d="M40 330h720" class="ink-stroke" stroke-width="3" opacity=".45"/>
-        </svg>
-        <div class="bubble" data-in="1.4" data-dur="1.4"><img src="assets/bubble.png" alt=""><div class="dots"><i></i><i></i><i></i></div></div>
-      </div>
-    </div>
+    <div class="copy" style="grid-row:2"><h2 class="h fx-up" data-in="2.2" data-dur="1.2" data-slot="h"></h2></div>
+    <div class="art" role="img" aria-label="مقعدان متقابلان، وبينهما فقاعة حوار بدل الشاشة"><div class="pos" style="--x:50%;--y:66%;--w:min(74cqw,74cqh)"><i class="ic l fx-up" data-ic="two-chairs" data-in="0.3" data-dur="1.3"></i></div><div class="pos" style="--x:50%;--y:22%;--w:min(40cqw,66cqh)"><i class="ic acc fx-scale" data-ic="dialogue" data-in="1.4" data-dur="1.4"></i></div></div>
   </section>
-
-  <!-- 08 -->
   <section class="scene s8" data-scene="7">
-    <div class="copy" style="grid-row:2">
-      <div class="eyebrow fx-fade" data-in="0.2" data-dur="0.8" data-slot="title"></div>
-      <div class="steps" data-list="steps"></div>
-    </div>
-    <div class="art" role="img" aria-label="يدان تضعان الهاتف جانبًا، ثم تظهر نافذة يمتد منها طريق بسيط">
-      <div class="hands" data-in="1.6" data-dur="2.6"><img src="assets/phone-hands.png" alt=""></div>
-      <svg class="way" viewBox="0 0 360 300" aria-hidden="true">
-        <g data-in="3.4" data-dur="3.4">
-          <rect x="40" y="20" width="280" height="260" rx="6" class="ink-stroke draw" stroke-width="6" pathLength="1"/>
-          <path d="M40 170h280" class="ink-stroke draw" stroke-width="4" pathLength="1"/>
-          <path d="M150 280c10-50 20-80 30-110M210 280c-10-50-20-80-30-110" class="ink-stroke draw" stroke-width="5" pathLength="1"/>
-          <circle cx="250" cy="110" r="26" class="ink-stroke draw" stroke-width="5" pathLength="1"/>
-        </g>
-      </svg>
-    </div>
+    <div class="copy" style="grid-row:2"><div class="eyebrow fx-fade" data-in="0.2" data-dur="0.8" data-slot="title"></div><div class="steps" data-list="steps"></div></div>
+    <div class="art" role="img" aria-label="يد تضع الهاتف جانبًا، ثم يظهر طريق"><div class="pos" style="--x:76%;--y:40%;--w:min(40cqw,66cqh)"><i class="ic  fx-up" data-ic="hand" data-in="0.4" data-dur="1.2"></i></div><div class="pos" style="--x:76%;--y:22%;--w:min(27cqw,46cqh)"><div class="wrap aside" data-in="1.8" data-dur="2.4"><i class="ic acc fx-fade" data-ic="phone" data-in="0.4" data-dur="1"></i></div></div><div class="pos" style="--x:30%;--y:52%;--w:min(70cqw,100cqh)"><i class="ic acc l fx-up" data-ic="path" data-in="3.4" data-dur="2"></i></div></div>
   </section>
-
-  <!-- 09 -->
   <section class="scene s9 on-purple" data-scene="8">
-    <div class="copy" style="grid-row:2">
-      <div class="eyebrow fx-fade" data-in="0.2" data-dur="0.8" data-slot="title"></div>
-      <h2 class="h fx-up" data-in="1.2" data-dur="1.2" data-slot="h"></h2>
-    </div>
-    <div class="art" role="img" aria-label="باب مفتوح يخرج منه ضوء، وبجانبه يدان مفتوحتان تحملان قلبًا كرمز للدعم الإنساني">
-      <div class="door fx-fade" data-in="0.3" data-dur="1.6"><img src="assets/door.png" alt=""></div>
-      <div class="medal fx-scale" data-in="2.2" data-dur="1.4"><img src="assets/heart-hands.png" alt=""></div>
-    </div>
+    <div class="copy" style="grid-row:2"><div class="eyebrow fx-fade" data-in="0.2" data-dur="0.8" data-slot="title"></div><h2 class="h fx-up" data-in="1.2" data-dur="1.2" data-slot="h"></h2></div>
+    <div class="art" role="img" aria-label="باب مفتوح ومصباح مضيء، ويدان تحتضنان قلبًا كرمز للدعم"><div class="pos" style="--x:66%;--y:48%;--w:min(70cqw,100cqh)"><i class="ic l fx-fade" data-ic="door" data-in="0.3" data-dur="1.6"></i></div><div class="pos" style="--x:91%;--y:12%;--w:min(24cqw,40cqh)"><i class="ic acc fx-scale" data-ic="light" data-in="1.4" data-dur="1.2"></i></div><div class="pos" style="--x:22%;--y:64%;--w:min(40cqw,66cqh)"><i class="ic acc fx-scale" data-ic="support" data-in="2.2" data-dur="1.4"></i></div></div>
   </section>
-
-  <!-- 10 -->
   <section class="scene center s10" data-scene="9">
-    <div class="copy" style="grid-row:2">
-      <h2 class="h fx-up" data-in="2.4" data-dur="1.3" data-slot="h"></h2>
-      <p class="outro fx-up" data-in="12" data-dur="1.4" data-slot="outro"></p>
-    </div>
-    <div class="art" role="img" aria-label="الشاشة تبتعد عن المنتصف وتصغر، وتبقى المرأة والرجل كلٌّ في مساحته المفتوحة والمتوازنة">
-      <div class="horizon"></div>
-      <div class="pair">
-        <div class="arch fx-up" data-in="0.3" data-dur="1.3"><img src="assets/woman.png" alt=""></div>
-        <div class="arch fx-up" data-in="0.3" data-dur="1.3"><img src="assets/man.png" alt=""></div>
-      </div>
-      <div class="away" data-in="2" data-dur="7"><div class="glow"></div></div>
-    </div>
+    <div class="copy" style="grid-row:2"><h2 class="h fx-up" data-in="2.4" data-dur="1.3" data-slot="h"></h2><p class="outro fx-up" data-in="12" data-dur="1.4" data-slot="outro"></p></div>
+    <div class="art" role="img" aria-label="الشاشة تبتعد وتصغر، ويبقى رمزا المرأة والرجل كلٌّ في مساحته، وبينهما شروق هادئ"><div class="horizon"></div><div class="pos" style="--x:14%;--y:62%;--w:min(40cqw,66cqh)"><i class="ic  fx-up" data-ic="woman" data-in="0.3" data-dur="1.3"></i></div><div class="pos" style="--x:86%;--y:62%;--w:min(40cqw,66cqh)"><i class="ic  fx-up" data-ic="man" data-in="0.3" data-dur="1.3"></i></div><div class="pos" style="--x:50%;--y:64%;--w:min(40cqw,66cqh)"><i class="ic acc fx-up" data-ic="hope" data-in="6" data-dur="1.6"></i></div><div class="pos" style="--x:50%;--y:40%;--w:min(27cqw,46cqh)"><div class="wrap away" data-in="2" data-dur="7"><i class="ic acc fx-fade" data-ic="screen" data-in="0" data-dur="0.6"></i></div></div></div>
   </section>
 
   <div class="safe" id="safe" hidden><span>منطقة الأمان</span></div>
@@ -457,14 +252,14 @@ body.render .chrome,body.render .cover,body.render .safe{display:none!important}
 const SCENES = [
   { title:"بيننا شاشة", dur:16.58,
     text:{ h:"بيننا شاشة", sub:"حكاية عن المشاهدة… وما نبحث عنه خلفها" },
-    visual:"امرأة ورجل في قوسين منفصلين، وبينهما مستطيل ضوئي يشبه شاشة الهاتف",
+    visual:"رمزا امرأة ورجل، وبينهما هاتف مضيء",
     cap:[[0.6,"أحيانًا، لا تكون المسافة بين شخصين طريقًا طويلًا…"],[5.42,"بل شاشة صغيرة."],[7.2,"نقترب منها بحثًا عن شيء،"],[10.14,"ثم نكتشف أن السؤال الحقيقي ليس: ماذا نشاهد؟"],[14.08,"بل: عمّ نبحث؟"]] },
   { title:"ليست حكاية طرف واحد", dur:15.48,
     text:{ h1:"ليست حكاية رجل فقط…", h2:"ولا امرأة فقط" },
     visual:"الشخصيتان متساويتان على كفتين متوازنتين",
     cap:[[0.02,"هذه ليست حكاية رجل وحده،"],[2.72,"ولا امرأة وحدها."],[3.98,"إنها حكاية أشخاص،"],[6.3,"تختلف تجاربهم ودوافعهم وحدودهم."],[10.42,"ولا يمكن فهمهم من خلال حكم واحد،"],[13.12,"أو صورة نمطية واحدة."]] },
   { title:"كيف تبدأ؟", dur:16.15,
-    list:{ key:"words", items:[["فضول.",0.4],["ملل.",2.9],["ضغط.",6.6],["وحدة.",7.6]] },
+    list:{ key:"words", items:[["فضول.",0.4,"curiosity"],["ملل.",2.9,"boredom"],["ضغط.",6.6,"pressure"],["وحدة.",7.6,"solitude"]] },
     visual:"هاتف وساعة ونافذة ليلية على مسار دائري بطيء",
     cap:[[0.22,"قد تبدأ المشاهدة بفضول،"],[2.88,"أو بوقت فارغ،"],[4.6,"أو بمحاولة للهروب من ضغط أو وحدة."],[8.48,"وهنا، بدل أن نبدأ باللوم،"],[10.66,"يمكن أن نبدأ بسؤال أهدأ:"],[14.08,"ما الذي أشعر به الآن؟"]] },
   { title:"ما لا تعرضه الشاشة", dur:15.32,
@@ -477,7 +272,7 @@ const SCENES = [
     cap:[[0.18,"وحين نتعامل مع الصورة كأنها معيار،"],[2.88,"قد نقسو على أنفسنا،"],[5.32,"أو نطلب من الآخر أن يشبه خيالًا."],[8.16,"لكن الإنسان ليس اختبارًا للمظهر أو الأداء…"],[11.96,"ولا يحتاج إلى أن يكون نسخة من أحد."]] },
   { title:"أسئلة بلا أحكام", dur:15.65,
     text:{ h:"هل ما زلت أختار؟" },
-    list:{ key:"items", items:[["وقتي",2.9,"clock"],["نومي",5.8,"moon"],["حضوري",8.4,"eye"],["حدودي",12.1,"frame"]] },
+    list:{ key:"items", items:[["وقتي",2.9,"clock"],["نومي",5.8,"sleep"],["حضوري",8.4,"presence"],["حدودي",12.1,"boundaries"]] },
     visual:"ساعة وهاتف وفقاعة تفكير مع فراغ واسع",
     cap:[[0.31,"اسأل نفسك بلا إهانة:"],[2.77,"هل يأخذ هذا من وقتي أكثر مما أريد؟"],[5.77,"هل يزاحم نومي أو مسؤولياتي؟"],[8.41,"هل أجد صعوبة في التوقف رغم رغبتي؟"],[12.09,"هذه أسئلة للفهم، وليست تشخيصًا."]] },
   { title:"مساحة للكلام", dur:16.56,
@@ -485,7 +280,7 @@ const SCENES = [
     visual:"مقعدان متقابلان وبينهما فقاعة حوار",
     cap:[[0.34,"وإذا كانت هناك علاقة،"],[2.22,"فابدأ بالكلام، لا بالتفتيش ولا بالاتهام."],[6.38,"قل: هذا ما أشعر به،"],[9.02,"وهذه حدودي،"],[10.74,"وهذا ما أحتاج إلى فهمه."],[12.48,"واستمع، دون سخرية أو ضغط أو إجبار."]] },
   { title:"خطوة صغيرة", dur:17.70,
-    list:{ key:"steps", items:[["توقّف قليلًا.",2.8],["لاحظ.",5.1],["اختر.",8.4]] },
+    list:{ key:"steps", items:[["توقّف قليلًا.",2.8,"pause"],["لاحظ.",5.1,"observe"],["اختر.",8.4,"choice"]] },
     visual:"يدان تضعان الهاتف جانبًا، ثم نافذة وطريق",
     cap:[[0.44,"قد تكون البداية خطوة صغيرة:"],[2.82,"أن تضع الهاتف جانبًا،"],[5.1,"أو تلاحظ الأوقات التي تلجأ فيها إلى المشاهدة،"],[8.4,"أو تختار نشاطًا آخر يناسب حاجتك."],[12.08,"ليس المطلوب كمالًا مفاجئًا…"],[14.7,"بل اختيارًا أكثر وعيًا."]] },
   { title:"لست مضطرًا وحدك", dur:15.63,
@@ -515,12 +310,12 @@ const FADE = 0.8;      // انتقال المشهد
 const CAP_IN = 0.55;   // دخول سطر الترجمة
 const CAP_OUT = 0.25;  // خروج السطر السابق
 
-/* Tabler Icons (MIT) */
+/* Baynana-Shasha icon set (64-unit grid) */
+const PACK = {"man": "<circle cx=\"32\" cy=\"18\" r=\"9\"/><path d=\"M17 55v-9a15 15 0 0 1 30 0v9M25 10l14 1\"/>", "woman": "<path d=\"M18 32V21a14 14 0 0 1 28 0v11M21 53l3-12h16l3 12\"/><circle cx=\"32\" cy=\"22\" r=\"9\"/><path d=\"M17 55h30\"/>", "phone": "<rect x=\"20\" y=\"7\" width=\"24\" height=\"50\" rx=\"5\"/><path d=\"M27 12h10M30 51h4\"/>", "screen": "<rect x=\"7\" y=\"10\" width=\"50\" height=\"34\" rx=\"3\"/><path d=\"M32 44v10M22 54h20\"/>", "balance": "<path d=\"M32 7v49M19 56h26M10 20h44M18 20 7 40h22ZM46 20 35 40h22Z\"/>", "night": "<path d=\"M43 9a23 23 0 1 0 12 35A24 24 0 0 1 43 9Z\"/>", "clock": "<circle cx=\"32\" cy=\"32\" r=\"24\"/><path d=\"M32 17v16l12 7\"/>", "curiosity": "<circle cx=\"27\" cy=\"27\" r=\"18\"/><path d=\"m40 40 17 17M23 23q0-7 7-5t-1 10v5M29 38h.1\"/>", "boredom": "<circle cx=\"32\" cy=\"32\" r=\"24\"/><path d=\"M19 25h7M39 25h7M23 43h18\"/>", "pressure": "<path d=\"M32 5v15M24 13l8 8 8-8M5 33h15M13 25l8 8-8 8M59 33H44M51 25l-8 8 8 8\"/><circle cx=\"32\" cy=\"39\" r=\"8\"/><path d=\"M21 58a11 11 0 0 1 22 0\"/>", "solitude": "<circle cx=\"32\" cy=\"23\" r=\"7\"/><path d=\"M22 47V39a10 10 0 0 1 20 0v8M9 55h46M7 9v37M57 9v37\"/>", "mirror": "<ellipse cx=\"32\" cy=\"26\" rx=\"18\" ry=\"21\"/><path d=\"M32 47v11M23 58h18M24 26l11-11M28 35l12-12\"/>", "fantasy": "<path d=\"m32 6 6 17 18 1-14 12 5 19-15-11-15 11 5-19L8 24l18-1Z\"/>", "image": "<rect x=\"7\" y=\"10\" width=\"50\" height=\"44\" rx=\"4\"/><circle cx=\"21\" cy=\"23\" r=\"5\"/><path d=\"m8 47 14-13 10 8 11-16 14 21\"/>", "dialogue": "<path d=\"M9 10h46v33H30L17 54V43H9zM18 21h28M18 31h19\"/>", "heart": "<path d=\"M32 54 10 33C-7 12 20-2 32 17 44-2 71 12 54 33Z\"/>", "consent": "<circle cx=\"32\" cy=\"32\" r=\"24\"/><path d=\"m19 32 9 9 18-20\"/>", "two-chairs": "<path d=\"M7 18h16v21H7zM5 39h21v9H5zM9 48v9M22 48v9M41 18h16v21H41zM38 39h21v9H38zM42 48v9M55 48v9\"/>", "listening": "<path d=\"M16 26C14 3 49 3 49 25c0 13-14 14-14 23 0 12-16 12-16 0M25 27c-1-12 15-12 15-1 0 7-10 9-10 16\"/>", "pause": "<circle cx=\"32\" cy=\"32\" r=\"24\"/><path d=\"M25 22v20M39 22v20\"/>", "observe": "<circle cx=\"26\" cy=\"26\" r=\"18\"/><path d=\"m39 39 18 18M18 26h16M26 18v16\"/>", "choice": "<path d=\"M32 56V34M32 34 14 16M32 34l18-18M7 16h14V3M43 3v13h14\"/>", "hand": "<path d=\"M19 54 9 37q-3-7 3-6l10 9V15q0-7 5-4v20V8q5-5 7 1v22V12q6-5 6 3v18V21q6-4 6 3v20q0 9-7 13H23\"/>", "path": "<path d=\"m7 58 19-50h12l19 50M32 12v7M32 28v8M32 46v10\"/>", "door": "<path d=\"M10 57h44M17 57V8h31v49M17 8l23 8v41M34 34v5\"/>", "support": "<path d=\"m6 39 12 16h28l12-16M10 30l16 13h12l16-13M18 35V22M46 35V22\"/><path d=\"M32 32 21 21C12 10 27 4 32 14c5-10 20-4 11 7Z\"/>", "light": "<path d=\"M23 42a17 17 0 1 1 18 0v8H23zM26 57h12M32 1v4M4 24h5M55 24h5M10 7l4 5M50 12l4-5\"/>", "hope": "<path d=\"M6 48h52M17 48a15 15 0 0 1 30 0M32 9v10M8 24l8 7M56 24l-8 7M8 57h48\"/>", "sleep": "<path d=\"M7 52V28M7 43h50v12M10 30h13v13M23 35h27q7 0 7 8M35 9h14L35 24h14\"/>", "presence": "<circle cx=\"32\" cy=\"20\" r=\"9\"/><path d=\"M18 49v-6a14 14 0 0 1 28 0v6M8 18V8h10M46 8h10v10M8 46v10h10M46 56h10V46\"/>", "boundaries": "<rect x=\"9\" y=\"9\" width=\"46\" height=\"46\" rx=\"7\" stroke-dasharray=\"5 5\"/><circle cx=\"32\" cy=\"32\" r=\"9\"/>", "thought": "<path d=\"M16 37a12 12 0 0 1-5-22 13 13 0 0 1 22-5 13 13 0 0 1 20 9 11 11 0 0 1-3 22H22\"/><circle cx=\"19\" cy=\"47\" r=\"4\"/><circle cx=\"11\" cy=\"56\" r=\"2\"/>", "question": "<path d=\"M20 22a12 12 0 1 1 19 10q-7 4-7 12\"/><circle cx=\"32\" cy=\"54\" r=\"1.5\"/>"};
+const packSvg = n => '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + PACK[n] + '</svg>';
+document.querySelectorAll('[data-ic]').forEach(n => { n.innerHTML = packSvg(n.dataset.ic); });
+/* Tabler Icons (MIT), player controls only */
 const ICONS = {
-  clock:'<path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /><path d="M12 7v5l3 3" />',
-  moon:'<path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454l0 .008" />',
-  eye:'<path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" /><path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6" />',
-  frame:'<path d="M4 6a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2l0 -12" /><path d="M12 8l0 .01" /><path d="M8 12l0 .01" /><path d="M12 12l0 .01" /><path d="M16 12l0 .01" /><path d="M12 16l0 .01" />',
   play:'<path d="M7 4v16l13 -8l-13 -8" fill="currentColor" />',
   pause:'<path d="M6 6a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v12a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1l0 -12" fill="currentColor" /><path d="M14 6a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v12a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1l0 -12" fill="currentColor" />',
   vol:'<path d="M15 8a5 5 0 0 1 0 8" /><path d="M17.7 5a9 9 0 0 1 0 14" /><path d="M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a.8 .8 0 0 1 1.5 .5v14a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5" />',
@@ -555,9 +350,13 @@ sceneEls.forEach((el, i) => {
       let n;
       if (host.tagName === 'UL') {
         n = document.createElement('li');
-        n.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICONS[icon] + '</svg><span></span>';
+        n.innerHTML = '<i class="ic acc">' + packSvg(icon) + '</i><span></span>';
         n.querySelector('span').textContent = word;
-      } else { n = document.createElement('div'); n.className = 'h'; n.textContent = word; }
+      } else {
+        n = document.createElement('div'); n.className = 'wordrow';
+        n.innerHTML = '<i class="ic acc">' + packSvg(icon) + '</i><div class="h"></div>';
+        n.querySelector('.h').textContent = word;
+      }
       n.classList.add('fx-side'); n.dataset.in = at; n.dataset.dur = 0.9;
       host.appendChild(n);
     });
