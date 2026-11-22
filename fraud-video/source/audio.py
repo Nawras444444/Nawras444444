@@ -3,7 +3,7 @@ import os, sys, subprocess, wave
 import numpy as np
 BASE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, BASE)
-from render import starts, S, VOICE
+from render import starts, S, VOICE, LEAD, VOICE_SHOCK
 
 SR = 48000
 st = starts(); total = st[-1]
@@ -81,7 +81,6 @@ fade = np.clip(t_all / 1.5, 0, 1) * np.clip((total - t_all) / 1.5, 0, 1)
 music = norm(music) * fade
 
 # --- SFX at the renderer's events
-LEAD = 0.25
 add(impact(), 0.05, 0.6)
 for k in range(15): add(pop(700 + 40 * k), 0.15 + k * 0.06 + 0.2, 0.18)      # intro face pops
 for i in range(1, len(S)):
@@ -94,7 +93,8 @@ for i in range(1, len(S)):
         o = b0 - LEAD
         add(pop(600), o + 0.6, 0.25); add(pop(1000), o + 0.85, 0.2)
         for k in range(10): add(tick(), o + 1.4 + k * 0.07, 0.12)       # amount counter
-        add(impact(), o + 0.55 * D, 0.65); add(zap(), o + 0.55 * D, 0.22)
+        sh = VOICE_SHOCK[i] - 0.05 if os.path.exists(VOICE) else o + 0.55 * D
+        add(impact(), sh, 0.65); add(zap(), sh, 0.22)
 add(riser(), st[-2] - 1.4, 0.3)
 
 sfx = mix

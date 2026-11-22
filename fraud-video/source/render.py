@@ -74,20 +74,46 @@ S = [
 ]
 # person cutout: crop to this fraction of height (keeps stock watermarks off screen); None = use photo card
 CUTCROP = {1: 1.0, 2: 1.0, 3: 0.6, 4: 1.0, 5: 0.6, 7: 1.0, 8: 1.0, 10: 1.0, 11: 1.0, 12: 0.9, 13: 1.0, 15: 0.56}
+# voice sync (seconds in voiceover.wav): scene starts and the punchline moment of each story
+VOICE_STARTS = [0.0, 6.80, 15.36, 22.00, 30.08, 37.28, 45.96, 55.48, 63.88, 72.28, 78.04, 85.60, 92.76, 99.04, 106.60, 114.76, 124.24]
+VOICE_END = 130.6
+VOICE_SHOCK = [None, 11.44, 19.72, 27.44, 33.96, 42.16, 51.88, 60.44, 69.60, 74.20, 81.12, 89.96, 94.76, 103.04, 111.24, 121.76, None]
+# (hero icon, shock icon, background icon set)
+ICONS = [
+ (None, None, ["money_bag", "gold", "bank", "chart_down"]),
+ ("chart_down", "bars", ["money_bag", "gold", "chart_up"]),
+ ("bank", "eraser", ["gold", "money_bag", "warning"]),
+ ("board", "chart_down", ["bar_chart", "chart_up", "folder"]),
+ ("shield_crack", "bars", ["gold", "chart_down", "money_bag"]),
+ ("folder", "bars", ["gold", "bank", "money_bag"]),
+ ("pin", "clock", ["globe", "money_bag", "gold"]),
+ ("chart_up", "warning", ["gold", "chart_up", "globe"]),
+ ("money_bag", "bars", ["gold", "money_bag", "folder"]),
+ ("chart_up", "chart_down", ["chart_up", "gold", "warning"]),
+ ("eraser", "warning", ["money_bag", "bar_chart", "bank"]),
+ ("camera_orange", "warning", ["camera_blue", "clock", "folder"]),
+ ("folder", "eraser", ["bar_chart", "eraser", "board"]),
+ ("bank", "clock", ["chart_down", "clock", "gold"]),
+ ("bar_chart", "eraser", ["board", "bar_chart", "chart_up"]),
+ ("money_bag", "bars", ["gold", "money_bag", "clock"]),
+ (None, None, ["warning", "shield_ok", "camera_blue", "globe"]),
+]
 BGTYPES = ["split", "diagonal", "spot"]
 for i, s in enumerate(S):
     s.setdefault("kind", "story")
     s["idx"] = i
     s["pal"] = PAL[[0, 1, 2][i % 3]] if s["kind"] == "story" else (PAL[0] if s["kind"] == "intro" else PAL[1])
     s["bg"] = BGTYPES[(i + i // 3) % 3] if s["kind"] == "story" else "split"
+    s["hero"], s["shockicon"], s["bgicons"] = ICONS[i]
 
 # ------------------------------------------------------------------ timing
-LEAD = 0.25   # half transition length
+LEAD = 0.3    # half transition length
 TR = 2 * LEAD
 
 def durations():
     if os.path.exists(VOICE):
-        return voice_durations()
+        b = VOICE_STARTS[1:] + [VOICE_END]
+        return [x - y + (0.1 if k == 0 else 0) for k, (x, y) in enumerate(zip(b, [0.1] + VOICE_STARTS[1:]))]
     out = []
     for s in S:
         if s["kind"] == "intro": out.append(4.2)
@@ -205,10 +231,10 @@ def rounded(im, r):
     out = im.convert("RGBA"); out.putalpha(Image.fromarray(np.minimum(np.array(out.getchannel("A")), np.array(m))))
     return out
 
-def cover(im, w, h):
+def cover(im, w, h, top=False):
     r = max(w / im.width, h / im.height)
     im = im.resize((int(im.width * r + 1), int(im.height * r + 1)), Image.LANCZOS)
-    x, y = (im.width - w) // 2, (im.height - h) // 2
+    x, y = (im.width - w) // 2, 0 if top else (im.height - h) // 2
     return im.crop((x, y, x + w, y + h))
 
 def pill(w, h, fill, outline=None, ow=3, r=None):
@@ -313,7 +339,7 @@ def layers(s):
             L["person_cut"] = True
         else:
             ph = Image.open(os.path.join(ASSETS, f"{i:02d}_photo.png")).convert("RGB")
-            ph = cover(ph, 560, 600 if ph.height >= ph.width * 0.9 else 420)
+            ph = cover(ph, 500, 560 if ph.height >= ph.width * 0.9 else 400, top=True)
             fr = Image.new("RGBA", (ph.width + 28, ph.height + 28), WHITE + (255,))
             fr.paste(ph, (14, 14))
             # tape strip
@@ -401,6 +427,50 @@ def face_grid(acc, small=False):
         faces.append(shadowed(ring, (6, 10), 10, 0.4))
     return faces
 
+# ------------------------------------------------------------------ 3D icons
+_ic = {}
+def icon(name, size, rot=0.0):
+    k = (name, size, round(rot, 1))
+    if k not in _ic:
+        im = Image.open(os.path.join(ASSETS, "icons", name + ".png")).convert("RGBA")
+        r = size / max(im.size)
+        im = im.resize((max(1, int(im.width * r)), max(1, int(im.height * r))), Image.LANCZOS)
+        if rot: im = im.rotate(rot, expand=True, resample=Image.BICUBIC)
+        _ic[k] = im
+    return _ic[k]
+
+_wall = {}
+def wallpaper(s):
+    """two parallax layers of themed 3D icons scattered behind the scene."""
+    i = s["idx"]
+    if i in _wall: return _wall[i]
+    rnd = random.Random(i * 97 + 3)
+    names = s["bgicons"]
+    layers_ = []
+    for depth, (n_cols, n_rows, smin, smax, op, blur) in enumerate(((5, 9, 80, 120, 0.30, 0), (3, 5, 150, 210, 0.42, 3))):
+        lay = Image.new("RGBA", (W + 200, H + 520), (0, 0, 0, 0))
+        cw, ch = lay.width / n_cols, lay.height / n_rows
+        k = 0
+        for r in range(n_rows):
+            for c in range(n_cols):
+                if rnd.random() < 0.18: continue
+                nm = names[k % len(names)]; k += 1
+                im = icon(nm, int(rnd.uniform(smin, smax)), rot=rnd.uniform(-28, 28))
+                x = int((c + 0.5 + (0.5 if r % 2 else 0)) * cw + rnd.uniform(-cw * .2, cw * .2) - im.width / 2) % lay.width
+                y = int((r + 0.5) * ch + rnd.uniform(-ch * .2, ch * .2) - im.height / 2)
+                lay.alpha_composite(im, (min(max(0, x), lay.width - im.width), min(max(0, y), lay.height - im.height)))
+        if blur: lay = lay.filter(ImageFilter.GaussianBlur(blur))
+        lay.putalpha(lay.getchannel("A").point(lambda v, op=op: int(v * op)))
+        layers_.append(lay)
+    _wall[i] = layers_
+    return layers_
+
+def shock_time(s, D):
+    v = VOICE_SHOCK[s["idx"]]
+    if os.path.exists(VOICE) and v is not None:
+        return v - VOICE_STARTS[s["idx"]] + LEAD - 0.05
+    return 0.55 * D
+
 # ------------------------------------------------------------------ scene frame
 HEADPOS = {}
 def scene_frame(s, t, D, gk=0):
@@ -411,10 +481,18 @@ def scene_frame(s, t, D, gk=0):
     ox = int(60 + 50 * math.sin(u * math.pi - math.pi / 2)); oy = int(60 + 50 * math.sin(u * 2.0))
     fr = Image.fromarray(bg[oy:oy + H, ox:ox + W]).convert("RGBA")
 
+    # themed icon wallpaper (parallax, drifts upward, fades in)
+    wa = clamp(t / 0.6)
+    for depth, lay in enumerate(wallpaper(s)):
+        sp = (22, 48)[depth]
+        yo = -int(min(500, 60 + sp * t)); xo = -100 + int((14, -24)[depth] * math.sin(t * 0.5))
+        piece = lay.crop((-xo, -yo, -xo + W, -yo + H))
+        fr.alpha_composite(alpha_mul(piece, wa))
+
     # floating accent shapes (Vox geometric confetti)
     d = ImageDraw.Draw(fr)
     rnd = random.Random(s["idx"] * 31 + 5)
-    for k in range(7):
+    for k in range(12):
         x0, y0, r0, ph = rnd.uniform(60, W - 60), rnd.uniform(150, 1050), rnd.uniform(8, 18), rnd.uniform(0, 6.3)
         x = x0 + 16 * math.sin(t * 0.9 + ph); y = y0 - 22 * t % 60 + 10 * math.cos(t * 1.1 + ph)
         sc = e_back((t - 0.3 - k * 0.05) / 0.4)
@@ -435,7 +513,7 @@ def scene_frame(s, t, D, gk=0):
     arr = np.asarray(fr.convert("RGB")).astype(np.float32)
     arr = arr * grain(gk)
     if s["kind"] == "story":
-        ts = t - 0.55 * D
+        ts = t - shock_time(s, D)
         if 0 <= ts < 0.3:                      # shock glitch
             arr = glitch(arr, (1 - ts / 0.3), seed=int(ts * 100) + s["idx"])
     if s["kind"] == "outro":
@@ -444,7 +522,7 @@ def scene_frame(s, t, D, gk=0):
 
 def story_layers(fr, s, L, t, D, acc):
     i = s["idx"]
-    shock_t = 0.55 * D
+    shock_t = shock_time(s, D)
     ts = t - shock_t
     shake = (10 * math.sin(ts * 60) * math.exp(-ts * 7), 8 * math.cos(ts * 47) * math.exp(-ts * 7)) if ts > 0 else (0, 0)
 
@@ -482,6 +560,13 @@ def story_layers(fr, s, L, t, D, acc):
         cy = bottom - pim.height / 2 + 260 * (1 - pe) + 6 * math.sin(t * 1.3)
         paste_c(fr, pim, cx + shake[0] * 1.2, cy + shake[1], clamp((t - 0.45) / 0.15))
         HEADPOS[i] = (cx, bottom - pim.height + 60)
+
+    # hero 3D icon pops on the right, floats
+    if s["hero"]:
+        ie = e_back((t - 0.9) / 0.5, 2.2)
+        if ie > 0:
+            hi = icon(s["hero"], 250, rot=round(4 * math.sin(t * 1.4)))
+            paste_c(fr, scaled(hi, ie), 905 + shake[0], 780 + 12 * math.sin(t * 1.8) + shake[1])
 
     # country tag pill (wipe from right)
     ce = e_out3((t - 0.65) / 0.45)
@@ -537,6 +622,11 @@ def story_layers(fr, s, L, t, D, acc):
         se = e_back(ts / 0.35, 1.6)
         st = L["shock"]
         paste_c(fr, scaled(st, 2.2 - 1.2 * se), 540 + shake[0], 930 + shake[1], clamp(ts / 0.12))
+        if s["shockicon"]:
+            ie = e_back((ts - 0.12) / 0.4, 2.4)
+            if ie > 0:
+                si = icon(s["shockicon"], 240, rot=-8)
+                paste_c(fr, scaled(si, ie), 185 + shake[0] * 1.5, 700 + 8 * math.sin(t * 2.2) + shake[1])
 
 def draw_amount(fr, s, acc, card, ae, cx, cy):
     txt = s["amar"]
@@ -688,6 +778,45 @@ def tr_glitch(A, B, p, pal):
         g = 255 - g if k > 0.85 else g
     return np.clip(g, 0, 255).astype(np.uint8)
 
+def tr_fx(img, p, pal, seed):
+    """Vox-style motion lines and flying shapes layered over every transition."""
+    k = 1 - abs(p - 0.5) * 2
+    if k <= 0.02: return img
+    im = Image.fromarray(img).convert("RGBA")
+    ov = Image.new("RGBA", (W, H), (0, 0, 0, 0)); d = ImageDraw.Draw(ov)
+    rnd = random.Random(seed)
+    cols = [pal["acc"], WHITE, pal["top"] if lum(pal["top"]) > 40 else pal["acc"]]
+    dirn = 1 if seed % 2 else -1
+    # speed lines
+    for n in range(16):
+        y = rnd.uniform(80, H - 80); ln = rnd.uniform(240, 820); th = rnd.uniform(4, 16)
+        sp = rnd.uniform(0.8, 1.6)
+        x = (W + ln) * (0.5 + dirn * (p - 0.5) * 2.2 * sp) - ln
+        c = cols[n % 3]
+        d.rounded_rectangle((x, y, x + ln, y + th), radius=int(th / 2), fill=c + (int(230 * k),))
+    # ring burst from the centre
+    R = 80 + 1100 * e_out3(p)
+    d.ellipse((540 - R, 900 - R, 540 + R, 900 + R), outline=pal["acc"] + (int(255 * k),), width=int(10 + 26 * k))
+    R2 = R * 0.62
+    d.ellipse((540 - R2, 900 - R2, 540 + R2, 900 + R2), outline=WHITE + (int(200 * k),), width=6)
+    # flying triangles, plus signs and squares
+    for n in range(12):
+        a = rnd.uniform(0, 2 * math.pi); dist = 120 + 900 * e_out3(p) * rnd.uniform(0.6, 1.2)
+        cx, cy = 540 + dist * math.cos(a), 900 + dist * math.sin(a)
+        r = rnd.uniform(18, 42) * (0.5 + k); rot = a + p * 6
+        c = cols[n % 3] + (int(255 * k),)
+        if n % 3 == 0:
+            pts = [(cx + r * math.cos(rot + q * 2.094), cy + r * math.sin(rot + q * 2.094)) for q in range(3)]
+            d.polygon(pts, fill=c)
+        elif n % 3 == 1:
+            for q in (0, 1.5708):
+                d.line((cx - r * math.cos(rot + q), cy - r * math.sin(rot + q), cx + r * math.cos(rot + q), cy + r * math.sin(rot + q)), fill=c, width=9)
+        else:
+            pts = [(cx + r * .8 * math.cos(rot + q * 1.5708 + .785), cy + r * .8 * math.sin(rot + q * 1.5708 + .785)) for q in range(4)]
+            d.polygon(pts, outline=c, width=6)
+    im.alpha_composite(ov)
+    return np.asarray(im.convert("RGB"))
+
 TRANS = [tr_bands, tr_circle, tr_push, tr_zoom, tr_diag, tr_glitch]
 
 # ------------------------------------------------------------------ global frame
@@ -708,7 +837,8 @@ def frame_at(T, st):
     p = (T - (st[j] - LEAD)) / TR
     A = scene_frame(S[i], loc(i), D(i), gk)
     B = scene_frame(S[j], loc(j), D(j), gk)
-    return TRANS[(j - 1) % len(TRANS)](A, B, clamp(p), S[j]["pal"])
+    out = TRANS[(j - 1) % len(TRANS)](A, B, clamp(p), S[j]["pal"])
+    return tr_fx(out, clamp(p), S[j]["pal"], j)
 
 def render_range(a, b, out):
     st = starts()
