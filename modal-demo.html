@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Modal transition demo</title>
+<style>
+  /* ---- Variables (from transitions-dev 06-modal) ---- */
+  :root {
+    --modal-open-dur: 250ms;
+    --modal-close-dur: 150ms;
+    --modal-scale: 0.96;
+    --modal-scale-close: 0.96;
+    --modal-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  /* ---- Page chrome (demo only, not part of the transition) ---- */
+  html, body { margin: 0; height: 100%; }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: #f4f4f1;
+    color: #1a1a1a;
+    display: grid;
+    place-items: center;
+    min-height: 100vh;
+    padding: 16px;
+    box-sizing: border-box;
+  }
+  .demo-open {
+    font: inherit;
+    font-weight: 600;
+    padding: 12px 20px;
+    border: 0;
+    border-radius: 10px;
+    background: #1a1a1a;
+    color: #fff;
+    cursor: pointer;
+  }
+  .demo-open:focus-visible { outline: 3px solid #6b8cff; outline-offset: 3px; }
+
+  /* Backdrop: fades with the same open/close timing as the modal */
+  .demo-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 10, 12, 0.45);
+    display: grid;
+    place-items: center;
+    padding: 16px;
+    box-sizing: border-box;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--modal-open-dur) var(--modal-ease);
+  }
+  .demo-backdrop.is-open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .demo-backdrop.is-closing {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--modal-close-dur) var(--modal-ease);
+  }
+
+  .demo-modal-panel {
+    width: min(420px, 100%);
+    background: #fff;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25);
+    box-sizing: border-box;
+  }
+  .demo-modal-panel h2 { margin: 0 0 8px; font-size: 20px; }
+  .demo-modal-panel p { margin: 0 0 20px; line-height: 1.5; color: #444; }
+  .demo-actions { display: flex; gap: 8px; justify-content: flex-end; }
+  .demo-btn {
+    font: inherit;
+    font-weight: 600;
+    padding: 10px 16px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background: #fff;
+    cursor: pointer;
+  }
+  .demo-btn.primary { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
+  .demo-btn:focus-visible { outline: 3px solid #6b8cff; outline-offset: 2px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .demo-backdrop, .demo-backdrop.is-closing { transition: none !important; }
+  }
+
+  /* ---- Modal transition (from transitions-dev 06-modal) ---- */
+  .t-modal {
+    transform-origin: center;
+    transform: scale(var(--modal-scale));
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      transform var(--modal-open-dur) var(--modal-ease),
+      opacity   var(--modal-open-dur) var(--modal-ease);
+    will-change: transform, opacity;
+  }
+  .t-modal.is-open {
+    transform: scale(1);
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .t-modal.is-closing {
+    transform: scale(var(--modal-scale-close));
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      transform var(--modal-close-dur) var(--modal-ease),
+      opacity   var(--modal-close-dur) var(--modal-ease);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .t-modal { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+  <button class="demo-open" id="openBtn" aria-haspopup="dialog" aria-controls="demoModal">Open modal</button>
+
+  <div class="demo-backdrop" id="backdrop">
+    <div class="t-modal demo-modal-panel" id="demoModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" inert>
+      <h2 id="modalTitle">Hello from the modal</h2>
+      <p>This dialog scales up from 96% on open and dips back down on close. Press Escape, click the backdrop, or use a button to close it.</p>
+      <div class="demo-actions">
+        <button class="demo-btn" id="cancelBtn">Cancel</button>
+        <button class="demo-btn primary" id="confirmBtn">Got it</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // Orchestration (from transitions-dev 06-modal). The close timing is read
+  // from the --modal-close-dur variable so JS and CSS stay in sync.
+  const backdrop = document.getElementById("backdrop");
+  const modal = document.getElementById("demoModal");
+  const openBtn = document.getElementById("openBtn");
+  const cancelBtn = document.getElementById("cancelBtn");
+  const confirmBtn = document.getElementById("confirmBtn");
+
+  const closeMs = parseFloat(
+    getComputedStyle(document.documentElement).getPropertyValue("--modal-close-dur")
+  ) || 150;
+
+  let closeTimer = null;
+  let lastFocus = null;
+
+  function openModal() {
+    clearTimeout(closeTimer);
+    lastFocus = document.activeElement;
+    backdrop.classList.remove("is-closing");
+    backdrop.classList.add("is-open");
+    modal.classList.remove("is-closing");
+    modal.classList.add("is-open");
+    modal.inert = false;
+    cancelBtn.focus();
+  }
+
+  function closeModal() {
+    if (!modal.classList.contains("is-open")) return;
+    modal.classList.remove("is-open");
+    modal.classList.add("is-closing");
+    backdrop.classList.remove("is-open");
+    backdrop.classList.add("is-closing");
+    modal.inert = true;
+    closeTimer = setTimeout(() => {
+      modal.classList.remove("is-closing");
+      backdrop.classList.remove("is-closing");
+    }, closeMs);
+    if (lastFocus) lastFocus.focus();
+  }
+
+  openBtn.addEventListener("click", openModal);
+  cancelBtn.addEventListener("click", closeModal);
+  confirmBtn.addEventListener("click", closeModal);
+
+  // Click on the backdrop (outside the panel) closes the modal.
+  backdrop.addEventListener("click", (e) => {
+    if (e.target === backdrop) closeModal();
+  });
+
+  // Escape closes the modal.
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeModal();
+  });
+
+  // Start with the modal inert so its buttons can't be reached while hidden.
+  modal.inert = true;
+</script>
+</body>
+</html>
