@@ -1,0 +1,571 @@
+<title>بيننا شاشة</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kufam:ital,wght@0,600;0,800;1,800;1,900&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
+<style>
+/* Weird Talks (Salamahtype) — personal-use licence, see assets/fonts/Readme_License.txt */
+@font-face{font-family:"Weird Talks";src:url(data:font/ttf;base64,__WT_B64__) format("truetype");font-display:block}
+/* Layout: a 9:16 story frame. Everything that matters sits inside the TikTok safe area
+   (top 11.5%, bottom 22%, right 13% for the app buttons, left 6%). Five backgrounds taken
+   from the references rotate across the ten scenes; the narrator caption keeps one corner. */
+:root{
+  --orange:#FC7702; --rust:#DB5227; --gold:#FCA311;
+  --ink-black:#0A0C12; --navy:#023661; --navy-2:#14213D; --slate:#384358; --peach:#FFA586; --wine:#541A2E; --crimson:#B51A2B;
+  --blush:#FCE9EC; --white:#FFFFFF; --mist:#E5E5E5; --coal:#292929;
+  --display:"Kufam","Noto Kufi Arabic","Segoe UI","Tahoma",sans-serif;
+  --text:"IBM Plex Sans Arabic","Noto Sans Arabic","Segoe UI","Tahoma",sans-serif;
+  --latin:"Weird Talks","Arial Black",Impact,sans-serif;
+  --safe-t:11.5cqh; --safe-b:22cqh; --safe-r:13cqw; --safe-l:6cqw;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;background:var(--ink-black);color:var(--white);font-family:var(--text);font-size:16px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:14px;
+  display:flex;flex-direction:column;align-items:center;gap:12px}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--orange);outline-offset:3px}
+.vh{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ---------- stage ---------- */
+.stage{position:relative;container:stage/size;aspect-ratio:9/16;width:min(100%,calc((100dvh - 170px) * 9 / 16));min-width:min(100%,300px);
+  overflow:hidden;background:var(--ink-black);border-radius:10px;max-width:100%}
+body.render{padding:0;gap:0;display:block;overflow:hidden}
+body.render .stage{width:100vw;height:100vh;aspect-ratio:auto;border-radius:0}
+body.render .chrome,body.render .cover,body.render .safe{display:none!important}
+
+.scene{position:absolute;inset:0;visibility:hidden;opacity:0;display:grid;overflow:hidden;
+  padding:var(--safe-t) var(--safe-r) var(--safe-b) var(--safe-l);
+  grid-template-rows:auto auto minmax(0,1fr) 13.5cqh;gap:1.4cqh;
+  background:var(--bg);color:var(--ink);will-change:transform,opacity,clip-path}
+.scene .grid,.scene .amb{position:absolute;inset:0;pointer-events:none}
+.scene .grid{background-image:linear-gradient(to right,var(--grid) 1px,transparent 1px),linear-gradient(to bottom,var(--grid) 1px,transparent 1px);background-size:calc(100% / 6) calc(100% / 12)}
+.scene .amb{background:radial-gradient(circle at var(--gx,80%) var(--gy,20%),var(--glow) 0,transparent 42%)}
+/* five backgrounds from the references */
+.bg-grid  {--bg:var(--ink-black);--ink:var(--white);--accent:var(--orange);--cap:var(--white);--soft:rgba(255,255,255,.7);--grid:rgba(255,255,255,.06);--glow:rgba(252,119,2,.38);--tag-bg:var(--orange);--tag-ink:var(--ink-black)}
+.bg-navy  {--bg:radial-gradient(120% 70% at 50% -8%,#4f86d8 0%,#1d4f93 22%,var(--navy) 45%,var(--ink-black) 92%);--ink:var(--white);--accent:var(--orange);--cap:var(--white);--soft:rgba(255,255,255,.72);--grid:rgba(255,255,255,.06);--glow:rgba(120,170,255,.22);--tag-bg:var(--orange);--tag-ink:var(--ink-black)}
+.bg-blush {--bg:var(--blush);--ink:var(--navy);--accent:var(--rust);--cap:var(--navy);--soft:rgba(2,54,97,.72);--grid:rgba(2,54,97,.08);--glow:rgba(219,82,39,.16);--tag-bg:var(--navy);--tag-ink:var(--blush)}
+.bg-sunset{--bg:linear-gradient(180deg,var(--wine) 0%,var(--crimson) 27%,var(--peach) 50%,var(--slate) 71%,#161E2F 100%);--ink:var(--white);--accent:var(--peach);--cap:var(--white);--soft:rgba(255,255,255,.8);--grid:rgba(255,255,255,.07);--glow:rgba(255,165,134,.3);--tag-bg:var(--white);--tag-ink:var(--wine)}
+.bg-gold  {--bg:radial-gradient(90% 60% at 50% 45%,#22355f 0%,var(--navy-2) 60%,#0c1427 100%);--ink:var(--white);--accent:var(--gold);--cap:var(--mist);--soft:rgba(229,229,229,.75);--grid:rgba(252,163,17,.08);--glow:rgba(252,163,17,.22);--tag-bg:var(--gold);--tag-ink:var(--navy-2)}
+
+.shead{position:relative;display:flex;justify-content:space-between;align-items:center}
+.mark{font:800 4.2cqw/1 var(--display);font-style:italic}
+.dot{width:2.2cqw;height:2.2cqw;border-radius:50%;background:var(--accent)}
+
+/* headline block, tilted like the typographic references */
+.copy{position:relative;display:flex;flex-direction:column;gap:1.4cqh;min-width:0;transform:rotate(-3.5deg);transform-origin:100% 50%}
+.center .copy{text-align:center;align-items:center;transform-origin:50% 50%}
+.eyebrow{font:600 3.3cqw/1.4 var(--text);color:var(--soft)}
+.h{margin:0;font:italic 900 9.4cqw/1.3 var(--display);text-wrap:balance;color:var(--ink)}
+.h > span:not(.ell){display:block}
+.h.xl{font-size:14.5cqw;line-height:1.2}
+.ell{font-family:var(--text);font-style:normal;font-weight:700}
+.bar{display:block;height:1.5cqw;width:34cqw;border-radius:1cqw;background:var(--accent);transform-origin:100% 50%}
+.center .bar{transform-origin:50% 50%}
+.sub{margin:0;font:500 4cqw/1.7 var(--text);color:var(--soft)}
+.outro{margin:0;font:700 4.3cqw/1.6 var(--text);color:var(--ink)}
+.art{position:relative;width:100%;height:100%;min-height:0;container-type:size}
+
+/* list rows (words / items / steps) */
+.rows{display:grid;grid-template-columns:repeat(2,max-content);gap:.8cqh 3cqw;justify-content:start}
+.rows.one{grid-template-columns:max-content}
+.rows.one .row .w{font-size:9cqw}
+.rows.one .row img{width:11.5cqw;height:11.5cqw}
+.row{display:flex;align-items:center;gap:2cqw;position:relative}
+.row img{width:10.5cqw;height:10.5cqw;object-fit:contain;flex:none;filter:drop-shadow(0 1cqw 1.2cqw rgba(0,0,0,.3))}
+.row .w{font:italic 900 7.8cqw/1.25 var(--display)}
+.rows.small .row .w{font-size:6cqw}
+.rows.small .row img{width:9cqw;height:9cqw}
+
+/* translation tags (Weird Talks) */
+.tag{position:absolute;z-index:3;font:400 4.4cqw/1 var(--latin);letter-spacing:.03em;color:var(--tag-ink);background:var(--tag-bg);
+  padding:1.3cqw 2.4cqw 1.1cqw 3.6cqw;border-radius:.8cqw;white-space:nowrap;direction:ltr;opacity:0;pointer-events:none;box-shadow:0 1.4cqw 2.4cqw rgba(0,0,0,.25)}
+.tag::before{content:"";position:absolute;left:1.2cqw;top:50%;width:1.2cqw;height:1.2cqw;border-radius:50%;background:var(--bg-hole,rgba(0,0,0,.35));transform:translateY(-50%)}
+.copy .tag{left:0;bottom:-1cqh}
+.row .tag{left:0;bottom:-28%;font-size:3.2cqw}
+
+/* icons (3D stickers) */
+.pos{position:absolute;left:var(--x);top:var(--y);width:var(--w);aspect-ratio:1;transform:translate(-50%,-50%)}
+.ico{position:absolute;inset:0;opacity:0}
+.ico img{width:100%;height:100%;object-fit:contain;display:block;filter:drop-shadow(0 2.4cqw 2.4cqw rgba(0,0,0,.32))}
+.halo::before{content:"";position:absolute;inset:-35%;border-radius:50%;background:radial-gradient(circle,var(--glow) 0,transparent 62%)}
+.orbit-ring{position:absolute;inset:0;margin:auto;width:min(100cqw,100cqh);aspect-ratio:1}
+.orbit-ring svg{width:100%;height:100%;display:block}
+
+/* ---------- narrator captions (lower-right corner of the safe area) ---------- */
+.caps{position:relative;min-height:0}
+.caps::before{content:"";position:absolute;top:0;right:0;width:6cqw;height:6cqw;border-top:3px solid var(--accent);border-right:3px solid var(--accent)}
+.caps::after{content:"";position:absolute;bottom:0;left:0;width:6cqw;height:6cqw;border-bottom:3px solid var(--accent);border-left:3px solid var(--accent);opacity:.5}
+.cap{position:absolute;inset:2.2cqw 3.2cqw 1.4cqw 2cqw;margin:0;display:flex;align-items:flex-start;
+  font:700 4.7cqw/1.6 var(--text);color:var(--cap);text-wrap:pretty;opacity:0;--q:0;--x:0}
+.cap.m0{opacity:calc(var(--q) * (1 - var(--x)));transform:translateY(calc((1 - var(--q)) * 2.6cqh - var(--x) * 1.6cqh))}
+.cap.m1{opacity:calc(1 - var(--x));clip-path:inset(0 0 0 calc((1 - var(--q)) * 100%))}
+.cap.m2{opacity:calc(var(--q) * (1 - var(--x)));filter:blur(calc((1 - var(--q)) * 9px));transform:scale(calc(.95 + var(--q) * .05));transform-origin:100% 0}
+
+/* safe-area guide (toggle in the panel) */
+.safe{position:absolute;z-index:9;pointer-events:none;inset:var(--safe-t) var(--safe-r) var(--safe-b) var(--safe-l);border:2px dashed #ff3b6b;border-radius:4px}
+.safe span{position:absolute;top:-3.2cqw;right:0;font:600 2.4cqw var(--text);color:#ff3b6b;background:rgba(0,0,0,.6);padding:0 1cqw}
+
+/* ---------- cover ---------- */
+.cover{position:absolute;inset:0;z-index:10;color:var(--white);display:grid;place-items:center;text-align:center;
+  padding:var(--safe-t) var(--safe-r) var(--safe-b) var(--safe-l);
+  background:radial-gradient(circle at 80% 18%,rgba(252,119,2,.4) 0,transparent 40%),var(--ink-black)}
+.cover::before{content:"";position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(to right,rgba(255,255,255,.06) 1px,transparent 1px),linear-gradient(to bottom,rgba(255,255,255,.06) 1px,transparent 1px);background-size:calc(100% / 6) calc(100% / 12)}
+.cover-in{position:relative;display:flex;flex-direction:column;align-items:center;gap:2cqh;max-width:100%}
+.cover h1{margin:0;font:italic 900 19cqw/1.15 var(--display);transform:rotate(-3.5deg)}
+.cover .cbar{width:40cqw;height:1.6cqw;border-radius:1cqw;background:var(--orange);transform:rotate(-3.5deg)}
+.cover p{margin:0;font:500 4.2cqw/1.7 var(--text);opacity:.85}
+.cover .meta{font:600 3cqw/1.7 var(--text);opacity:.65}
+.cover .en{font:400 5cqw/1 var(--latin);color:var(--orange);letter-spacing:.04em}
+.cover-btns{display:flex;flex-direction:column;align-items:stretch;gap:12px;margin-top:1.5cqh}
+.btn{min-height:50px;padding:0 1.4em;border-radius:999px;border:2px solid var(--orange);background:var(--orange);color:var(--ink-black);font-weight:700;font-size:clamp(15px,4.2cqw,20px)}
+.btn.ghost{background:transparent;color:var(--white);border-color:rgba(255,255,255,.4)}
+.btn:hover{filter:brightness(1.1)}
+
+/* ---------- chrome ---------- */
+.chrome{width:min(100%,560px);display:flex;flex-direction:column;gap:10px}
+.prog{display:flex;gap:4px}
+.prog button{flex:1;height:22px;padding:0;border:0;background:transparent;position:relative}
+.prog button::before{content:"";position:absolute;inset:9px 0;border-radius:2px;background:rgba(255,255,255,.18)}
+.prog button i{position:absolute;top:9px;bottom:9px;right:0;width:calc(var(--f,0) * 100%);border-radius:2px;background:var(--orange)}
+.bar-c{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px}
+.ctl{min-width:48px;min-height:48px;border-radius:999px;border:1.5px solid rgba(255,255,255,.3);background:transparent;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:0 13px;font-weight:600;font-size:14px}
+.ctl svg{width:22px;height:22px}
+.ctl.primary{background:var(--orange);color:var(--ink-black);border-color:var(--orange)}
+.ctl[aria-pressed="true"]{border-color:var(--orange);color:var(--orange)}
+.ctl:disabled{opacity:.35;cursor:default}
+.now{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding-inline:4px}
+.now b{font:italic 800 18px/1.3 var(--display);color:var(--orange)}
+.now small{font-size:13px;opacity:.75}
+.note{font-size:13px;opacity:.7;min-height:1em;margin:0;text-align:center}
+
+/* ---------- panel ---------- */
+.panel{position:fixed;inset:0 0 0 auto;width:min(560px,100%);z-index:20;background:#11141c;border-inline-start:1px solid rgba(255,255,255,.15);
+  padding:calc(20px + env(safe-area-inset-top,0px)) max(20px,env(safe-area-inset-right,0px)) calc(20px + env(safe-area-inset-bottom,0px)) 20px;
+  display:flex;flex-direction:column;gap:14px;overflow:auto;box-shadow:-20px 0 60px rgba(0,0,0,.5)}
+.panel h2{margin:0;font:italic 800 26px/1.3 var(--display);color:var(--orange)}
+.panel h3{margin:8px 0 0;font:600 16px/1.4 var(--text);color:var(--peach)}
+.panel textarea{width:100%;min-height:40vh;resize:vertical;background:rgba(255,255,255,.05);color:var(--white);border:1px solid rgba(255,255,255,.25);border-radius:8px;padding:14px;font:500 16px/1.9 var(--text)}
+.panel p{margin:0;font-size:14px;line-height:1.7;opacity:.85}
+.times{display:grid;grid-template-columns:1fr auto;gap:6px 12px;align-items:center;font-size:14px}
+.times input{width:90px;min-height:40px;background:transparent;color:var(--white);border:1px solid rgba(255,255,255,.3);border-radius:6px;padding:0 8px;font:600 15px var(--text);direction:ltr;text-align:center}
+.prow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.check{display:flex;gap:10px;align-items:center;font-size:15px;min-height:44px}
+.check input{width:22px;height:22px;accent-color:var(--orange)}
+</style>
+
+<div class="stage" id="stage">
+  <div class="safe" id="safe" hidden><span>منطقة الأمان</span></div>
+  <div class="cover" id="cover">
+    <div class="cover-in">
+      <div class="en">BETWEEN US, A SCREEN</div>
+      <h1>بيننا شاشة</h1>
+      <div class="cbar"></div>
+      <p>حكاية عن المشاهدة… وما نبحث عنه خلفها</p>
+      <div class="meta">قصة بصرية للبالغين · ١٠ مشاهد · نحو دقيقتين و٤٤ ثانية<br>بلا صور صريحة · النص مكتوب على الشاشة</div>
+      <div class="cover-btns">
+        <button class="btn" id="startAuto" type="button">ابدأ الحكاية مع الصوت</button>
+        <button class="btn ghost" id="startManual" type="button">تصفّح بلا صوت</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="chrome" id="chrome" hidden>
+  <div class="now" aria-live="polite"><b id="nowTitle"></b><small id="nowNum"></small></div>
+  <div class="prog" id="prog" aria-label="المشاهد"></div>
+  <div class="bar-c">
+    <button class="ctl" id="prev" type="button" aria-label="المشهد السابق"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6l-6 6" /></svg></button>
+    <button class="ctl primary" id="play" type="button" aria-label="تشغيل"><svg id="playIco" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"></svg></button>
+    <button class="ctl" id="next" type="button" aria-label="المشهد التالي"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6l6 6" /></svg></button>
+    <button class="ctl" id="sound" type="button" aria-pressed="true" aria-label="الصوت مفعّل"><svg id="soundIco" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"></svg></button>
+    <button class="ctl" id="restart" type="button" aria-label="من البداية"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4" /> <path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" /></svg><span>من البداية</span></button>
+    <button class="ctl" id="openPanel" type="button" aria-haspopup="dialog" aria-controls="panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3v4a1 1 0 0 0 1 1h4" /> <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2" /> <path d="M9 9l1 0" /> <path d="M9 13l6 0" /> <path d="M9 17l6 0" /></svg><span>نص التعليق الصوتي</span></button>
+  </div>
+  <p class="note" id="note">الأسهم: ← التالي · → السابق · المسافة للتشغيل والإيقاف</p>
+</div>
+
+<aside class="panel" id="panel" role="dialog" aria-modal="true" aria-labelledby="panelTitle" hidden>
+  <div class="prow" style="justify-content:space-between">
+    <h2 id="panelTitle">نص التعليق الصوتي</h2>
+    <button class="ctl" id="closePanel" type="button" aria-label="إغلاق اللوحة"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6l-12 12" /> <path d="M6 6l12 12" /></svg></button>
+  </div>
+  <p>نص متصل ونظيف، بلا عناوين مشاهد ولا تعليمات أداء، جاهز للنسخ إلى أداة توليد الصوت.</p>
+  <label class="vh" for="voText">نص التعليق الصوتي</label>
+  <textarea id="voText" readonly></textarea>
+  <div class="prow"><button class="ctl primary" id="copy" type="button"><span>نسخ النص</span></button><span id="copyMsg" class="note" role="status"></span></div>
+  <label class="check"><input type="checkbox" id="safeToggle"> إظهار منطقة الأمان في تيك توك</label>
+  <label class="check"><input type="checkbox" id="sfxToggle" checked> مؤثرات صوتية خفيفة عند الانتقال</label>
+  <h3>مدة كل مشهد بالثواني</h3>
+  <p>مضبوطة على التسجيل الحالي (٢:٤٤)، وتتحرك الترجمة مع كل مشهد. عدّلها إذا غيّرت التسجيل.</p>
+  <div class="times" id="times"></div>
+  <div class="prow"><button class="ctl" id="resetTimes" type="button">إعادة التوقيتات الأصلية</button><span class="note" id="totalTime"></span></div>
+</aside>
+
+<audio id="vo" src="assets/voiceover.mp3" preload="auto"></audio>
+
+<script>
+/* ======================================================================
+   كل شيء في مصفوفة واحدة: النصوص، الأيقونات، الترجمة الإنجليزية، الترجمة الكاملة، التوقيت.
+   bg: grid | navy | blush | sunset | gold     tr: انتقال الدخول
+   art: [أيقونة، x٪، y٪، الحجم، ثانية الظهور، خيارات]
+   tags: [ثانية الظهور، الكلمة بالإنجليزية]  — تظهر ثم تختفي، والعربية باقية
+   ====================================================================== */
+const SCENES = [
+  { title:"بيننا شاشة", dur:16.58, bg:"grid", center:true, tr:"none",
+    h:["بيننا شاشة"], xl:true, sub:"حكاية عن المشاهدة… وما نبحث عنه خلفها", hAt:1.6,
+    tags:[[3.2,"BETWEEN US"]],
+    art:[["3d/woman",20,56,"M",0.3],["3d/phone",50,48,"S",1.0,{halo:1}],["3d/man",80,56,"M",0.6]],
+    alt:"امرأة ورجل في مساحتين منفصلتين، وبينهما هاتف مضيء",
+    cap:[[0.6,"أحيانًا، لا تكون المسافة بين شخصين طريقًا طويلًا…"],[5.42,"بل شاشة صغيرة."],[7.2,"نقترب منها بحثًا عن شيء،"],[10.14,"ثم نكتشف أن السؤال الحقيقي ليس: ماذا نشاهد؟"],[14.08,"بل: عمّ نبحث؟"]] },
+  { title:"ليست حكاية طرف واحد", dur:15.48, bg:"blush", center:true, tr:"wipe",
+    h:["ليست حكاية رجل فقط…","ولا امرأة فقط"], hAt:0.9, h2At:3,
+    tags:[[1.8,"NOT JUST HIM"],[4.4,"NOT JUST HER"]],
+    art:[["3d/comparison",50,50,"L",0.3],["3d/man",12,64,"S",0.7],["3d/woman",88,64,"S",0.8]],
+    alt:"ميزان متوازن، وعلى جانبيه رجل وامرأة بالحجم نفسه",
+    cap:[[0.02,"هذه ليست حكاية رجل وحده،"],[2.72,"ولا امرأة وحدها."],[3.98,"إنها حكاية أشخاص،"],[6.3,"تختلف تجاربهم ودوافعهم وحدودهم."],[10.42,"ولا يمكن فهمهم من خلال حكم واحد،"],[13.12,"أو صورة نمطية واحدة."]] },
+  { title:"كيف تبدأ؟", dur:16.15, bg:"navy", tr:"iris",
+    rows:[["فضول.",0.4,"3d/curiosity","CURIOSITY"],["ملل.",2.9,"3d/boredom","BOREDOM"],["ضغط.",6.6,"3d/pressure","PRESSURE"],["وحدة.",7.6,"3d/solitude","LONELINESS"]],
+    orbit:true,
+    art:[["3d/night",50,15,"OR",0.5],["3d/phone",80.3,67.5,"OR",0.8],["3d/clock",19.7,67.5,"OR",1.1]],
+    alt:"ليل وهاتف وساعة على مسار دائري بطيء",
+    cap:[[0.22,"قد تبدأ المشاهدة بفضول،"],[2.88,"أو بوقت فارغ،"],[4.6,"أو بمحاولة للهروب من ضغط أو وحدة."],[8.48,"وهنا، بدل أن نبدأ باللوم،"],[10.66,"يمكن أن نبدأ بسؤال أهدأ:"],[14.08,"ما الذي أشعر به الآن؟"]] },
+  { title:"ما لا تعرضه الشاشة", dur:15.32, bg:"gold", tr:"push",
+    h:["ما تراه…","ليس العلاقة كلها"], hAt:0.9, h2At:2.3,
+    tags:[[3.4,"NOT THE WHOLE STORY"]],
+    art:[["3d/screen",50,46,"L",0.4],["iso/play",74,30,"XS",1.4],
+         ["3d/dialogue",11,12,"XS",3.6,{soft:1}],["3d/heart",89,12,"XS",4.0,{soft:1}],["3d/two-chairs",11,88,"XS",4.4,{soft:1}],["3d/hands",89,88,"XS",4.8,{soft:1}]],
+    alt:"شاشة تعرض مشهدًا مختارًا، وحولها رموز باهتة لما لا تعرضه: الحوار والقلب والجلوس معًا والمصافحة",
+    cap:[[0.42,"ما تعرضه الشاشة ليس درسًا في الحب،"],[3.36,"ولا وصفة لعلاقة حقيقية."],[6.16,"فالعلاقة ليست مشهدًا مختارًا؛"],[8.78,"إنها حديث، وموافقة،"],[10.86,"واحترام، وحدود،"],[12.52,"وتفاصيل لا تختصرها صورة."]] },
+  { title:"حين تبدأ المقارنة", dur:14.85, bg:"sunset", tr:"zoom",
+    h:["هل أقارن إنسانًا…","بصورة؟"], hAt:0.9, h2At:2.3,
+    tags:[[3.2,"COMPARISON"]],
+    art:[["3d/mirror",50,50,"L",0.3],["3d/fantasy",82,22,"S",1.0,{fade:5}],["3d/image",18,28,"S",1.3,{fade:5.6}],["iso/star",80,82,"XS",1.6,{fade:6.2}]],
+    alt:"مرآة كبيرة، وحولها قلعة خيالية وصورة ونجمة تتلاشى تدريجيًا",
+    cap:[[0.18,"وحين نتعامل مع الصورة كأنها معيار،"],[2.88,"قد نقسو على أنفسنا،"],[5.32,"أو نطلب من الآخر أن يشبه خيالًا."],[8.16,"لكن الإنسان ليس اختبارًا للمظهر أو الأداء…"],[11.96,"ولا يحتاج إلى أن يكون نسخة من أحد."]] },
+  { title:"أسئلة بلا أحكام", dur:15.65, bg:"blush", tr:"wipe",
+    h:["هل ما زلت أختار؟"], hAt:0.8, small:true,
+    tags:[[1.6,"STILL CHOOSING?"]],
+    rows:[["وقتي",2.9,"3d/clock","TIME"],["نومي",5.8,"3d/sleep","SLEEP"],["حضوري",8.4,"3d/presence","PRESENCE"],["حدودي",12.1,"3d/boundaries","BOUNDARIES"]],
+    art:[["3d/thought",58,44,"L",0.4],["3d/question",57,40,"S",1.3],["3d/phone",14,72,"S",1.0]],
+    alt:"فقاعة تفكير وعلامة سؤال وهاتف",
+    cap:[[0.31,"اسأل نفسك بلا إهانة:"],[2.77,"هل يأخذ هذا من وقتي أكثر مما أريد؟"],[5.77,"هل يزاحم نومي أو مسؤولياتي؟"],[8.41,"هل أجد صعوبة في التوقف رغم رغبتي؟"],[12.09,"هذه أسئلة للفهم، وليست تشخيصًا."]] },
+  { title:"مساحة للكلام", dur:16.56, bg:"grid", center:true, tr:"iris",
+    h:["حديث صريح… بلا إهانة"], hAt:2.0,
+    tags:[[3.2,"HONEST TALK"]],
+    art:[["3d/two-chairs",50,64,"L",0.3],["3d/dialogue",50,18,"M",1.3,{halo:1}],["3d/listening",88,30,"XS",2.6],["iso/chat",12,30,"XS",3.0]],
+    alt:"مقعدان متقابلان، وفوقهما فقاعتا حوار وأذن تستمع",
+    cap:[[0.34,"وإذا كانت هناك علاقة،"],[2.22,"فابدأ بالكلام، لا بالتفتيش ولا بالاتهام."],[6.38,"قل: هذا ما أشعر به،"],[9.02,"وهذه حدودي،"],[10.74,"وهذا ما أحتاج إلى فهمه."],[12.48,"واستمع، دون سخرية أو ضغط أو إجبار."]] },
+  { title:"خطوة صغيرة", dur:17.70, bg:"navy", tr:"push",
+    rows:[["توقّف قليلًا.",2.8,"3d/time","PAUSE"],["لاحظ.",5.1,"3d/observe","NOTICE"],["اختر.",8.4,"3d/choice","CHOOSE"]], one:true,
+    art:[["3d/hand",76,46,"M",0.4],["3d/phone",74,22,"S",0.6,{aside:1.8}],["3d/path",30,52,"L",3.4]],
+    alt:"يد تضع الهاتف جانبًا، ثم يظهر طريق",
+    cap:[[0.44,"قد تكون البداية خطوة صغيرة:"],[2.82,"أن تضع الهاتف جانبًا،"],[5.1,"أو تلاحظ الأوقات التي تلجأ فيها إلى المشاهدة،"],[8.4,"أو تختار نشاطًا آخر يناسب حاجتك."],[12.08,"ليس المطلوب كمالًا مفاجئًا…"],[14.7,"بل اختيارًا أكثر وعيًا."]] },
+  { title:"لست مضطرًا وحدك", dur:15.63, bg:"gold", tr:"zoom",
+    h:["طلب المساعدة","ليس حكمًا عليك"], hAt:1.0, h2At:2.0,
+    tags:[[3.0,"ASK FOR HELP"]],
+    art:[["3d/door",66,48,"L",0.3],["3d/light",90,14,"S",1.3,{halo:1}],["3d/responsibility",22,64,"M",2.1]],
+    alt:"باب مفتوح ومصباح مضيء، ويدان تحتضنان كرة من الضوء كرمز للدعم",
+    cap:[[0.41,"وإذا شعرت بضيق، أو بأن السيطرة أصبحت صعبة،"],[3.73,"فلا تجعل الخجل يمنعك من طلب المساعدة"],[7.17,"من مختص مؤهل."],[8.67,"طلب الدعم ليس إدانة لك،"],[11.59,"ولا اختصارًا لهويتك في سلوك واحد."]] },
+  { title:"عودة إلى الحضور", dur:20.32, bg:"sunset", center:true, tr:"iris",
+    h:["الإنسان أكبر من صورة"], hAt:2.4, outro:"وقت أصدق. حدود أوضح. تواصل أكثر احترامًا.", outroAt:12,
+    tags:[[3.8,"MORE THAN AN IMAGE"]],
+    art:[["3d/woman",15,60,"M",0.3],["3d/man",85,60,"M",0.3],["3d/presence",50,62,"M",6,{halo:1}],["3d/screen",50,36,"S",0.2,{away:2}]],
+    alt:"الشاشة تبتعد وتصغر، وتبقى المرأة والرجل كلٌّ في مساحته، وبينهما شخص هادئ حاضر",
+    cap:[[0.48,"في النهاية، ليست الغاية أن نحارب أنفسنا أو بعضنا."],[4.86,"بل أن نرى الإنسان خلف الشاشة:"],[7.72,"بكرامته، وحدوده،"],[9.68,"وحاجته إلى الفهم."],[12.04,"وقت أصدق. حضور أهدأ."],[14.5,"وتواصل أكثر احترامًا."]] }
+];
+const VO = [
+ "أحيانًا، لا تكون المسافة بين شخصين طريقًا طويلًا… بل شاشة صغيرة. نقترب منها بحثًا عن شيء، ثم نكتشف أن السؤال الحقيقي ليس: ماذا نشاهد؟ بل: عمّ نبحث؟",
+ "هذه ليست حكاية رجل وحده، ولا امرأة وحدها. إنها حكاية أشخاص، تختلف تجاربهم ودوافعهم وحدودهم. ولا يمكن فهمهم من خلال حكم واحد، أو صورة نمطية واحدة.",
+ "قد تبدأ المشاهدة بفضول، أو بوقت فارغ، أو بمحاولة للهروب من ضغط أو وحدة. وهنا، بدل أن نبدأ باللوم، يمكن أن نبدأ بسؤال أهدأ: ما الذي أشعر به الآن؟",
+ "ما تعرضه الشاشة ليس درسًا في الحب، ولا وصفة لعلاقة حقيقية. فالعلاقة ليست مشهدًا مختارًا؛ إنها حديث، وموافقة، واحترام، وحدود، وتفاصيل لا تختصرها صورة.",
+ "وحين نتعامل مع الصورة كأنها معيار، قد نقسو على أنفسنا، أو نطلب من الآخر أن يشبه خيالًا. لكن الإنسان ليس اختبارًا للمظهر أو الأداء… ولا يحتاج إلى أن يكون نسخة من أحد.",
+ "اسأل نفسك بلا إهانة: هل يأخذ هذا من وقتي أكثر مما أريد؟ هل يزاحم نومي أو مسؤولياتي؟ هل أجد صعوبة في التوقف رغم رغبتي؟ هذه أسئلة للفهم، وليست تشخيصًا.",
+ "وإذا كانت هناك علاقة، فابدأ بالكلام، لا بالتفتيش ولا بالاتهام. قل: هذا ما أشعر به، وهذه حدودي، وهذا ما أحتاج إلى فهمه. واستمع، دون سخرية أو ضغط أو إجبار.",
+ "قد تكون البداية خطوة صغيرة: أن تضع الهاتف جانبًا، أو تلاحظ الأوقات التي تلجأ فيها إلى المشاهدة، أو تختار نشاطًا آخر يناسب حاجتك. ليس المطلوب كمالًا مفاجئًا… بل اختيارًا أكثر وعيًا.",
+ "وإذا شعرت بضيق، أو بأن السيطرة أصبحت صعبة، فلا تجعل الخجل يمنعك من طلب المساعدة من مختص مؤهل. طلب الدعم ليس إدانة لك، ولا اختصارًا لهويتك في سلوك واحد.",
+ "في النهاية، ليست الغاية أن نحارب أنفسنا أو بعضنا. بل أن نرى الإنسان خلف الشاشة: بكرامته، وحدوده، وحاجته إلى الفهم. وقت أصدق. حضور أهدأ. وتواصل أكثر احترامًا."
+];
+const DEFAULT_DURS = SCENES.map(s => s.dur);
+/* motion system: one signature curve, three durations, one entrance pattern */
+const TR = 0.75;               // scene transition
+const D = { quick:0.4, std:0.65, slow:1.1 };
+const CAP_IN = 0.55, CAP_OUT = 0.25;
+const TAG_HOLD = 2.4;
+const SIZES = { L:"min(68cqw,100cqh)", M:"min(40cqw,64cqh)", S:"min(27cqw,44cqh)", XS:"min(19cqw,30cqh)", OR:"30%" };
+
+const UI = {
+  play:'<path d="M7 4v16l13 -8l-13 -8" fill="currentColor" />',
+  pause:'<path d="M6 6a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v12a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1l0 -12" fill="currentColor" /><path d="M14 6a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v12a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1l0 -12" fill="currentColor" />',
+  vol:'<path d="M15 8a5 5 0 0 1 0 8" /><path d="M17.7 5a9 9 0 0 1 0 14" /><path d="M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a.8 .8 0 0 1 1.5 .5v14a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5" />',
+  volOff:'<path d="M15 8a5 5 0 0 1 1.912 4.934m-1.377 2.602a5 5 0 0 1 -.535 .464" /><path d="M17.7 5a9 9 0 0 1 2.362 11.086m-1.676 2.299a9 9 0 0 1 -.686 .615" /><path d="M9.069 5.054l.431 -.554a.8 .8 0 0 1 1.5 .5v2m0 4v8a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l1.294 -1.664" /><path d="M3 3l18 18" />'
+};
+
+const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+const isRender = new URLSearchParams(location.search).has('render');
+if (isRender) document.body.classList.add('render');
+const $ = id => document.getElementById(id);
+const stage = $('stage');
+const clamp = x => Math.max(0, Math.min(1, x));
+const easeOut = x => 1 - Math.pow(1 - x, 4);                    // signature curve (decelerate)
+const easeInOut = x => x < .5 ? 8 * x ** 4 : 1 - Math.pow(-2 * x + 2, 4) / 2;
+const easeBack = x => { const c = 1.45; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+
+function el(tag, cls, html) { const n = document.createElement(tag); if (cls) n.className = cls; if (html != null) n.innerHTML = html; return n; }
+function textWithEllipsis(n, v) {
+  v.split('…').forEach((part, j) => { if (j) n.appendChild(el('span', 'ell', '…')); n.appendChild(document.createTextNode(part)); });
+}
+
+/* ---------- build scenes from the array ---------- */
+const sceneEls = SCENES.map((s, i) => {
+  const sc = el('section', 'scene bg-' + s.bg + (s.center ? ' center' : ''));
+  sc.setAttribute('aria-label', 'المشهد ' + (i + 1) + ': ' + s.title);
+  sc.anims = []; const A = (n, kind, at, o = {}) => sc.anims.push(Object.assign({ n, kind, at }, o));
+  sc.appendChild(el('div', 'grid')); const amb = el('div', 'amb'); sc.appendChild(amb); A(amb, 'amb', 0, { ph: i * 1.7 });
+  const head = el('div', 'shead', '<span class="mark">بيننا شاشة</span><span class="dot"></span>'); head.setAttribute('aria-hidden', 'true'); head.style.gridRow = '1'; sc.appendChild(head);
+  /* copy */
+  const copy = el('div', 'copy'); copy.style.gridRow = '2';
+  if (!s.center) { const eb = el('div', 'eyebrow'); eb.textContent = s.title; copy.appendChild(eb); A(eb, 'fade', 0.25); }
+  if (s.h) {
+    const h = el('h2', 'h' + (s.xl ? ' xl' : ''));
+    s.h.forEach((line, k) => { const sp = el('span'); textWithEllipsis(sp, line); h.appendChild(sp); A(sp, 'rise', k ? (s.h2At ?? s.hAt + 1.2) : s.hAt); });
+    copy.appendChild(h);
+    const bar = el('i', 'bar'); copy.appendChild(bar); A(bar, 'grow', (s.h2At ?? s.hAt) + 0.5);
+  }
+  if (s.sub) { const p = el('p', 'sub'); textWithEllipsis(p, s.sub); copy.appendChild(p); A(p, 'fade', s.hAt + 1.4); }
+  if (s.rows) {
+    const rows = el('div', 'rows' + (s.one ? ' one' : '') + (s.small ? ' small' : ''));
+    s.rows.forEach(([w, at, src, en]) => {
+      const r = el('div', 'row'); const img = el('img'); img.src = 'assets/' + src + '.webp'; img.alt = '';
+      const t = el('span', 'w'); t.textContent = w; r.append(img, t);
+      const tg = el('span', 'tag'); tg.textContent = en; tg.setAttribute('lang', 'en'); r.appendChild(tg);
+      rows.appendChild(r); A(r, 'side', at); A(tg, 'tag', at + 0.35);
+    });
+    copy.appendChild(rows);
+  }
+  if (s.outro) { const p = el('p', 'outro'); p.textContent = s.outro; copy.appendChild(p); A(p, 'rise', s.outroAt); }
+  (s.tags || []).forEach(([at, en]) => { const tg = el('span', 'tag'); tg.textContent = en; tg.setAttribute('lang', 'en'); copy.appendChild(tg); A(tg, 'tag', at); });
+  sc.appendChild(copy);
+  /* art */
+  const art = el('div', 'art'); art.style.gridRow = '3'; art.setAttribute('role', 'img'); art.setAttribute('aria-label', s.alt);
+  let host = art;
+  if (s.orbit) {
+    host = el('div', 'orbit-ring', '<svg viewBox="0 0 400 400" aria-hidden="true"><circle cx="200" cy="200" r="140" fill="none" stroke="currentColor" stroke-width="2.5" stroke-dasharray="4 10" opacity=".45"/><g class="spin" style="transform-origin:200px 200px"><circle cx="200" cy="60" r="8" fill="var(--accent)"/></g></svg>');
+    art.appendChild(host); A(host.querySelector('.spin'), 'spin', 0, { d: 16 });
+  }
+  s.art.forEach(([src, x, y, size, at, o = {}], k) => {
+    const pos = el('div', 'pos' + (o.halo ? ' halo' : '')); pos.style.cssText = '--x:' + x + '%;--y:' + y + '%;--w:' + SIZES[size];
+    const ico = el('div', 'ico'); const img = el('img'); img.src = 'assets/' + src + '.webp'; img.alt = ''; ico.appendChild(img); pos.appendChild(ico); host.appendChild(pos);
+    A(ico, 'icon', at, Object.assign({ img, ph: k * 1.3 + i, big: size === 'L' }, o));
+  });
+  sc.appendChild(art);
+  /* captions */
+  const caps = el('div', 'caps'); caps.style.gridRow = '4'; sc.appendChild(caps);
+  sc.caps = s.cap.map(([at, txt], k) => { const p = el('p', 'cap m' + ((i + k) % 3)); p.textContent = txt; caps.appendChild(p); return { n: p, at }; });
+  stage.insertBefore(sc, $('safe'));
+  return sc;
+});
+
+/* ---------- timeline ---------- */
+let starts = [], total = 0;
+function computeTimeline() { starts = []; total = 0; SCENES.forEach(s => { starts.push(total); total += s.dur; }); }
+try { const saved = JSON.parse(localStorage.getItem('bs-v4-durs') || 'null');
+  if (Array.isArray(saved) && saved.length === SCENES.length) saved.forEach((d, i) => { if (d > 3) SCENES[i].dur = d; }); } catch (e) {}
+computeTimeline();
+const sceneAt = t => { let i = 0; while (i < SCENES.length - 1 && t >= starts[i + 1]) i++; return i; };
+
+function sfxCues() {
+  const c = [];
+  SCENES.forEach((s, i) => {
+    if (i) c.push({ t: Math.max(0, starts[i] - 0.25), k: 'whoosh' });
+    (s.rows || []).forEach(([, at]) => c.push({ t: starts[i] + at, k: 'tick' }));
+  });
+  c.push({ t: starts[9] + SCENES[9].outroAt, k: 'chime' });
+  return c.sort((a, b) => a.t - b.t);
+}
+window.__sfx = () => sfxCues();
+
+/* ---------- per-element motion ---------- */
+function animate(a, L, rm) {
+  const n = a.n, p = t => clamp((L - a.at) / t);
+  switch (a.kind) {
+    case 'amb': { // ambient glow drift (slow sine)
+      const k = rm ? 0 : (L + a.ph);
+      n.style.setProperty('--gx', (72 + Math.sin(k * .35) * 10).toFixed(2) + '%');
+      n.style.setProperty('--gy', (22 + Math.cos(k * .28) * 8).toFixed(2) + '%'); break; }
+    case 'fade': { const q = rm ? +(L >= a.at) : easeOut(p(D.std)); n.style.opacity = q; break; }
+    case 'rise': { const q = rm ? +(L >= a.at) : easeOut(p(D.std)); n.style.opacity = q; n.style.transform = 'translateY(' + ((1 - q) * 45).toFixed(2) + '%)'; break; }
+    case 'grow': { const q = rm ? +(L >= a.at) : easeOut(p(D.std)); n.style.transform = 'scaleX(' + q.toFixed(4) + ')'; break; }
+    case 'side': { const q = rm ? +(L >= a.at) : easeOut(p(D.std)); n.style.opacity = q; n.style.transform = 'translateX(' + ((1 - q) * 6).toFixed(2) + 'cqw)'; break; }
+    case 'spin': { n.style.transform = 'rotate(' + (rm ? 0 : clamp(L / a.d) * 300).toFixed(2) + 'deg)'; break; }
+    case 'tag': { // appears, holds, goes — the Arabic stays
+      const tIn = L - a.at, tOut = tIn - TAG_HOLD;
+      if (tIn < 0) { n.style.opacity = 0; break; }
+      if (rm) { n.style.opacity = tOut < 0 ? 1 : 0; n.style.transform = 'rotate(-7deg)'; break; }
+      const qi = easeBack(clamp(tIn / D.quick)), qo = easeInOut(clamp(tOut / D.quick));
+      n.style.opacity = (clamp(tIn / 0.2) * (1 - qo)).toFixed(3);
+      n.style.transform = 'translateY(' + (-qo * 60).toFixed(1) + '%) rotate(' + (-16 + 9 * qi).toFixed(2) + 'deg) scale(' + (.7 + .3 * qi).toFixed(3) + ')'; break; }
+    case 'icon': {
+      const pin = p(D.slow * (a.big ? 1 : .8));
+      let o = rm ? +(L >= a.at) : clamp(pin * 2.4), sc = rm ? 1 : .55 + .45 * easeBack(pin), ty = rm ? 0 : (1 - easeOut(pin)) * 14;
+      let tx = 0, rot = 0;
+      if (!rm) ty += Math.sin((L + a.ph) * Math.PI * 2 / 4.6) * 1.6 * easeOut(pin);     // ambient bob
+      if (a.soft) o *= .55;
+      if (a.fade != null) { const f = rm ? +(L >= a.fade + 4) : easeInOut(clamp((L - a.fade) / 5)); o *= 1 - f; sc *= 1 - .15 * f; }
+      if (a.aside != null) { const q = rm ? +(L >= a.aside) : easeInOut(clamp((L - a.aside) / 2.4)); tx -= 60 * q; ty += 80 * q; rot -= 22 * q; sc *= 1 - .35 * q; o *= 1 - .7 * q; }
+      if (a.away != null) { const q = rm ? +(L >= a.away) : easeInOut(clamp((L - a.away) / 7)); tx += 40 * q; ty -= 70 * q; sc *= 1 - .55 * q; o *= 1 - .9 * q; }
+      n.style.opacity = o.toFixed(3);
+      n.style.transform = 'translate(' + tx.toFixed(2) + '%,' + ty.toFixed(2) + '%) rotate(' + rot.toFixed(2) + 'deg) scale(' + sc.toFixed(4) + ')';
+      break; }
+  }
+}
+
+/* ---------- scene transitions: wipe · iris · push · zoom ---------- */
+function applyTransition(cur, prev, type, f, rm) {
+  const reset = s => { if (!s) return; s.style.transform = ''; s.style.clipPath = ''; s.style.filter = ''; };
+  reset(cur); reset(prev);
+  if (rm || f >= 1 || !prev || type === 'none') { cur.style.opacity = 1; return false; }
+  const e = easeInOut(f);
+  cur.style.opacity = 1; prev.style.opacity = 1;
+  if (type === 'wipe') {          // diagonal wipe, right to left (RTL reading direction)
+    const L = (1 - e) * 130 - 30;
+    cur.style.clipPath = 'polygon(' + (L + 30) + '% 0,100% 0,100% 100%,' + L + '% 100%)';
+    prev.style.transform = 'translateX(' + (-e * 8) + '%)';
+  } else if (type === 'iris') {   // circle opens from the glow
+    cur.style.clipPath = 'circle(' + (e * 120).toFixed(2) + '% at 72% 30%)';
+    prev.style.transform = 'scale(' + (1 + e * .05) + ')';
+  } else if (type === 'push') {   // new card pushes the old one up
+    cur.style.transform = 'translateY(' + ((1 - e) * 100).toFixed(2) + '%)';
+    prev.style.transform = 'translateY(' + (-e * 30).toFixed(2) + '%) scale(' + (1 - e * .06) + ')';
+    prev.style.filter = 'brightness(' + (1 - e * .4) + ')';
+  } else if (type === 'zoom') {   // zoom through
+    cur.style.opacity = easeOut(f); cur.style.transform = 'scale(' + (1.12 - .12 * easeOut(f)) + ')';
+    prev.style.opacity = 1 - e; prev.style.transform = 'scale(' + (1 + e * .18) + ')';
+  }
+  return true;
+}
+
+let shown = -1, fromIdx = -1;
+function render(t, opts = {}) {
+  const idx = sceneAt(t), L = t - starts[idx];
+  const rm = reduced.matches && !isRender;
+  if (idx !== shown) { fromIdx = opts.deterministic ? idx - 1 : shown; shown = idx; }
+  const f = clamp(L / TR);
+  const cur = sceneEls[idx], prev = fromIdx >= 0 && fromIdx !== idx ? sceneEls[fromIdx] : null;
+  sceneEls.forEach((s, i) => { if (s !== cur && s !== prev) { s.style.visibility = 'hidden'; s.style.opacity = 0; } s.setAttribute('aria-hidden', s === cur ? 'false' : 'true'); });
+  cur.style.visibility = 'visible'; cur.style.zIndex = 2;
+  const type = idx === 0 ? 'none' : SCENES[idx].tr;
+  const both = applyTransition(cur, prev, type, f, rm);
+  if (idx === 0 && !rm) cur.style.opacity = easeOut(f);
+  if (prev) { prev.style.zIndex = 1; prev.style.visibility = both ? 'visible' : 'hidden'; if (both) prev.anims.forEach(a => animate(a, t - starts[fromIdx], rm)); }
+  cur.anims.forEach(a => animate(a, L, rm));
+  /* captions */
+  const cs = cur.caps; let ci = -1;
+  cs.forEach((c, k) => { if (L >= c.at) ci = k; });
+  cs.forEach((c, k) => {
+    let q = 0, x = 0, vis = false;
+    if (k === ci) { vis = true; q = rm ? 1 : easeOut(clamp((L - c.at) / CAP_IN)); }
+    else if (k === ci - 1 && !rm) { const d = L - cs[ci].at; if (d < CAP_OUT) { vis = true; q = 1; x = d / CAP_OUT; } }
+    c.n.style.visibility = vis ? 'visible' : 'hidden';
+    c.n.style.setProperty('--q', q.toFixed(4)); c.n.style.setProperty('--x', x.toFixed(4));
+  });
+  return idx;
+}
+window.__render = t => { render(t, { deterministic: true }); return true; };
+window.__total = () => total;
+window.__ready = () => Promise.all([document.fonts.ready, ...[...document.images].map(i => i.decode ? i.decode().catch(() => {}) : 0)]);
+
+if (isRender) {
+  $('cover').remove();
+  render(0, { deterministic: true });
+} else {
+  const audio = $('vo');
+  const SFX = { whoosh: 'assets/sfx-whoosh.mp3', tick: 'assets/sfx-tick.mp3', chime: 'assets/sfx-chime.mp3' };
+  const sfxVol = { whoosh: .35, tick: .35, chime: .3 };
+  const st = { t: 0, idx: 0, playing: false, sound: true, sfx: true, audioOk: true, last: 0, prevT: 0 };
+  let cues = sfxCues();
+  audio.addEventListener('error', () => { st.audioOk = false; $('note').textContent = 'تعذّر تحميل ملف الصوت، فيعمل العرض دون صوت.'; });
+  const playSfx = k => { if (!st.sound || !st.sfx) return; try { const a = new Audio(SFX[k]); a.volume = sfxVol[k]; a.play().catch(() => {}); } catch (e) {} };
+
+  const prog = $('prog');
+  SCENES.forEach((s, i) => { const b = el('button', null, '<i></i>'); b.type = 'button'; b.setAttribute('aria-label', 'انتقل إلى المشهد ' + (i + 1) + ': ' + s.title); b.onclick = () => goTo(i); prog.appendChild(b); });
+  const segs = [...prog.children];
+  function syncUi() {
+    $('nowTitle').textContent = SCENES[st.idx].title;
+    $('nowNum').textContent = 'المشهد ' + (st.idx + 1) + ' من ' + SCENES.length;
+    $('prev').disabled = st.idx === 0; $('next').disabled = st.idx === SCENES.length - 1;
+    $('play').setAttribute('aria-label', st.playing ? 'إيقاف مؤقت' : 'تشغيل');
+    $('playIco').innerHTML = st.playing ? UI.pause : UI.play;
+    $('soundIco').innerHTML = st.sound ? UI.vol : UI.volOff;
+    $('sound').setAttribute('aria-pressed', st.sound);
+    $('sound').setAttribute('aria-label', st.sound ? 'الصوت مفعّل، اضغط للكتم' : 'الصوت مكتوم، اضغط للتفعيل');
+  }
+  function goTo(i) { st.idx = Math.max(0, Math.min(SCENES.length - 1, i)); st.t = starts[st.idx]; st.prevT = st.t; if (st.playing && st.sound && st.audioOk) audio.currentTime = st.t; syncUi(); }
+  function play() {
+    if (st.t >= total - 0.05) { st.t = 0; st.idx = 0; }
+    st.playing = true; st.prevT = st.t;
+    if (st.sound && st.audioOk) { audio.currentTime = st.t; audio.play().catch(() => { st.sound = false; $('note').textContent = 'لم يسمح المتصفح بتشغيل الصوت، فيستمر العرض دونه والنص ظاهر.'; syncUi(); }); }
+    syncUi();
+  }
+  function pause() { st.playing = false; audio.pause(); syncUi(); }
+  function loop(now) {
+    const dt = st.last ? Math.min(0.1, (now - st.last) / 1000) : 0; st.last = now;
+    if (st.playing) {
+      if (st.sound && st.audioOk && !audio.paused) st.t = audio.currentTime; else st.t += dt;
+      if (st.t >= total) { st.t = total - 0.001; pause(); $('note').textContent = 'انتهت الحكاية. يمكنك العودة من البداية.'; }
+      st.idx = sceneAt(st.t);
+      cues.forEach(c => { if (c.t > st.prevT && c.t <= st.t) playSfx(c.k); });
+    } else st.t = Math.min(st.t + dt, starts[st.idx] + SCENES[st.idx].dur - 0.001);
+    st.prevT = st.t;
+    const before = shown; render(st.t); if (shown !== before) syncUi();
+    segs.forEach((b, i) => b.firstChild.style.setProperty('--f', clamp((st.t - starts[i]) / SCENES[i].dur)));
+    requestAnimationFrame(loop);
+  }
+  function start(auto) { $('cover').remove(); $('chrome').hidden = false; st.t = 0; st.idx = 0; st.sound = auto; syncUi(); requestAnimationFrame(loop); if (auto) play(); $('play').focus(); }
+  $('startManual').onclick = () => start(false);
+  $('startAuto').onclick = () => start(true);
+  $('prev').onclick = () => goTo(st.idx - 1);
+  $('next').onclick = () => goTo(st.idx + 1);
+  $('play').onclick = () => st.playing ? pause() : play();
+  $('restart').onclick = () => { goTo(0); $('note').textContent = ''; };
+  $('sound').onclick = () => { st.sound = !st.sound; if (!st.sound) audio.pause(); else if (st.playing && st.audioOk) { audio.currentTime = st.t; audio.play().catch(() => {}); } syncUi(); };
+  document.addEventListener('keydown', e => {
+    if (!$('panel').hidden) { if (e.key === 'Escape') closePanel(); return; }
+    if ($('chrome').hidden || e.target.closest('input,textarea')) return;
+    if (e.key === 'ArrowLeft') { e.preventDefault(); goTo(st.idx + 1); }       // RTL: اليسار = التالي
+    else if (e.key === 'ArrowRight') { e.preventDefault(); goTo(st.idx - 1); }
+    else if (e.key === ' ' && !e.target.closest('button')) { e.preventDefault(); st.playing ? pause() : play(); }
+    else if (e.key === 'Home') { e.preventDefault(); goTo(0); }
+    else if (e.key === 'End') { e.preventDefault(); goTo(SCENES.length - 1); }
+  });
+  const voText = $('voText'); voText.value = VO.join('\n\n');
+  let lastFocus = null;
+  function openPanel() { lastFocus = document.activeElement; $('panel').hidden = false; $('closePanel').focus(); }
+  function closePanel() { $('panel').hidden = true; lastFocus?.focus(); }
+  $('openPanel').onclick = openPanel; $('closePanel').onclick = closePanel;
+  $('copy').onclick = () => {
+    const done = () => $('copyMsg').textContent = 'نُسخ النص.';
+    const fail = () => { voText.focus(); voText.select(); $('copyMsg').textContent = 'تعذّر النسخ التلقائي. النص محدّد الآن، انسخه يدويًا.'; };
+    try { navigator.clipboard.writeText(voText.value).then(done, fail); } catch (e) { fail(); }
+  };
+  $('safeToggle').onchange = e => { $('safe').hidden = !e.target.checked; };
+  $('sfxToggle').onchange = e => { st.sfx = e.target.checked; };
+  const times = $('times');
+  function buildTimes() {
+    times.innerHTML = '';
+    SCENES.forEach((s, i) => {
+      const id = 'dur' + i;
+      times.insertAdjacentHTML('beforeend', '<label for="' + id + '">' + s.title + '</label><input id="' + id + '" type="number" min="4" max="90" step="0.1" value="' + s.dur + '">');
+      times.lastChild.oninput = e => { const v = parseFloat(e.target.value); if (v >= 4) { s.dur = v; computeTimeline(); cues = sfxCues(); saveDurs(); showTotal(); goTo(st.idx); } };
+    });
+    showTotal();
+  }
+  function showTotal() { const m = Math.floor(total / 60), s = (total % 60).toFixed(1); $('totalTime').textContent = 'المجموع: ' + m + ':' + s.padStart(4, '0'); }
+  function saveDurs() { try { localStorage.setItem('bs-v4-durs', JSON.stringify(SCENES.map(s => s.dur))); } catch (e) {} }
+  $('resetTimes').onclick = () => { SCENES.forEach((s, i) => s.dur = DEFAULT_DURS[i]); computeTimeline(); cues = sfxCues(); saveDurs(); buildTimes(); goTo(st.idx); };
+  buildTimes();
+  render(0);
+}
+</script>
