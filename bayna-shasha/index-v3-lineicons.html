@@ -1,0 +1,552 @@
+<title>بيننا شاشة</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lalezar&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: a 9:16 story frame. Everything that matters sits inside the TikTok safe area:
+   top 11.5%, bottom 22%, right 13% (app buttons), left 6%. Headline above, art in the middle,
+   the narrator caption anchored to the lower-right corner of the safe area. */
+:root{
+  --orange:#FC7702;
+  --orange-deep:#D96500;   /* derived from the brand orange, for small caption text on white */
+  --coal:#292929;
+  --white:#FFFFFF;
+  --purple:#B8A1F2;
+  --display:"Lalezar","Noto Kufi Arabic","Segoe UI","Tahoma",sans-serif;
+  --text:"IBM Plex Sans Arabic","Noto Sans Arabic","Segoe UI","Tahoma",sans-serif;
+  --safe-t:11.5cqh; --safe-b:22cqh; --safe-r:13cqw; --safe-l:6cqw;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;background:var(--coal);color:var(--white);font-family:var(--text);font-size:16px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:14px;
+  display:flex;flex-direction:column;align-items:center;gap:12px}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--orange);outline-offset:3px}
+.vh{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ---------- stage ---------- */
+.stage{position:relative;container:stage/size;aspect-ratio:9/16;width:min(100%,calc((100dvh - 170px) * 9 / 16));min-width:min(100%,300px);
+  overflow:hidden;background:var(--white);border-radius:10px;max-width:100%}
+body.render{padding:0;gap:0;display:block;overflow:hidden}
+body.render .stage{width:100vw;height:100vh;aspect-ratio:auto;border-radius:0}
+body.render .chrome,body.render .cover,body.render .safe{display:none!important}
+
+.scene{position:absolute;inset:0;visibility:hidden;opacity:0;display:grid;
+  padding:var(--safe-t) var(--safe-r) var(--safe-b) var(--safe-l);
+  grid-template-rows:auto auto minmax(0,1fr) 13.5cqh;gap:1.4cqh;
+  --ink:var(--orange);--cap:var(--orange-deep);--ground:var(--white);--grid:rgba(252,119,2,.10);--soft:rgba(252,119,2,.75);--accent:var(--coal);
+  background-color:var(--ground);color:var(--ink)}
+.scene.on-purple{--ink:var(--coal);--cap:var(--coal);--ground:var(--purple);--grid:rgba(41,41,41,.10);--soft:rgba(41,41,41,.72);--accent:var(--orange)}
+.scene::before{content:"";position:absolute;inset:0;pointer-events:none;
+  background-image:linear-gradient(to right,var(--grid) 1px,transparent 1px),linear-gradient(to bottom,var(--grid) 1px,transparent 1px);
+  background-size:calc(100% / 6) calc(100% / 12)}
+.gl{position:absolute;font:500 1.6cqw/1 var(--text);color:var(--ink);opacity:.3;direction:ltr;pointer-events:none}
+.shead{position:relative;display:flex;justify-content:space-between;align-items:baseline}
+.mark{font:4.4cqw/1 var(--display)}
+.num{font:600 2.8cqw/1 var(--text);direction:ltr;letter-spacing:.06em}
+
+.copy{position:relative;display:flex;flex-direction:column;gap:1.2cqh;min-width:0}
+.center .copy{text-align:center;align-items:center}
+.eyebrow{font:600 3.2cqw/1.4 var(--text);color:var(--soft);display:flex;gap:2cqw;align-items:center}
+.eyebrow::before{content:"";width:7cqw;height:2px;background:currentColor;display:inline-block}
+.h{margin:0;font:400 10.5cqw/1.3 var(--display);text-wrap:balance;color:var(--ink)}
+.h > span:not(.ell){display:block}
+.h.xl{font-size:17cqw;line-height:1.15}
+.ell{font-family:var(--text);font-weight:700}
+.sub{margin:0;font:500 4cqw/1.7 var(--text);color:var(--soft)}
+.art{position:relative;width:100%;height:100%;min-height:0;container-type:size}
+.art svg{display:block}
+.ink-stroke{stroke:var(--ink);fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+
+/* reveal helpers: JS writes --p (0..1) on every [data-in] element */
+[data-in]{--p:0}
+.fx-up{opacity:var(--p);transform:translateY(calc((1 - var(--p)) * 3.5cqh))}
+.fx-fade{opacity:var(--p)}
+.fx-side{opacity:var(--p);transform:translateX(calc((1 - var(--p)) * 5cqw))}
+.fx-scale{opacity:var(--p);transform:scale(calc(.93 + var(--p) * .07))}
+
+/* ---------- narrator captions (lower-right corner of the safe area) ---------- */
+.caps{position:relative;min-height:0}
+.caps::before{content:"";position:absolute;top:0;right:0;width:6cqw;height:6cqw;border-top:3px solid var(--ink);border-right:3px solid var(--ink)}
+.caps::after{content:"";position:absolute;bottom:0;left:0;width:6cqw;height:6cqw;border-bottom:3px solid var(--ink);border-left:3px solid var(--ink);opacity:.45}
+.cap{position:absolute;inset:2.2cqw 3.2cqw 1.4cqw 2cqw;margin:0;display:flex;align-items:flex-start;
+  font:700 4.7cqw/1.6 var(--text);color:var(--cap);text-wrap:pretty;opacity:0;--q:0;--x:0}
+.cap.m0{opacity:calc(var(--q) * (1 - var(--x)));transform:translateY(calc((1 - var(--q)) * 2.6cqh - var(--x) * 1.6cqh))}
+.cap.m1{opacity:calc(1 - var(--x));clip-path:inset(0 0 0 calc((1 - var(--q)) * 100%))}
+.cap.m2{opacity:calc(var(--q) * (1 - var(--x)));filter:blur(calc((1 - var(--q)) * 9px));transform:scale(calc(.95 + var(--q) * .05));transform-origin:100% 0}
+
+/* icon compositions (Baynana-Shasha icon set, 64-unit grid) */
+.pos{position:absolute;left:var(--x);top:var(--y);width:var(--w);aspect-ratio:1;transform:translate(-50%,-50%)}
+.pos > .ic,.pos > .wrap{position:absolute;inset:0}
+.ic{display:block;color:var(--ink)}
+.ic svg{width:100%;height:100%;display:block;overflow:visible;stroke-width:2.3}
+.ic.acc{color:var(--accent)}
+.ic.soft{opacity:calc(var(--p) * .6)}
+.l svg{stroke-width:2}
+.glow-ic svg{filter:drop-shadow(0 0 2.4cqw rgba(252,119,2,.65))}
+.sq{position:absolute;inset:0;margin:auto;width:min(100cqw,100cqh);aspect-ratio:1}
+.sq > svg{position:absolute;inset:0;width:100%;height:100%}
+.orbit{transform-origin:200px 200px;transform:rotate(calc(var(--p) * 300deg))}
+.reflect{opacity:calc(1 - var(--p))}
+.aside{transform:translate(calc(var(--p) * -55%),calc(var(--p) * 70%)) rotate(calc(var(--p) * -24deg)) scale(calc(1 - var(--p) * .35));opacity:calc(1 - var(--p) * .7)}
+.away{transform:translate(calc(var(--p) * 40%),calc(var(--p) * -55%)) scale(calc(1 - var(--p) * .55));opacity:calc(1 - var(--p) * .9)}
+.horizon{position:absolute;bottom:4%;left:0;right:0;height:.6cqw;background:var(--ink);opacity:.45}
+.outro{margin:0;font:700 4.3cqw/1.6 var(--text);color:var(--ink)}
+.words{display:grid;grid-template-columns:repeat(2,max-content);justify-content:start;gap:.4cqh 6cqw}
+.wordrow{display:flex;align-items:center;gap:2.2cqw}
+.wordrow .h{font-size:11.5cqw;line-height:1.25}
+.wordrow .ic{width:10cqw;height:10cqw;flex:none}
+.steps{display:flex;flex-direction:column;gap:.2cqh}
+.steps .wordrow .h{font-size:11cqw}
+.items{list-style:none;margin:.6cqh 0 0;padding:0;display:grid;grid-template-columns:repeat(2,max-content);gap:.8cqh 8cqw}
+.items li{display:flex;align-items:center;gap:2.2cqw;font:400 8cqw/1.3 var(--display)}
+.items .ic{width:9.5cqw;height:9.5cqw;flex:none}
+
+/* safe-area guide (toggle in the panel) */
+.safe{position:absolute;z-index:4;pointer-events:none;inset:var(--safe-t) var(--safe-r) var(--safe-b) var(--safe-l);border:2px dashed #e0245e;border-radius:4px}
+.safe span{position:absolute;top:-3.2cqw;right:0;font:600 2.4cqw var(--text);color:#e0245e;background:rgba(255,255,255,.85);padding:0 1cqw}
+
+/* ---------- cover ---------- */
+.cover{position:absolute;inset:0;z-index:5;background:var(--purple);color:var(--coal);display:grid;place-items:center;text-align:center;
+  padding:var(--safe-t) var(--safe-r) var(--safe-b) var(--safe-l)}
+.cover::before{content:"";position:absolute;inset:0;pointer-events:none;
+  background-image:linear-gradient(to right,rgba(41,41,41,.10) 1px,transparent 1px),linear-gradient(to bottom,rgba(41,41,41,.10) 1px,transparent 1px);background-size:calc(100% / 6) calc(100% / 12)}
+.cover-in{position:relative;display:flex;flex-direction:column;align-items:center;gap:2cqh;max-width:100%}
+.cover h1{margin:0;font:400 19cqw/1.15 var(--display)}
+.cover p{margin:0;font:500 4.2cqw/1.7 var(--text)}
+.cover .meta{font:600 3cqw/1.7 var(--text);opacity:.8}
+.cover-btns{display:flex;flex-direction:column;align-items:stretch;gap:12px;margin-top:1.5cqh}
+.btn{min-height:50px;padding:0 1.4em;border-radius:999px;border:2px solid var(--coal);background:var(--coal);color:var(--white);font-weight:700;font-size:clamp(15px,4.2cqw,20px)}
+.btn.ghost{background:transparent;color:var(--coal)}
+.btn:hover{filter:brightness(1.15)}
+
+/* ---------- chrome ---------- */
+.chrome{width:min(100%,560px);display:flex;flex-direction:column;gap:10px}
+.prog{display:flex;gap:4px}
+.prog button{flex:1;height:22px;padding:0;border:0;background:transparent;position:relative}
+.prog button::before{content:"";position:absolute;inset:9px 0;border-radius:2px;background:rgba(255,255,255,.2)}
+.prog button i{position:absolute;top:9px;bottom:9px;right:0;width:calc(var(--f,0) * 100%);border-radius:2px;background:var(--orange)}
+.bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px}
+.ctl{min-width:48px;min-height:48px;border-radius:999px;border:1.5px solid rgba(255,255,255,.3);background:transparent;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:0 13px;font-weight:600;font-size:14px}
+.ctl svg{width:22px;height:22px}
+.ctl.primary{background:var(--orange);color:var(--coal);border-color:var(--orange)}
+.ctl[aria-pressed="true"]{border-color:var(--orange);color:var(--orange)}
+.ctl:disabled{opacity:.35;cursor:default}
+.now{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding-inline:4px}
+.now b{font:400 19px/1.3 var(--display);color:var(--orange)}
+.now small{font-size:13px;opacity:.75}
+.note{font-size:13px;opacity:.7;min-height:1em;margin:0;text-align:center}
+
+/* ---------- panel ---------- */
+.panel{position:fixed;inset:0 0 0 auto;width:min(560px,100%);z-index:20;background:var(--coal);border-inline-start:1px solid rgba(255,255,255,.18);
+  padding:calc(20px + env(safe-area-inset-top,0px)) max(20px,env(safe-area-inset-right,0px)) calc(20px + env(safe-area-inset-bottom,0px)) 20px;
+  display:flex;flex-direction:column;gap:14px;overflow:auto;box-shadow:-20px 0 60px rgba(0,0,0,.4)}
+.panel h2{margin:0;font:400 28px/1.3 var(--display);color:var(--orange)}
+.panel h3{margin:8px 0 0;font:600 16px/1.4 var(--text);color:var(--purple)}
+.panel textarea{width:100%;min-height:40vh;resize:vertical;background:rgba(255,255,255,.05);color:var(--white);border:1px solid rgba(255,255,255,.25);border-radius:8px;padding:14px;font:500 16px/1.9 var(--text)}
+.panel p{margin:0;font-size:14px;line-height:1.7;opacity:.85}
+.times{display:grid;grid-template-columns:1fr auto;gap:6px 12px;align-items:center;font-size:14px}
+.times input{width:90px;min-height:40px;background:transparent;color:var(--white);border:1px solid rgba(255,255,255,.3);border-radius:6px;padding:0 8px;font:600 15px var(--text);direction:ltr;text-align:center}
+.prow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.check{display:flex;gap:10px;align-items:center;font-size:15px;min-height:44px}
+.check input{width:22px;height:22px;accent-color:var(--orange)}
+</style>
+
+<div class="stage" id="stage">
+  <section class="scene center s1 on-purple" data-scene="0">
+    <div class="copy" style="grid-row:2"><h2 class="h xl fx-up" data-in="1.8" data-dur="1.2" data-slot="h"></h2><p class="sub fx-fade" data-in="3" data-dur="1.4" data-slot="sub"></p></div>
+    <div class="art" role="img" aria-label="رمز امرأة ورمز رجل في مساحتين منفصلتين، وبينهما هاتف مضيء"><div class="pos" style="--x:20%;--y:55%;--w:min(40cqw,66cqh)"><i class="ic l fx-up" data-ic="woman" data-in="0.3" data-dur="1.4"></i></div><div class="pos" style="--x:50%;--y:50%;--w:min(27cqw,46cqh)"><i class="ic acc glow-ic fx-scale" data-ic="phone" data-in="1.2" data-dur="1.6"></i></div><div class="pos" style="--x:80%;--y:55%;--w:min(40cqw,66cqh)"><i class="ic l fx-up" data-ic="man" data-in="0.6" data-dur="1.4"></i></div></div>
+  </section>
+  <section class="scene center s2" data-scene="1">
+    <div class="copy" style="grid-row:2"><h2 class="h"><span class="fx-up" data-in="0.9" data-dur="1.2" data-slot="h1"></span><span class="fx-up" data-in="3" data-dur="1.2" data-slot="h2"></span></h2></div>
+    <div class="art" role="img" aria-label="ميزان متوازن، وعلى جانبيه رمز رجل ورمز امرأة بالحجم نفسه"><div class="pos" style="--x:50%;--y:50%;--w:min(70cqw,100cqh)"><i class="ic acc l fx-scale" data-ic="balance" data-in="0.2" data-dur="1.3"></i></div><div class="pos" style="--x:13%;--y:62%;--w:min(27cqw,46cqh)"><i class="ic  fx-up" data-ic="man" data-in="0.6" data-dur="1.2"></i></div><div class="pos" style="--x:87%;--y:62%;--w:min(27cqw,46cqh)"><i class="ic  fx-up" data-ic="woman" data-in="0.6" data-dur="1.2"></i></div></div>
+  </section>
+  <section class="scene s3 on-purple" data-scene="2">
+    <div class="copy" style="grid-row:2"><div class="eyebrow fx-fade" data-in="0.2" data-dur="0.8" data-slot="title"></div><div class="words" data-list="words"></div></div>
+    <div class="art" role="img" aria-label="ليل وهاتف وساعة على مسار دائري بطيء"><div class="sq"><svg viewBox="0 0 400 400" aria-hidden="true"><circle cx="200" cy="200" r="140" class="ink-stroke" stroke-dasharray="4 10" opacity=".5"/><g class="orbit" data-in="0" data-dur="16" data-ease="lin"><circle cx="200" cy="60" r="8" fill="var(--accent)"/></g></svg><div class="pos" style="--x:50%;--y:15%;--w:32%"><i class="ic acc fx-scale" data-ic="night" data-in="0.4" data-dur="1.2"></i></div><div class="pos" style="--x:80.3%;--y:67.5%;--w:32%"><i class="ic  fx-scale" data-ic="phone" data-in="0.8" data-dur="1.2"></i></div><div class="pos" style="--x:19.7%;--y:67.5%;--w:32%"><i class="ic  fx-scale" data-ic="clock" data-in="1.2" data-dur="1.2"></i></div></div></div>
+  </section>
+  <section class="scene s4" data-scene="3">
+    <div class="copy" style="grid-row:2"><div class="eyebrow fx-fade" data-in="0.2" data-dur="0.8" data-slot="title"></div><h2 class="h"><span class="fx-up" data-in="1" data-dur="1.2" data-slot="h1"></span><span class="fx-up" data-in="2.4" data-dur="1.2" data-slot="h2"></span></h2></div>
+    <div class="art" role="img" aria-label="شاشة تعرض صورة مختارة، وحولها رموز باهتة لما لا تعرضه: الحوار والمشاعر والموافقة والجلوس معًا"><div class="pos" style="--x:50%;--y:48%;--w:min(70cqw,100cqh)"><i class="ic acc l fx-scale" data-ic="screen" data-in="0.4" data-dur="1.4"></i><div class="pos" style="--x:50%;--y:42%;--w:42%"><i class="ic  fx-fade" data-ic="image" data-in="1.2" data-dur="1.2"></i></div></div><div class="pos" style="--x:12%;--y:14%;--w:min(27cqw,46cqh)"><i class="ic soft fx-fade" data-ic="dialogue" data-in="3.5" data-dur="2"></i></div><div class="pos" style="--x:88%;--y:14%;--w:min(27cqw,46cqh)"><i class="ic soft fx-fade" data-ic="heart" data-in="4" data-dur="2"></i></div><div class="pos" style="--x:12%;--y:86%;--w:min(27cqw,46cqh)"><i class="ic soft fx-fade" data-ic="two-chairs" data-in="4.5" data-dur="2"></i></div><div class="pos" style="--x:88%;--y:86%;--w:min(27cqw,46cqh)"><i class="ic soft fx-fade" data-ic="consent" data-in="5" data-dur="2"></i></div></div>
+  </section>
+  <section class="scene s5 on-purple" data-scene="4">
+    <div class="copy" style="grid-row:2"><div class="eyebrow fx-fade" data-in="0.2" data-dur="0.8" data-slot="title"></div><h2 class="h"><span class="fx-up" data-in="1" data-dur="1.2" data-slot="h1"></span><span class="fx-up" data-in="2.4" data-dur="1.2" data-slot="h2"></span></h2></div>
+    <div class="art" role="img" aria-label="مرآة كبيرة، وحولها رمزا نجمة وصورة مثالية يتلاشيان"><div class="pos" style="--x:50%;--y:50%;--w:min(70cqw,100cqh)"><i class="ic l fx-scale" data-ic="mirror" data-in="0.3" data-dur="1.4"></i></div><div class="pos" style="--x:80%;--y:22%;--w:min(27cqw,46cqh)"><div class="wrap reflect" data-in="4" data-dur="8"><i class="ic acc fx-scale" data-ic="fantasy" data-in="1" data-dur="1.2"></i></div></div><div class="pos" style="--x:20%;--y:30%;--w:min(27cqw,46cqh)"><div class="wrap reflect" data-in="4.5" data-dur="8"><i class="ic acc fx-scale" data-ic="image" data-in="1.4" data-dur="1.2"></i></div></div></div>
+  </section>
+  <section class="scene s6" data-scene="5">
+    <div class="copy" style="grid-row:2"><div class="eyebrow fx-fade" data-in="0.2" data-dur="0.8" data-slot="title"></div><h2 class="h fx-up" data-in="0.8" data-dur="1.2" data-slot="h"></h2><ul class="items" data-list="items"></ul></div>
+    <div class="art" role="img" aria-label="فقاعة تفكير فيها علامة سؤال، وبجانبها هاتف"><div class="pos" style="--x:58%;--y:45%;--w:min(70cqw,100cqh)"><i class="ic acc l fx-scale" data-ic="thought" data-in="0.4" data-dur="1.3"></i><div class="pos" style="--x:52%;--y:42%;--w:40%"><i class="ic  fx-up" data-ic="question" data-in="1.4" data-dur="1.2"></i></div></div><div class="pos" style="--x:16%;--y:70%;--w:min(27cqw,46cqh)"><i class="ic  fx-scale" data-ic="phone" data-in="1" data-dur="1.2"></i></div></div>
+  </section>
+  <section class="scene center s7 on-purple" data-scene="6">
+    <div class="copy" style="grid-row:2"><h2 class="h fx-up" data-in="2.2" data-dur="1.2" data-slot="h"></h2></div>
+    <div class="art" role="img" aria-label="مقعدان متقابلان، وبينهما فقاعة حوار بدل الشاشة"><div class="pos" style="--x:50%;--y:66%;--w:min(74cqw,74cqh)"><i class="ic l fx-up" data-ic="two-chairs" data-in="0.3" data-dur="1.3"></i></div><div class="pos" style="--x:50%;--y:22%;--w:min(40cqw,66cqh)"><i class="ic acc fx-scale" data-ic="dialogue" data-in="1.4" data-dur="1.4"></i></div></div>
+  </section>
+  <section class="scene s8" data-scene="7">
+    <div class="copy" style="grid-row:2"><div class="eyebrow fx-fade" data-in="0.2" data-dur="0.8" data-slot="title"></div><div class="steps" data-list="steps"></div></div>
+    <div class="art" role="img" aria-label="يد تضع الهاتف جانبًا، ثم يظهر طريق"><div class="pos" style="--x:76%;--y:40%;--w:min(40cqw,66cqh)"><i class="ic  fx-up" data-ic="hand" data-in="0.4" data-dur="1.2"></i></div><div class="pos" style="--x:76%;--y:22%;--w:min(27cqw,46cqh)"><div class="wrap aside" data-in="1.8" data-dur="2.4"><i class="ic acc fx-fade" data-ic="phone" data-in="0.4" data-dur="1"></i></div></div><div class="pos" style="--x:30%;--y:52%;--w:min(70cqw,100cqh)"><i class="ic acc l fx-up" data-ic="path" data-in="3.4" data-dur="2"></i></div></div>
+  </section>
+  <section class="scene s9 on-purple" data-scene="8">
+    <div class="copy" style="grid-row:2"><div class="eyebrow fx-fade" data-in="0.2" data-dur="0.8" data-slot="title"></div><h2 class="h fx-up" data-in="1.2" data-dur="1.2" data-slot="h"></h2></div>
+    <div class="art" role="img" aria-label="باب مفتوح ومصباح مضيء، ويدان تحتضنان قلبًا كرمز للدعم"><div class="pos" style="--x:66%;--y:48%;--w:min(70cqw,100cqh)"><i class="ic l fx-fade" data-ic="door" data-in="0.3" data-dur="1.6"></i></div><div class="pos" style="--x:91%;--y:12%;--w:min(24cqw,40cqh)"><i class="ic acc fx-scale" data-ic="light" data-in="1.4" data-dur="1.2"></i></div><div class="pos" style="--x:22%;--y:64%;--w:min(40cqw,66cqh)"><i class="ic acc fx-scale" data-ic="support" data-in="2.2" data-dur="1.4"></i></div></div>
+  </section>
+  <section class="scene center s10" data-scene="9">
+    <div class="copy" style="grid-row:2"><h2 class="h fx-up" data-in="2.4" data-dur="1.3" data-slot="h"></h2><p class="outro fx-up" data-in="12" data-dur="1.4" data-slot="outro"></p></div>
+    <div class="art" role="img" aria-label="الشاشة تبتعد وتصغر، ويبقى رمزا المرأة والرجل كلٌّ في مساحته، وبينهما شروق هادئ"><div class="horizon"></div><div class="pos" style="--x:14%;--y:62%;--w:min(40cqw,66cqh)"><i class="ic  fx-up" data-ic="woman" data-in="0.3" data-dur="1.3"></i></div><div class="pos" style="--x:86%;--y:62%;--w:min(40cqw,66cqh)"><i class="ic  fx-up" data-ic="man" data-in="0.3" data-dur="1.3"></i></div><div class="pos" style="--x:50%;--y:64%;--w:min(40cqw,66cqh)"><i class="ic acc fx-up" data-ic="hope" data-in="6" data-dur="1.6"></i></div><div class="pos" style="--x:50%;--y:40%;--w:min(27cqw,46cqh)"><div class="wrap away" data-in="2" data-dur="7"><i class="ic acc fx-fade" data-ic="screen" data-in="0" data-dur="0.6"></i></div></div></div>
+  </section>
+
+  <div class="safe" id="safe" hidden><span>منطقة الأمان</span></div>
+
+  <div class="cover" id="cover">
+    <div class="cover-in">
+      <h1>بيننا شاشة</h1>
+      <p>حكاية عن المشاهدة… وما نبحث عنه خلفها</p>
+      <div class="meta">قصة بصرية للبالغين · ١٠ مشاهد · نحو دقيقتين و٤٤ ثانية<br>بلا صور صريحة · النص مكتوب على الشاشة</div>
+      <div class="cover-btns">
+        <button class="btn" id="startAuto" type="button">ابدأ الحكاية مع الصوت</button>
+        <button class="btn ghost" id="startManual" type="button">تصفّح بلا صوت</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="chrome" id="chrome" hidden>
+  <div class="now" aria-live="polite"><b id="nowTitle"></b><small id="nowNum"></small></div>
+  <div class="prog" id="prog" aria-label="المشاهد"></div>
+  <div class="bar">
+    <button class="ctl" id="prev" type="button" aria-label="المشهد السابق"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6l-6 6" /></svg></button>
+    <button class="ctl primary" id="play" type="button" aria-label="تشغيل"><svg id="playIco" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"></svg></button>
+    <button class="ctl" id="next" type="button" aria-label="المشهد التالي"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6l6 6" /></svg></button>
+    <button class="ctl" id="sound" type="button" aria-pressed="true" aria-label="الصوت مفعّل"><svg id="soundIco" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"></svg></button>
+    <button class="ctl" id="restart" type="button" aria-label="من البداية"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4" /> <path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" /></svg><span>من البداية</span></button>
+    <button class="ctl" id="openPanel" type="button" aria-haspopup="dialog" aria-controls="panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3v4a1 1 0 0 0 1 1h4" /> <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2" /> <path d="M9 9l1 0" /> <path d="M9 13l6 0" /> <path d="M9 17l6 0" /></svg><span>نص التعليق الصوتي</span></button>
+  </div>
+  <p class="note" id="note">الأسهم: ← التالي · → السابق · المسافة للتشغيل والإيقاف</p>
+</div>
+
+<aside class="panel" id="panel" role="dialog" aria-modal="true" aria-labelledby="panelTitle" hidden>
+  <div class="prow" style="justify-content:space-between">
+    <h2 id="panelTitle">نص التعليق الصوتي</h2>
+    <button class="ctl" id="closePanel" type="button" aria-label="إغلاق اللوحة"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6l-12 12" /> <path d="M6 6l12 12" /></svg></button>
+  </div>
+  <p>نص متصل ونظيف، بلا عناوين مشاهد ولا تعليمات أداء، جاهز للنسخ إلى أداة توليد الصوت.</p>
+  <label class="vh" for="voText">نص التعليق الصوتي</label>
+  <textarea id="voText" readonly></textarea>
+  <div class="prow"><button class="ctl primary" id="copy" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9.667a2.667 2.667 0 0 1 2.667 -2.667h8.666a2.667 2.667 0 0 1 2.667 2.667v8.666a2.667 2.667 0 0 1 -2.667 2.667h-8.666a2.667 2.667 0 0 1 -2.667 -2.667l0 -8.666" /> <path d="M4.012 16.737a2.005 2.005 0 0 1 -1.012 -1.737v-10c0 -1.1 .9 -2 2 -2h10c.75 0 1.158 .385 1.5 1" /></svg><span>نسخ النص</span></button><span id="copyMsg" class="note" role="status"></span></div>
+  <label class="check"><input type="checkbox" id="safeToggle"> إظهار منطقة الأمان في تيك توك</label>
+  <label class="check"><input type="checkbox" id="sfxToggle" checked> مؤثرات صوتية خفيفة عند الانتقال</label>
+  <h3>مدة كل مشهد بالثواني</h3>
+  <p>مضبوطة على التسجيل الحالي (٢:٤٤)، وتتحرك الترجمة مع كل مشهد. عدّلها إذا غيّرت التسجيل.</p>
+  <div class="times" id="times"></div>
+  <div class="prow"><button class="ctl" id="resetTimes" type="button">إعادة التوقيتات الأصلية</button><span class="note" id="totalTime"></span></div>
+</aside>
+
+<audio id="vo" src="assets/voiceover.mp3" preload="auto"></audio>
+
+<script>
+/* ===== كل نصوص المشاهد والترجمة وتوقيتاتها هنا =====
+   cap: [ثانية البداية داخل المشهد، النص] — الترجمة الكاملة لنص الراوي */
+const SCENES = [
+  { title:"بيننا شاشة", dur:16.58,
+    text:{ h:"بيننا شاشة", sub:"حكاية عن المشاهدة… وما نبحث عنه خلفها" },
+    visual:"رمزا امرأة ورجل، وبينهما هاتف مضيء",
+    cap:[[0.6,"أحيانًا، لا تكون المسافة بين شخصين طريقًا طويلًا…"],[5.42,"بل شاشة صغيرة."],[7.2,"نقترب منها بحثًا عن شيء،"],[10.14,"ثم نكتشف أن السؤال الحقيقي ليس: ماذا نشاهد؟"],[14.08,"بل: عمّ نبحث؟"]] },
+  { title:"ليست حكاية طرف واحد", dur:15.48,
+    text:{ h1:"ليست حكاية رجل فقط…", h2:"ولا امرأة فقط" },
+    visual:"الشخصيتان متساويتان على كفتين متوازنتين",
+    cap:[[0.02,"هذه ليست حكاية رجل وحده،"],[2.72,"ولا امرأة وحدها."],[3.98,"إنها حكاية أشخاص،"],[6.3,"تختلف تجاربهم ودوافعهم وحدودهم."],[10.42,"ولا يمكن فهمهم من خلال حكم واحد،"],[13.12,"أو صورة نمطية واحدة."]] },
+  { title:"كيف تبدأ؟", dur:16.15,
+    list:{ key:"words", items:[["فضول.",0.4,"curiosity"],["ملل.",2.9,"boredom"],["ضغط.",6.6,"pressure"],["وحدة.",7.6,"solitude"]] },
+    visual:"هاتف وساعة ونافذة ليلية على مسار دائري بطيء",
+    cap:[[0.22,"قد تبدأ المشاهدة بفضول،"],[2.88,"أو بوقت فارغ،"],[4.6,"أو بمحاولة للهروب من ضغط أو وحدة."],[8.48,"وهنا، بدل أن نبدأ باللوم،"],[10.66,"يمكن أن نبدأ بسؤال أهدأ:"],[14.08,"ما الذي أشعر به الآن؟"]] },
+  { title:"ما لا تعرضه الشاشة", dur:15.32,
+    text:{ h1:"ما تراه…", h2:"ليس العلاقة كلها" },
+    visual:"إطار شاشة يعرض جزءًا مُعدًّا بعناية، وبقية الحياة خارجه بخطوط متقطعة",
+    cap:[[0.42,"ما تعرضه الشاشة ليس درسًا في الحب،"],[3.36,"ولا وصفة لعلاقة حقيقية."],[6.16,"فالعلاقة ليست مشهدًا مختارًا؛"],[8.78,"إنها حديث، وموافقة،"],[10.86,"واحترام، وحدود،"],[12.52,"وتفاصيل لا تختصرها صورة."]] },
+  { title:"حين تبدأ المقارنة", dur:14.85,
+    text:{ h1:"هل أقارن إنسانًا…", h2:"بصورة؟" },
+    visual:"مرآة مقسومة، وانعكاسات رمزية مثالية تتلاشى",
+    cap:[[0.18,"وحين نتعامل مع الصورة كأنها معيار،"],[2.88,"قد نقسو على أنفسنا،"],[5.32,"أو نطلب من الآخر أن يشبه خيالًا."],[8.16,"لكن الإنسان ليس اختبارًا للمظهر أو الأداء…"],[11.96,"ولا يحتاج إلى أن يكون نسخة من أحد."]] },
+  { title:"أسئلة بلا أحكام", dur:15.65,
+    text:{ h:"هل ما زلت أختار؟" },
+    list:{ key:"items", items:[["وقتي",2.9,"clock"],["نومي",5.8,"sleep"],["حضوري",8.4,"presence"],["حدودي",12.1,"boundaries"]] },
+    visual:"ساعة وهاتف وفقاعة تفكير مع فراغ واسع",
+    cap:[[0.31,"اسأل نفسك بلا إهانة:"],[2.77,"هل يأخذ هذا من وقتي أكثر مما أريد؟"],[5.77,"هل يزاحم نومي أو مسؤولياتي؟"],[8.41,"هل أجد صعوبة في التوقف رغم رغبتي؟"],[12.09,"هذه أسئلة للفهم، وليست تشخيصًا."]] },
+  { title:"مساحة للكلام", dur:16.56,
+    text:{ h:"حديث صريح… بلا إهانة" },
+    visual:"مقعدان متقابلان وبينهما فقاعة حوار",
+    cap:[[0.34,"وإذا كانت هناك علاقة،"],[2.22,"فابدأ بالكلام، لا بالتفتيش ولا بالاتهام."],[6.38,"قل: هذا ما أشعر به،"],[9.02,"وهذه حدودي،"],[10.74,"وهذا ما أحتاج إلى فهمه."],[12.48,"واستمع، دون سخرية أو ضغط أو إجبار."]] },
+  { title:"خطوة صغيرة", dur:17.70,
+    list:{ key:"steps", items:[["توقّف قليلًا.",2.8,"pause"],["لاحظ.",5.1,"observe"],["اختر.",8.4,"choice"]] },
+    visual:"يدان تضعان الهاتف جانبًا، ثم نافذة وطريق",
+    cap:[[0.44,"قد تكون البداية خطوة صغيرة:"],[2.82,"أن تضع الهاتف جانبًا،"],[5.1,"أو تلاحظ الأوقات التي تلجأ فيها إلى المشاهدة،"],[8.4,"أو تختار نشاطًا آخر يناسب حاجتك."],[12.08,"ليس المطلوب كمالًا مفاجئًا…"],[14.7,"بل اختيارًا أكثر وعيًا."]] },
+  { title:"لست مضطرًا وحدك", dur:15.63,
+    text:{ h:"طلب المساعدة ليس حكمًا عليك" },
+    visual:"باب مفتوح ويدان تحملان قلبًا",
+    cap:[[0.41,"وإذا شعرت بضيق، أو بأن السيطرة أصبحت صعبة،"],[3.73,"فلا تجعل الخجل يمنعك من طلب المساعدة"],[7.17,"من مختص مؤهل."],[8.67,"طلب الدعم ليس إدانة لك،"],[11.59,"ولا اختصارًا لهويتك في سلوك واحد."]] },
+  { title:"عودة إلى الحضور", dur:20.32,
+    text:{ h:"الإنسان أكبر من صورة", outro:"وقت أصدق. حدود أوضح. تواصل أكثر احترامًا." },
+    visual:"الشاشة تبتعد وتصغر، والشخصيتان في مساحتين مفتوحتين",
+    cap:[[0.48,"في النهاية، ليست الغاية أن نحارب أنفسنا أو بعضنا."],[4.86,"بل أن نرى الإنسان خلف الشاشة:"],[7.72,"بكرامته، وحدوده،"],[9.68,"وحاجته إلى الفهم."],[12.04,"وقت أصدق. حضور أهدأ."],[14.5,"وتواصل أكثر احترامًا."]] }
+];
+/* نص التعليق الصوتي كما سُجّل (لوحة النسخ) */
+const VO = [
+ "أحيانًا، لا تكون المسافة بين شخصين طريقًا طويلًا… بل شاشة صغيرة. نقترب منها بحثًا عن شيء، ثم نكتشف أن السؤال الحقيقي ليس: ماذا نشاهد؟ بل: عمّ نبحث؟",
+ "هذه ليست حكاية رجل وحده، ولا امرأة وحدها. إنها حكاية أشخاص، تختلف تجاربهم ودوافعهم وحدودهم. ولا يمكن فهمهم من خلال حكم واحد، أو صورة نمطية واحدة.",
+ "قد تبدأ المشاهدة بفضول، أو بوقت فارغ، أو بمحاولة للهروب من ضغط أو وحدة. وهنا، بدل أن نبدأ باللوم، يمكن أن نبدأ بسؤال أهدأ: ما الذي أشعر به الآن؟",
+ "ما تعرضه الشاشة ليس درسًا في الحب، ولا وصفة لعلاقة حقيقية. فالعلاقة ليست مشهدًا مختارًا؛ إنها حديث، وموافقة، واحترام، وحدود، وتفاصيل لا تختصرها صورة.",
+ "وحين نتعامل مع الصورة كأنها معيار، قد نقسو على أنفسنا، أو نطلب من الآخر أن يشبه خيالًا. لكن الإنسان ليس اختبارًا للمظهر أو الأداء… ولا يحتاج إلى أن يكون نسخة من أحد.",
+ "اسأل نفسك بلا إهانة: هل يأخذ هذا من وقتي أكثر مما أريد؟ هل يزاحم نومي أو مسؤولياتي؟ هل أجد صعوبة في التوقف رغم رغبتي؟ هذه أسئلة للفهم، وليست تشخيصًا.",
+ "وإذا كانت هناك علاقة، فابدأ بالكلام، لا بالتفتيش ولا بالاتهام. قل: هذا ما أشعر به، وهذه حدودي، وهذا ما أحتاج إلى فهمه. واستمع، دون سخرية أو ضغط أو إجبار.",
+ "قد تكون البداية خطوة صغيرة: أن تضع الهاتف جانبًا، أو تلاحظ الأوقات التي تلجأ فيها إلى المشاهدة، أو تختار نشاطًا آخر يناسب حاجتك. ليس المطلوب كمالًا مفاجئًا… بل اختيارًا أكثر وعيًا.",
+ "وإذا شعرت بضيق، أو بأن السيطرة أصبحت صعبة، فلا تجعل الخجل يمنعك من طلب المساعدة من مختص مؤهل. طلب الدعم ليس إدانة لك، ولا اختصارًا لهويتك في سلوك واحد.",
+ "في النهاية، ليست الغاية أن نحارب أنفسنا أو بعضنا. بل أن نرى الإنسان خلف الشاشة: بكرامته، وحدوده، وحاجته إلى الفهم. وقت أصدق. حضور أهدأ. وتواصل أكثر احترامًا."
+];
+const DEFAULT_DURS = SCENES.map(s => s.dur);
+const FADE = 0.8;      // انتقال المشهد
+const CAP_IN = 0.55;   // دخول سطر الترجمة
+const CAP_OUT = 0.25;  // خروج السطر السابق
+
+/* Baynana-Shasha icon set (64-unit grid) */
+const PACK = {"man": "<circle cx=\"32\" cy=\"18\" r=\"9\"/><path d=\"M17 55v-9a15 15 0 0 1 30 0v9M25 10l14 1\"/>", "woman": "<path d=\"M18 32V21a14 14 0 0 1 28 0v11M21 53l3-12h16l3 12\"/><circle cx=\"32\" cy=\"22\" r=\"9\"/><path d=\"M17 55h30\"/>", "phone": "<rect x=\"20\" y=\"7\" width=\"24\" height=\"50\" rx=\"5\"/><path d=\"M27 12h10M30 51h4\"/>", "screen": "<rect x=\"7\" y=\"10\" width=\"50\" height=\"34\" rx=\"3\"/><path d=\"M32 44v10M22 54h20\"/>", "balance": "<path d=\"M32 7v49M19 56h26M10 20h44M18 20 7 40h22ZM46 20 35 40h22Z\"/>", "night": "<path d=\"M43 9a23 23 0 1 0 12 35A24 24 0 0 1 43 9Z\"/>", "clock": "<circle cx=\"32\" cy=\"32\" r=\"24\"/><path d=\"M32 17v16l12 7\"/>", "curiosity": "<circle cx=\"27\" cy=\"27\" r=\"18\"/><path d=\"m40 40 17 17M23 23q0-7 7-5t-1 10v5M29 38h.1\"/>", "boredom": "<circle cx=\"32\" cy=\"32\" r=\"24\"/><path d=\"M19 25h7M39 25h7M23 43h18\"/>", "pressure": "<path d=\"M32 5v15M24 13l8 8 8-8M5 33h15M13 25l8 8-8 8M59 33H44M51 25l-8 8 8 8\"/><circle cx=\"32\" cy=\"39\" r=\"8\"/><path d=\"M21 58a11 11 0 0 1 22 0\"/>", "solitude": "<circle cx=\"32\" cy=\"23\" r=\"7\"/><path d=\"M22 47V39a10 10 0 0 1 20 0v8M9 55h46M7 9v37M57 9v37\"/>", "mirror": "<ellipse cx=\"32\" cy=\"26\" rx=\"18\" ry=\"21\"/><path d=\"M32 47v11M23 58h18M24 26l11-11M28 35l12-12\"/>", "fantasy": "<path d=\"m32 6 6 17 18 1-14 12 5 19-15-11-15 11 5-19L8 24l18-1Z\"/>", "image": "<rect x=\"7\" y=\"10\" width=\"50\" height=\"44\" rx=\"4\"/><circle cx=\"21\" cy=\"23\" r=\"5\"/><path d=\"m8 47 14-13 10 8 11-16 14 21\"/>", "dialogue": "<path d=\"M9 10h46v33H30L17 54V43H9zM18 21h28M18 31h19\"/>", "heart": "<path d=\"M32 54 10 33C-7 12 20-2 32 17 44-2 71 12 54 33Z\"/>", "consent": "<circle cx=\"32\" cy=\"32\" r=\"24\"/><path d=\"m19 32 9 9 18-20\"/>", "two-chairs": "<path d=\"M7 18h16v21H7zM5 39h21v9H5zM9 48v9M22 48v9M41 18h16v21H41zM38 39h21v9H38zM42 48v9M55 48v9\"/>", "listening": "<path d=\"M16 26C14 3 49 3 49 25c0 13-14 14-14 23 0 12-16 12-16 0M25 27c-1-12 15-12 15-1 0 7-10 9-10 16\"/>", "pause": "<circle cx=\"32\" cy=\"32\" r=\"24\"/><path d=\"M25 22v20M39 22v20\"/>", "observe": "<circle cx=\"26\" cy=\"26\" r=\"18\"/><path d=\"m39 39 18 18M18 26h16M26 18v16\"/>", "choice": "<path d=\"M32 56V34M32 34 14 16M32 34l18-18M7 16h14V3M43 3v13h14\"/>", "hand": "<path d=\"M19 54 9 37q-3-7 3-6l10 9V15q0-7 5-4v20V8q5-5 7 1v22V12q6-5 6 3v18V21q6-4 6 3v20q0 9-7 13H23\"/>", "path": "<path d=\"m7 58 19-50h12l19 50M32 12v7M32 28v8M32 46v10\"/>", "door": "<path d=\"M10 57h44M17 57V8h31v49M17 8l23 8v41M34 34v5\"/>", "support": "<path d=\"m6 39 12 16h28l12-16M10 30l16 13h12l16-13M18 35V22M46 35V22\"/><path d=\"M32 32 21 21C12 10 27 4 32 14c5-10 20-4 11 7Z\"/>", "light": "<path d=\"M23 42a17 17 0 1 1 18 0v8H23zM26 57h12M32 1v4M4 24h5M55 24h5M10 7l4 5M50 12l4-5\"/>", "hope": "<path d=\"M6 48h52M17 48a15 15 0 0 1 30 0M32 9v10M8 24l8 7M56 24l-8 7M8 57h48\"/>", "sleep": "<path d=\"M7 52V28M7 43h50v12M10 30h13v13M23 35h27q7 0 7 8M35 9h14L35 24h14\"/>", "presence": "<circle cx=\"32\" cy=\"20\" r=\"9\"/><path d=\"M18 49v-6a14 14 0 0 1 28 0v6M8 18V8h10M46 8h10v10M8 46v10h10M46 56h10V46\"/>", "boundaries": "<rect x=\"9\" y=\"9\" width=\"46\" height=\"46\" rx=\"7\" stroke-dasharray=\"5 5\"/><circle cx=\"32\" cy=\"32\" r=\"9\"/>", "thought": "<path d=\"M16 37a12 12 0 0 1-5-22 13 13 0 0 1 22-5 13 13 0 0 1 20 9 11 11 0 0 1-3 22H22\"/><circle cx=\"19\" cy=\"47\" r=\"4\"/><circle cx=\"11\" cy=\"56\" r=\"2\"/>", "question": "<path d=\"M20 22a12 12 0 1 1 19 10q-7 4-7 12\"/><circle cx=\"32\" cy=\"54\" r=\"1.5\"/>"};
+const packSvg = n => '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + PACK[n] + '</svg>';
+document.querySelectorAll('[data-ic]').forEach(n => { n.innerHTML = packSvg(n.dataset.ic); });
+/* Tabler Icons (MIT), player controls only */
+const ICONS = {
+  play:'<path d="M7 4v16l13 -8l-13 -8" fill="currentColor" />',
+  pause:'<path d="M6 6a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v12a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1l0 -12" fill="currentColor" /><path d="M14 6a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v12a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1l0 -12" fill="currentColor" />',
+  vol:'<path d="M15 8a5 5 0 0 1 0 8" /><path d="M17.7 5a9 9 0 0 1 0 14" /><path d="M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a.8 .8 0 0 1 1.5 .5v14a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5" />',
+  volOff:'<path d="M15 8a5 5 0 0 1 1.912 4.934m-1.377 2.602a5 5 0 0 1 -.535 .464" /><path d="M17.7 5a9 9 0 0 1 2.362 11.086m-1.676 2.299a9 9 0 0 1 -.686 .615" /><path d="M9.069 5.054l.431 -.554a.8 .8 0 0 1 1.5 .5v2m0 4v8a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l1.294 -1.664" /><path d="M3 3l18 18" />'
+};
+
+const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+const isRender = new URLSearchParams(location.search).has('render');
+if (isRender) document.body.classList.add('render');
+const $ = id => document.getElementById(id);
+const sceneEls = [...document.querySelectorAll('.scene')];
+
+function fillWithEllipsis(n, v) {
+  if (!v.includes('…') || !n.closest('.h')) { n.textContent = v; return; }
+  n.textContent = '';
+  v.split('…').forEach((part, j) => {
+    if (j) { const e = document.createElement('span'); e.className = 'ell'; e.textContent = '…'; n.appendChild(e); }
+    n.appendChild(document.createTextNode(part));
+  });
+}
+
+/* --- build scenes from the data array --- */
+sceneEls.forEach((el, i) => {
+  const s = SCENES[i];
+  el.querySelectorAll('[data-slot]').forEach(n => {
+    const k = n.dataset.slot;
+    fillWithEllipsis(n, k === 'title' ? String(i + 1).padStart(2, '0') + ' · ' + s.title : (s.text?.[k] ?? ''));
+  });
+  const host = el.querySelector('[data-list]');
+  if (host && s.list) {
+    s.list.items.forEach(([word, at, icon]) => {
+      let n;
+      if (host.tagName === 'UL') {
+        n = document.createElement('li');
+        n.innerHTML = '<i class="ic acc">' + packSvg(icon) + '</i><span></span>';
+        n.querySelector('span').textContent = word;
+      } else {
+        n = document.createElement('div'); n.className = 'wordrow';
+        n.innerHTML = '<i class="ic acc">' + packSvg(icon) + '</i><div class="h"></div>';
+        n.querySelector('.h').textContent = word;
+      }
+      n.classList.add('fx-side'); n.dataset.in = at; n.dataset.dur = 0.9;
+      host.appendChild(n);
+    });
+  }
+  /* header row + grid labels */
+  el.insertAdjacentHTML('afterbegin',
+    '<div class="shead" aria-hidden="true" style="grid-row:1"><span class="mark">بيننا شاشة</span><span class="num">' +
+    String(i + 1).padStart(2, '0') + ' / ' + SCENES.length + '</span></div>' +
+    ['A1','B3','C5','D2','E4','F6'].map((l, k) => '<span class="gl" aria-hidden="true" style="left:calc(' + ((k * 2 + 1) % 6) + ' * 16.666% + 1cqw);top:calc(' + (k * 2 + 1) + ' * 8.333% + 1cqw)">' + l + '</span>').join(''));
+  el.querySelector('.art').style.gridRow = '3';
+  /* captions: full narrator text, three motion styles in rotation */
+  const caps = document.createElement('div'); caps.className = 'caps'; caps.style.gridRow = '4';
+  caps.setAttribute('aria-live', 'off');
+  el.appendChild(caps);
+  el._caps = s.cap.map(([at, txt], k) => {
+    const p = document.createElement('p'); p.className = 'cap m' + ((i + k) % 3); p.textContent = txt; caps.appendChild(p);
+    return { n: p, at };
+  });
+  el.setAttribute('aria-label', 'المشهد ' + (i + 1) + ': ' + s.title);
+  el._anims = [...el.querySelectorAll('[data-in]')].map(n => ({ n, at: +n.dataset.in, d: +n.dataset.dur || 1, lin: n.dataset.ease === 'lin' }));
+});
+
+/* --- timeline --- */
+let starts = [], total = 0;
+function computeTimeline() { starts = []; total = 0; SCENES.forEach(s => { starts.push(total); total += s.dur; }); }
+try { const saved = JSON.parse(localStorage.getItem('bs916-durs') || 'null');
+  if (Array.isArray(saved) && saved.length === SCENES.length) saved.forEach((d, i) => { if (d > 3) SCENES[i].dur = d; }); } catch (e) {}
+computeTimeline();
+const sceneAt = t => { let i = 0; while (i < SCENES.length - 1 && t >= starts[i + 1]) i++; return i; };
+const ease = x => 1 - Math.pow(1 - x, 3);
+const clamp = x => Math.max(0, Math.min(1, x));
+
+/* sound-effect cues (absolute seconds): whoosh on scene changes, tick on list reveals, chime on the closing line */
+function sfxCues() {
+  const c = [];
+  SCENES.forEach((s, i) => {
+    if (i) c.push({ t: Math.max(0, starts[i] - 0.25), k: 'whoosh' });
+    (s.list?.items || []).forEach(([, at]) => c.push({ t: starts[i] + at, k: 'tick' }));
+  });
+  c.push({ t: starts[9] + 12, k: 'chime' });
+  return c.sort((a, b) => a.t - b.t);
+}
+window.__sfx = () => sfxCues();
+
+let shown = -1, fromIdx = -1;
+function render(t, opts = {}) {
+  const idx = sceneAt(t), local = t - starts[idx];
+  const rm = reduced.matches && !isRender;
+  if (idx !== shown) { fromIdx = opts.deterministic ? idx - 1 : shown; shown = idx; }
+  const f = rm ? 1 : ease(clamp(local / FADE));
+  sceneEls.forEach((el, i) => {
+    let o = 0, z = 0;
+    if (i === idx) { o = f; z = 2; } else if (i === fromIdx && f < 1) { o = 1; z = 1; }
+    el.style.opacity = o; el.style.zIndex = z; el.style.visibility = o > 0 ? 'visible' : 'hidden';
+    el.setAttribute('aria-hidden', i === idx ? 'false' : 'true');
+  });
+  const el = sceneEls[idx];
+  el._anims.forEach(a => {
+    let p = clamp((local - a.at) / a.d);
+    if (rm) p = local >= a.at ? 1 : 0; else if (!a.lin) p = ease(p);
+    a.n.style.setProperty('--p', p.toFixed(4));
+  });
+  /* captions */
+  const cs = el._caps; let cur = -1;
+  cs.forEach((c, k) => { if (local >= c.at) cur = k; });
+  cs.forEach((c, k) => {
+    let q = 0, x = 0, vis = false;
+    if (k === cur) { vis = true; q = rm ? 1 : ease(clamp((local - c.at) / CAP_IN)); }
+    else if (k === cur - 1 && !rm) { const d = local - cs[cur].at; if (d < CAP_OUT) { vis = true; q = 1; x = d / CAP_OUT; } }
+    c.n.style.visibility = vis ? 'visible' : 'hidden';
+    c.n.style.setProperty('--q', q.toFixed(4)); c.n.style.setProperty('--x', x.toFixed(4));
+  });
+  return idx;
+}
+window.__render = t => { render(t, { deterministic: true }); return true; };
+window.__total = () => total;
+
+if (isRender) {
+  $('cover').remove();
+  render(0, { deterministic: true });
+} else {
+  /* ---------- interactive player ---------- */
+  const audio = $('vo');
+  const SFX = { whoosh: 'assets/sfx-whoosh.mp3', tick: 'assets/sfx-tick.mp3', chime: 'assets/sfx-chime.mp3' };
+  const sfxVol = { whoosh: .35, tick: .35, chime: .3 };
+  const st = { t: 0, idx: 0, playing: false, sound: true, sfx: true, audioOk: true, last: 0, prevT: 0 };
+  let cues = sfxCues();
+  audio.addEventListener('error', () => { st.audioOk = false; $('note').textContent = 'تعذّر تحميل ملف الصوت، فيعمل العرض دون صوت.'; });
+  function playSfx(k) { if (!st.sound || !st.sfx) return; try { const a = new Audio(SFX[k]); a.volume = sfxVol[k]; a.play().catch(() => {}); } catch (e) {} }
+
+  const prog = $('prog');
+  SCENES.forEach((s, i) => {
+    const b = document.createElement('button'); b.type = 'button';
+    b.setAttribute('aria-label', 'انتقل إلى المشهد ' + (i + 1) + ': ' + s.title);
+    b.innerHTML = '<i></i>'; b.onclick = () => goTo(i); prog.appendChild(b);
+  });
+  const segs = [...prog.children];
+
+  function syncUi() {
+    $('nowTitle').textContent = SCENES[st.idx].title;
+    $('nowNum').textContent = 'المشهد ' + (st.idx + 1) + ' من ' + SCENES.length;
+    $('prev').disabled = st.idx === 0; $('next').disabled = st.idx === SCENES.length - 1;
+    $('play').setAttribute('aria-label', st.playing ? 'إيقاف مؤقت' : 'تشغيل');
+    $('playIco').innerHTML = st.playing ? ICONS.pause : ICONS.play;
+    $('soundIco').innerHTML = st.sound ? ICONS.vol : ICONS.volOff;
+    $('sound').setAttribute('aria-pressed', st.sound);
+    $('sound').setAttribute('aria-label', st.sound ? 'الصوت مفعّل، اضغط للكتم' : 'الصوت مكتوم، اضغط للتفعيل');
+  }
+  function goTo(i) {
+    st.idx = Math.max(0, Math.min(SCENES.length - 1, i)); st.t = starts[st.idx]; st.prevT = st.t;
+    if (st.playing && st.sound && st.audioOk) audio.currentTime = st.t;
+    syncUi();
+  }
+  function play() {
+    if (st.t >= total - 0.05) { st.t = 0; st.idx = 0; }
+    st.playing = true; st.prevT = st.t;
+    if (st.sound && st.audioOk) { audio.currentTime = st.t; audio.play().catch(() => { st.sound = false; $('note').textContent = 'لم يسمح المتصفح بتشغيل الصوت، فيستمر العرض دونه والنص ظاهر.'; syncUi(); }); }
+    syncUi();
+  }
+  function pause() { st.playing = false; audio.pause(); syncUi(); }
+  function loop(now) {
+    const dt = st.last ? Math.min(0.1, (now - st.last) / 1000) : 0; st.last = now;
+    if (st.playing) {
+      if (st.sound && st.audioOk && !audio.paused) st.t = audio.currentTime; else st.t += dt;
+      if (st.t >= total) { st.t = total - 0.001; pause(); $('note').textContent = 'انتهت الحكاية. يمكنك العودة من البداية.'; }
+      st.idx = sceneAt(st.t);
+      cues.forEach(c => { if (c.t > st.prevT && c.t <= st.t) playSfx(c.k); });
+    } else {
+      st.t = Math.min(st.t + dt, starts[st.idx] + SCENES[st.idx].dur - 0.001);
+    }
+    st.prevT = st.t;
+    const before = shown; render(st.t); if (shown !== before) syncUi();
+    segs.forEach((b, i) => b.firstChild.style.setProperty('--f', clamp((st.t - starts[i]) / SCENES[i].dur)));
+    requestAnimationFrame(loop);
+  }
+  function start(auto) {
+    $('cover').remove(); $('chrome').hidden = false; st.t = 0; st.idx = 0; st.sound = auto;
+    syncUi(); requestAnimationFrame(loop);
+    if (auto) play();
+    $('play').focus();
+  }
+  $('startManual').onclick = () => start(false);
+  $('startAuto').onclick = () => start(true);
+  $('prev').onclick = () => goTo(st.idx - 1);
+  $('next').onclick = () => goTo(st.idx + 1);
+  $('play').onclick = () => st.playing ? pause() : play();
+  $('restart').onclick = () => { goTo(0); $('note').textContent = ''; };
+  $('sound').onclick = () => {
+    st.sound = !st.sound;
+    if (!st.sound) audio.pause(); else if (st.playing && st.audioOk) { audio.currentTime = st.t; audio.play().catch(() => {}); }
+    syncUi();
+  };
+  document.addEventListener('keydown', e => {
+    if (!$('panel').hidden) { if (e.key === 'Escape') closePanel(); return; }
+    if ($('chrome').hidden || e.target.closest('input,textarea')) return;
+    if (e.key === 'ArrowLeft') { e.preventDefault(); goTo(st.idx + 1); }       // RTL: اليسار = التالي
+    else if (e.key === 'ArrowRight') { e.preventDefault(); goTo(st.idx - 1); }
+    else if (e.key === ' ' && !e.target.closest('button')) { e.preventDefault(); st.playing ? pause() : play(); }
+    else if (e.key === 'Home') { e.preventDefault(); goTo(0); }
+    else if (e.key === 'End') { e.preventDefault(); goTo(SCENES.length - 1); }
+  });
+
+  /* ---------- panel ---------- */
+  const voText = $('voText');
+  voText.value = VO.join('\n\n');
+  let lastFocus = null;
+  function openPanel() { lastFocus = document.activeElement; $('panel').hidden = false; $('closePanel').focus(); }
+  function closePanel() { $('panel').hidden = true; lastFocus?.focus(); }
+  $('openPanel').onclick = openPanel; $('closePanel').onclick = closePanel;
+  $('copy').onclick = () => {
+    const done = () => $('copyMsg').textContent = 'نُسخ النص.';
+    const fail = () => { voText.focus(); voText.select(); $('copyMsg').textContent = 'تعذّر النسخ التلقائي. النص محدّد الآن، انسخه يدويًا.'; };
+    try { navigator.clipboard.writeText(voText.value).then(done, fail); } catch (e) { fail(); }
+  };
+  $('safeToggle').onchange = e => { $('safe').hidden = !e.target.checked; };
+  $('sfxToggle').onchange = e => { st.sfx = e.target.checked; };
+  const times = $('times');
+  function buildTimes() {
+    times.innerHTML = '';
+    SCENES.forEach((s, i) => {
+      const id = 'dur' + i;
+      times.insertAdjacentHTML('beforeend', '<label for="' + id + '">' + String(i + 1).padStart(2, '0') + ' · ' + s.title + '</label><input id="' + id + '" type="number" min="4" max="90" step="0.1" value="' + s.dur + '">');
+      times.lastChild.oninput = e => { const v = parseFloat(e.target.value); if (v >= 4) { s.dur = v; computeTimeline(); cues = sfxCues(); saveDurs(); showTotal(); goTo(st.idx); } };
+    });
+    showTotal();
+  }
+  function showTotal() { const m = Math.floor(total / 60), s = (total % 60).toFixed(1); $('totalTime').textContent = 'المجموع: ' + m + ':' + s.padStart(4, '0'); }
+  function saveDurs() { try { localStorage.setItem('bs916-durs', JSON.stringify(SCENES.map(s => s.dur))); } catch (e) {} }
+  $('resetTimes').onclick = () => { SCENES.forEach((s, i) => s.dur = DEFAULT_DURS[i]); computeTimeline(); cues = sfxCues(); saveDurs(); buildTimes(); goTo(st.idx); };
+  buildTimes();
+  render(0);
+}
+</script>
