@@ -1,7 +1,8 @@
 <!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;background:#000}canvas{display:block}</style></head><body>
 <canvas id="c" width="1080" height="1920"></canvas>
 <script>
-const W=1080,H=1920,cv=document.getElementById('c'),ctx=cv.getContext('2d');
+const W=1080,H=1920,cv=document.getElementById('c'),MAIN=cv.getContext('2d');let ctx=MAIN;
+const mkC=()=>{const c=document.createElement('canvas');c.width=W;c.height=H;return c};const CA=mkC(),CB=mkC();
 const FONT='Inter, "Inter Display", Arial, sans-serif';
 const GOLD='#ffc233',ORANGE='#ff5a1f',CYAN='#2ee6d6',PINK='#ff3d81',WHITE='#ffffff',GRAY='#7b84a3';
 const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
@@ -15,8 +16,7 @@ const mix=(a,b,t)=>{const A=hex(a),B=hex(b);return `rgb(${A.map((v,i)=>Math.roun
 const SC=[0,7,17,30,42,54,63,70];
 // background keyframes [time, top, bottom]
 const BG=[[0,'#12040a','#2a0a0a'],[7,'#07102b','#0b1f4a'],[17,'#031a1c','#052f33'],[30,'#140a33','#2a0f55'],[42,'#0a0a0a','#2b0f08'],[54,'#0b0b12','#0b0b12'],[63,'#07102b','#1a1240'],[70,'#07102b','#1a1240']];
-function bg(t){let i=0;while(i<BG.length-2&&t>=BG[i+1][0])i++;const a=BG[i],b=BG[i+1];const k=E.io(prog(t,b[0]-1.2,b[0]+0.2));const k2=t<b[0]-1.2?0:k;
- const g=ctx.createLinearGradient(0,0,W*0.3,H);g.addColorStop(0,mix(a[1],b[1],k2));g.addColorStop(1,mix(a[2],b[2],k2));ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}
+function bg(i){const a=BG[i];const g=ctx.createLinearGradient(0,0,W*0.3,H);g.addColorStop(0,a[1]);g.addColorStop(1,a[2]);ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}
 function glow(x,y,r,col,a){const g=ctx.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,col);g.addColorStop(1,'rgba(0,0,0,0)');ctx.globalAlpha=a;ctx.fillStyle=g;ctx.fillRect(x-r,y-r,2*r,2*r);ctx.globalAlpha=1}
 function embers(t,col){ctx.save();for(let i=0;i<60;i++){const sp=40+rnd(i)*120,x0=rnd(i+9)*W,y=((rnd(i+3)*H*2-sp*t)%(H+100)+(H+100))%(H+100)-50;const x=x0+Math.sin(t*.8+i)*30;const a=.15+.5*rnd(i+5);ctx.globalAlpha=a*(0.5+0.5*Math.sin(t*2+i));ctx.fillStyle=col;ctx.beginPath();ctx.arc(x,y,1.5+rnd(i+7)*3.5,0,7);ctx.fill()}ctx.restore();}
 const beat=t=>{const p=(t%0.5)/0.5;return Math.exp(-p*5)}; // 120bpm pulse
@@ -163,19 +163,65 @@ function S7(t){// 63-70 CTA
   const c=E.out(prog(t,5.0,5.7));ctx.save();ctx.globalAlpha=c;ctx.translate(W/2-40,1380+(1-c)*40);ctx.fillStyle=GOLD;rr(-300,-60,600,120,60);ctx.fill();T('FOLLOW FOR DAILY FUEL',0,2,40,{c:'#1a1030',w:900,ls:1});ctx.restore();}
 }
 const FN=[S1,S2,S3,S4,S5,S6,S7];
-function wipe(t){for(let i=1;i<SC.length-1;i++){const B=SC[i];const p=prog(t,B-.3,B+.3);if(p>0&&p<1){const x=lerp(-W*1.6,W*1.6,E.io(p));ctx.save();ctx.fillStyle=[GOLD,CYAN,PINK,ORANGE,GOLD,CYAN][i-1];ctx.beginPath();ctx.moveTo(x-W*.8+260,0);ctx.lineTo(x+W*.8+260,0);ctx.lineTo(x+W*.8-260,H);ctx.lineTo(x-W*.8-260,H);ctx.fill();ctx.restore()}}}
-function draw(t){ctx.clearRect(0,0,W,H);bg(t);
- // vignette pulse
- let s=0;for(let i=0;i<SC.length-1;i++)if(t>=SC[i]&&t<SC[i+1]){s=i;break}
- if(t>=SC[SC.length-1])s=6;
- if(s!=0&&s!=4&&s!=6)embers(t,'#ffffff');
- const lt=t-SC[s];FN[s](lt);
- wipe(t);
+// ---------- transitions ----------
+// each cut gets its own transition; p=0..1 over [B-PRE, B+POST], p=.5 lands on the audio hit at B
+const PRE=.45,POST=.45;
+function renderScene(i,t,c){ctx=c.getContext('2d');ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=1;ctx.filter='none';ctx.globalCompositeOperation='source-over';
+ bg(i);if(i!=0&&i!=4&&i!=6)embers(t,'#ffffff');FN[i](Math.max(0,t-SC[i]));ctx=MAIN;return c}
+const ss=x=>x*x*(3-2*x);
+function flash(a,col='#ffffff'){if(a<=0.003)return;MAIN.save();MAIN.globalAlpha=clamp(a);MAIN.fillStyle=col;MAIN.fillRect(0,0,W,H);MAIN.restore()}
+function zoomed(img,s,blur=0,a=1,dx=0,dy=0){const m=MAIN;m.save();m.globalAlpha=a;if(blur>.5)m.filter=`blur(${blur}px)`;m.translate(W/2+dx,H/2+dy);m.scale(s,s);m.drawImage(img,-W/2,-H/2);m.restore()}
+const TR=[
+ // 7s  ZOOM PUNCH: push into A, white-hot flash, B slams back from oversize
+ function(p,A,B){const m=MAIN;if(p<.5){const q=E.in(p*2);zoomed(A,1+q*1.1,q*22)}else{const q=E.out((p-.5)*2);zoomed(B,lerp(1.35,1,q),(1-q)*18)}
+  // radial speed lines
+  const k=Math.sin(Math.PI*p);m.save();m.globalAlpha=k*.6;m.strokeStyle=GOLD;m.lineCap='round';for(let i=0;i<46;i++){const an=rnd(i)*6.283,r0=200+rnd(i+1)*300+p*500,len=150+rnd(i+2)*500*k;m.lineWidth=2+rnd(i+3)*6;m.beginPath();m.moveTo(W/2+Math.cos(an)*r0,H/2+Math.sin(an)*r0);m.lineTo(W/2+Math.cos(an)*(r0+len),H/2+Math.sin(an)*(r0+len));m.stroke()}m.restore();
+  flash(Math.exp(-Math.abs(p-.5)*16)*.95,'#fff3d6')},
+ // 17s GLITCH SLICE: horizontal strips tear sideways with RGB split, strips flip to B
+ function(p,A,B){const m=MAIN;const amp=Math.sin(Math.PI*p);const f=Math.floor(p*40);let y=0,j=0;
+  m.fillStyle='#000';m.fillRect(0,0,W,H);
+  while(y<H){const h=24+Math.floor(rnd(j*3+f*.0+1)*150);const useB=rnd(j*7+3)<ss(clamp((p-.25)/.5));const img=useB?B:A;const dx=(rnd(j*11+f*13)-.5)*2*amp*W*.35*(rnd(j+f)>.35?1:.15);
+   m.drawImage(img,0,y,W,h,dx,y,W,h);
+   if(amp>.15&&rnd(j*5+f)>.55){m.save();m.globalCompositeOperation='screen';m.globalAlpha=.5*amp;m.fillStyle=rnd(j+f*3)>.5?CYAN:PINK;m.fillRect(dx+(rnd(j)-.5)*80,y,W,h*.4);m.restore()}
+   y+=h;j++}
+  // scanlines + RGB ghost
+  m.save();m.globalAlpha=.25*amp;m.globalCompositeOperation='screen';m.drawImage(p<.5?A:B,24*amp,0);m.restore();
+  m.save();m.globalAlpha=.18*amp;m.fillStyle='#000';for(let yy=0;yy<H;yy+=6)m.fillRect(0,yy,W,2);m.restore();
+  flash(Math.exp(-Math.abs(p-.5)*30)*.5,CYAN)},
+ // 30s IRIS: B opens through a growing circle trimmed with neon rings
+ function(p,A,B){const m=MAIN;zoomed(A,1+.12*E.in(p),E.in(p)*8);const R=Math.hypot(W,H)/2+40;const q=E.io(prog(p,.12,.88));const r=q*R;
+  if(r>1){m.save();m.beginPath();m.arc(W/2,H/2,r,0,7);m.clip();zoomed(B,lerp(1.3,1,q));m.restore();
+   const a=Math.sin(Math.PI*q);m.save();m.shadowBlur=40;m.lineWidth=18;m.strokeStyle=CYAN;m.shadowColor=CYAN;m.globalAlpha=a;m.beginPath();m.arc(W/2,H/2,r,0,7);m.stroke();
+   m.lineWidth=6;m.strokeStyle='#b48cff';m.shadowColor='#7a3cff';m.beginPath();m.arc(W/2,H/2,Math.max(0,r-60),0,7);m.stroke();m.restore()}},
+ // 42s SHUTTER: staggered colour bars slam shut over A, then open onto B
+ function(p,A,B){const m=MAIN;const N=7,bw=W/N,cols=[PINK,ORANGE,GOLD,ORANGE,PINK,ORANGE,GOLD];
+  m.drawImage(p<.5?A:B,0,0);if(p>=.5)zoomed(B,lerp(1.12,1,E.out((p-.5)*2)));
+  for(let i=0;i<N;i++){const d=Math.abs(i-(N-1)/2)/((N-1)/2)*.22;let h;
+   if(p<.5){h=E.io(prog(p,d,.5))}else{h=1-E.io(prog(p,.5+(.22-d),1))}
+   if(h<=0)continue;const fromTop=i%2==0;m.fillStyle=cols[i];
+   if(p<.5){fromTop?m.fillRect(i*bw-1,0,bw+2,H*h):m.fillRect(i*bw-1,H*(1-h),bw+2,H*h)}else{fromTop?m.fillRect(i*bw-1,H*(1-h),bw+2,H*h):m.fillRect(i*bw-1,0,bw+2,H*h)}}
+  flash(Math.exp(-Math.abs(p-.5)*24)*.35)},
+ // 54s WHIP PAN: fast lateral swipe with motion-blur ghosting into the drop
+ function(p,A,B){const m=MAIN;const x=E.io(p)*W;const sp=Math.sin(Math.PI*p);m.fillStyle='#000';m.fillRect(0,0,W,H);
+  const n=1+Math.round(sp*7);for(let k=0;k<n;k++){const o=(k/(n||1))*sp*260;m.globalAlpha=k==0?1:.22;m.drawImage(A,-x+o,0);m.drawImage(B,W-x+o,0)}m.globalAlpha=1;
+  // streaks
+  m.save();m.globalAlpha=sp*.5;for(let i=0;i<30;i++){const y=rnd(i)*H,len=300+rnd(i+1)*700;m.fillStyle=i%3?WHITE:GOLD;m.fillRect(((rnd(i+2)*W*2-x*2.2)%(W+len)+W+len)%(W+len)-len,y,len,2+rnd(i+3)*5)}m.restore()},
+ // 63s TILE FLIP: grid of tiles flips from the centre outward, revealing B
+ function(p,A,B){const m=MAIN;const cs=120,cx=W/cs,cy=H/cs;m.fillStyle='#07060f';m.fillRect(0,0,W,H);const md=Math.hypot(cx/2,cy/2);
+  for(let gx=0;gx<cx;gx++)for(let gy=0;gy<cy;gy++){const d=Math.hypot(gx+.5-cx/2,gy+.5-cy/2)/md;const q=prog(p,d*.55,d*.55+.45);const img=q<.5?A:B;const s=Math.abs(Math.cos(q*Math.PI));
+   const X=gx*cs,Y=gy*cs;m.save();m.translate(X+cs/2,Y+cs/2);m.scale(Math.max(.001,s),1);m.drawImage(img,X,Y,cs,cs,-cs/2,-cs/2,cs+1,cs+1);
+   if(q>0&&q<1){m.globalAlpha=(1-s)*.8;m.fillStyle=GOLD;m.fillRect(-cs/2,-cs/2,cs,cs)}m.restore()}}
+];
+function draw(t){MAIN.setTransform(1,0,0,1,0,0);MAIN.clearRect(0,0,W,H);
+ let s=6;for(let i=0;i<SC.length-1;i++)if(t>=SC[i]&&t<SC[i+1]){s=i;break}
+ let k=-1;for(let i=1;i<SC.length-1;i++)if(t>SC[i]-PRE&&t<SC[i]+POST){k=i;break}
+ if(k<0){renderScene(s,t,CA);MAIN.drawImage(CA,0,0)}
+ else{const p=(t-(SC[k]-PRE))/(PRE+POST);TR[k-1](p,renderScene(k-1,t,CA),renderScene(k,t,CB))}
  // top progress
- ctx.fillStyle='#ffffff22';ctx.fillRect(60,70,W-120,8);ctx.fillStyle=GOLD;ctx.fillRect(60,70,(W-120)*clamp(t/70),8);
+ MAIN.fillStyle='#ffffff22';MAIN.fillRect(60,70,W-120,8);MAIN.fillStyle=GOLD;MAIN.fillRect(60,70,(W-120)*clamp(t/70),8);
  // vignette
- const v=ctx.createRadialGradient(W/2,H/2,H*.35,W/2,H/2,H*.75);v.addColorStop(0,'rgba(0,0,0,0)');v.addColorStop(1,'rgba(0,0,0,.55)');ctx.fillStyle=v;ctx.fillRect(0,0,W,H);
+ const v=MAIN.createRadialGradient(W/2,H/2,H*.35,W/2,H/2,H*.75);v.addColorStop(0,'rgba(0,0,0,0)');v.addColorStop(1,'rgba(0,0,0,.55)');MAIN.fillStyle=v;MAIN.fillRect(0,0,W,H);
  // fade in/out
- const fi=1-clamp(t/.3),fo=clamp((t-69.6)/.4);ctx.fillStyle=`rgba(0,0,0,${Math.max(fi,fo)})`;ctx.fillRect(0,0,W,H);}
+ const fi=1-clamp(t/.3),fo=clamp((t-69.6)/.4);MAIN.fillStyle=`rgba(0,0,0,${Math.max(fi,fo)})`;MAIN.fillRect(0,0,W,H);}
 window.draw=draw;document.fonts.load('900 100px Inter').then(()=>document.fonts.load('500 100px Inter')).then(()=>{window.ready=true});
 </script></body></html>
