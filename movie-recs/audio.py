@@ -63,6 +63,65 @@ add(50.95, impact(), 0.45)
 for i in range(5): add(51.9 + i * 0.13, chime(1046.5 * 2 ** (i * 2 / 12)), 0.05)
 add(56.2, impact(), 0.3)
 
+# ---- second pass: sounds for the new icons, lights and props ----
+def pop():
+    t = t_(0.12); f = 380 + 900 * t / 0.12
+    return np.sin(2 * np.pi * np.cumsum(f) / sr) * np.exp(-t * 30)
+def tick():
+    t = t_(0.03); return lp(rng.standard_normal(len(t)), 3) * np.exp(-t * 180)
+def flip():
+    t = t_(0.18); x = rng.standard_normal(len(t)); x = x - lp(x, 6)
+    return x * np.exp(-t * 22) * (1 + np.sin(2 * np.pi * 38 * t))
+def clink():
+    t = t_(0.5); return sum(np.sin(2 * np.pi * f * t) * np.exp(-t * d) for f, d in ((2300, 9), (3410, 12), (5120, 16))) / 3
+def ding():
+    t = t_(1.2); return (np.sin(2 * np.pi * 1318.5 * t) + 0.5 * np.sin(2 * np.pi * 2637 * t)) * np.exp(-t * 4)
+def buzz(d):
+    t = t_(d); hum = np.sin(2 * np.pi * 100 * t) * 0.6 + np.sin(2 * np.pi * 200 * t) * 0.3
+    crack = (rng.random(len(t)) > 0.9985) * rng.standard_normal(len(t)) * 3
+    return (hum + lp(crack, 4)) * np.minimum(t / 0.05, 1) * np.minimum((d - t) / 0.2, 1).clip(0)
+def scribble(d):
+    t = t_(d); x = rng.standard_normal(len(t)); x = x - lp(x, 4)
+    return x * (0.5 + 0.5 * np.sin(2 * np.pi * 9 * t) ** 2) * np.minimum((d - t) / 0.05, 1).clip(0)
+def thunk():
+    t = t_(0.4); return np.sin(2 * np.pi * 70 * t) * np.exp(-t * 14) + lp(rng.standard_normal(len(t)), 8) * np.exp(-t * 40) * 0.6
+def clatter(d):
+    t = t_(d); x = np.zeros(len(t))
+    for k in range(int(d * 24)):
+        i = int(k / 24 * sr); n = min(300, len(x) - i)
+        x[i:i + n] += rng.standard_normal(n) * np.exp(-np.arange(n) / sr * 400) * (0.6 + 0.4 * (k % 2))
+    return (x - lp(x, 5)) * np.minimum(t / 0.3, 1) * np.minimum((d - t) / 0.4, 1).clip(0)
+def applause(d):
+    t = t_(d); x = np.zeros(len(t))
+    for _ in range(int(d * 55)):
+        i = int(rng.random() * (len(x) - 900)); n = 600
+        x[i:i + n] += rng.standard_normal(n) * np.exp(-np.arange(n) / sr * 260) * rng.uniform(.3, 1)
+    x = lp(x, 2) - lp(x, 30)
+    return x * np.minimum(t / 0.6, 1) * np.minimum((d - t) / 1.0, 1).clip(0)
+
+add(1.85, thunk(), 0.30)                                       # house lights go down
+add(1.9, whoosh(0.7), 0.22)                                    # cat rises in
+add(10.1, riser(0.5), 0.15); add(10.3, whoosh(0.5), 0.35)      # zoom through the "?"
+for k in range(int(1.9 * 6)): add(12.0 + k / 6, tick(), 0.35)  # loading spinner
+add(14.9, pop(), 0.35)                                         # pointing sticker
+add(19.1, clatter(4.2), 0.10)                                  # projector running
+for i in range(1, 5): add(19.8 + i * 0.8, flip(), 0.30)        # calendar pages
+add(23.35, whoosh(0.6), 0.3)                                   # cut to the TV
+for i in range(5): add(23.75 + i * 0.15 + 0.45, pop(), 0.22)   # posters land on the TV
+for a in (27.75, 32.7, 36.95, 41.3, 46.95):
+    add(a + 0.35, tick(), 0.4); add(a + 0.45, flip(), 0.22)    # calendar drops
+    add(a + 0.6, clink(), 0.10)                                # badge clip
+add(30.5, pop(), 0.35); add(32.25, pop(), 0.2)                 # statue sticker in/out
+add(34.2, scribble(0.7), 0.16)                                 # arrow drawn
+add(38.6, ding(), 0.12)                                        # verified badge
+add(43.4, buzz(1.3), 0.10)                                     # neon bulb flickers on
+add(49.1, pop(), 0.35)                                         # thumbs up
+add(52.05, pop(), 0.3); add(52.65, pop(), 0.28)                # statue + ghost
+add(54.2, whoosh(0.5), 0.3)                                    # cat leaves, phone rises
+add(54.6, ding(), 0.08); add(54.78, ding(), 0.06)              # message notification
+add(54.8, scribble(0.7), 0.12)                                 # speech bubble drawn
+add(54.4, applause(3.1), 0.16)                                 # applause at the end
+
 music = np.stack([L, R], 1)
 ir = rng.standard_normal(int(1.8 * sr)) * np.exp(-np.arange(int(1.8 * sr)) / sr * 3.2)
 ir /= np.abs(ir).sum() ** 0.5 * 4
