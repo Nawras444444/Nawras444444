@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>رحلة حبة قهوة</title>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Tajawal:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+  html,body{margin:0;height:100%;background:#0b0705;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;font-family:Tajawal,sans-serif;color:#f5e6d3}
+  canvas{width:min(96vw,170vh);aspect-ratio:16/9;border-radius:10px;box-shadow:0 20px 60px #000}
+  button{font:700 16px Tajawal;padding:10px 26px;border-radius:99px;border:1px solid #d4a24c88;background:#4a3122;color:#f5e6d3;cursor:pointer}
+  body.render button,body.render audio{display:none}
+  body.render canvas{width:1920px;height:1080px;border-radius:0;box-shadow:none}
+</style>
+</head>
+<body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<button id="play">▶ تشغيل</button>
+<audio id="aud" src="final_audio.wav" preload="auto"></audio>
+<script>
+/* ---------- timeline (seconds), synced to the voiceover's pauses ---------- */
+const DUR = 46.5, XF = 0.5;            // total length, crossfade
+const SHOTS = [                          // [start, end, panel, zoomFrom, zoomTo, panX, panY]
+  [0.0,  2.3, 's1_00', 1.00, 1.10,  0.00, -0.02],
+  [2.3,  4.6, 's1_01', 1.12, 1.02,  0.03,  0.00],
+  [4.6,  6.4, 's1_10', 1.02, 1.10, -0.03,  0.00],
+  [6.4,  8.2, 's2_00', 1.10, 1.02,  0.02,  0.01],
+  [8.2, 10.75,'s2_11', 1.00, 1.10,  0.00,  0.03],
+  [10.75,12.8,'s3_00', 1.08, 1.00, -0.03,  0.00],
+  [12.8, 14.7,'s3_10', 1.00, 1.08,  0.02,  0.00],
+  [14.7, 16.5,'s4_01', 1.00, 1.10,  0.00,  0.02],
+  [16.5, 18.3,'s4_10', 1.10, 1.02,  0.03,  0.00],
+  [18.3, 20.1,'s4_21', 1.00, 1.08,  0.00, -0.02],
+  [20.1, 21.6,'s5_01', 1.00, 1.08,  0.02,  0.00],
+  [21.6, 23.1,'s5_11', 1.08, 1.00, -0.02,  0.00],
+  [23.1, 25.1,'s5_21', 1.00, 1.10,  0.00,  0.00],
+  [25.1, 26.8,'s6_01', 1.02, 1.10, -0.04,  0.00],
+  [26.8, 28.5,'s6_10', 1.10, 1.02,  0.03,  0.00],
+  [28.5, 30.2,'s6_11', 1.00, 1.08,  0.03,  0.00],
+  [30.2, 31.9,'s7_00', 1.00, 1.08,  0.00,  0.00],
+  [31.9, 33.6,'s7_01', 1.08, 1.00,  0.00,  0.02],
+  [33.6, 35.3,'s7_11', 1.00, 1.08, -0.02,  0.00],
+  [35.3, 37.0,'s7_20', 1.08, 1.00,  0.02,  0.00],
+  [37.0, 39.5,'s8_00', 1.00, 1.08,  0.02,  0.00],
+  [39.5, 42.0,'s8_11', 1.02, 1.10,  0.00, -0.02],
+  [42.0, DUR, 's1_31', 1.04, 1.14,  0.02,  0.00],   // end card background
+];
+const CHAPTERS = [ // [start, end, label]
+  [0,4.6,'١  المزرعة'],[4.6,10.75,'٢  القطف'],[10.75,14.7,'٣  التجفيف'],[14.7,20.1,'٤  التحميص'],
+  [20.1,25.1,'٥  الطحن والتعبئة'],[25.1,30.2,'٦  السفر'],[30.2,37.0,'٧  الفنجان'],[37.0,42.0,'٨  الخاتمة'],
+];
+const CAPS = [ // [phrase1 start, phrase2 start, end, phrase1, phrase2]
+  [0.05, 2.29, 4.45, 'في أعالي الجبال…', 'تبدأ حكاية رشفة.'],
+  [5.05, 6.50, 10.6, 'حبة صغيرة…', 'تُقطف بعناية، وتحمل تعب موسم كامل.'],
+  [11.0, 13.0, 14.55,'تُجفف تحت الشمس…', 'وتنتظر بصبر.'],
+  [15.1, 17.25,19.95,'ثم تدخل النار…', 'فتتغير رائحتها ولونها.'],
+  [20.55,22.9, 24.95,'تُطحن، تُعبأ…', 'وتبدأ رحلة جديدة.'],
+  [25.5, 27.7, 30.05,'تعبر البحار والمدن…', 'لتصل إلى يدٍ تنتظرها.'],
+  [30.55,31.45,36.85,'هنا…', 'تتحول كل خطوة إلى رائحة، وكل تعب إلى دفء.'],
+  [37.3, 39.45,41.85,'لأن خلف كل رشفة…', 'رحلة تستحق التقدير.'],
+];
+
+/* ---------- helpers ---------- */
+const c = document.getElementById('c'), x = c.getContext('2d');
+const W = 1920, H = 1080, BAR = 96, BH = H - 2*BAR;
+const clamp = (v,a=0,b=1)=>Math.min(b,Math.max(a,v));
+const ease = t => t<.5 ? 2*t*t : 1-Math.pow(-2*t+2,2)/2;
+const lerp = (a,b,t)=>a+(b-a)*t;
+const fade = (t,a,b,d=.4)=>clamp((t-a)/d)*clamp((b-t)/d);
+const IMG = {};
+
+function drawShot(s, t, alpha){
+  const [a,b,key,z0,z1,px,py] = s, img = IMG[key];
+  const p = ease(clamp((t-a)/(b+XF-a)));
+  const z = lerp(z0,z1,p);
+  const cover = Math.max(W/img.width, BH/img.height)*z;
+  const w = img.width*cover, h = img.height*cover;
+  const dx = (W-w)/2 + px*W*(p-.5)*2, dy = BAR + (BH-h)/2 + py*BH*(p-.5)*2;
+  x.save(); x.globalAlpha = alpha;
+  x.beginPath(); x.rect(0,BAR,W,BH); x.clip();
+  x.drawImage(img, dx, dy, w, h);
+  x.restore();
+}
+
+function textShadow(on){ x.shadowColor = on?'rgba(0,0,0,.75)':'transparent'; x.shadowBlur = on?18:0; x.shadowOffsetY = on?3:0; }
+
+function draw(t){
+  x.fillStyle = '#000'; x.fillRect(0,0,W,H);
+  // shots with crossfade (each shot lingers XF after its end, the next fades in over it)
+  for (const s of SHOTS){
+    if (t < s[0] || t > s[1]+XF) continue;
+    const alpha = s[0]===0 ? 1 : clamp((t-s[0])/XF);
+    drawShot(s, t, alpha);
+  }
+  // warm grade + vignette
+  x.save(); x.beginPath(); x.rect(0,BAR,W,BH); x.clip();
+  x.globalCompositeOperation='soft-light'; x.fillStyle='rgba(212,140,60,.18)'; x.fillRect(0,BAR,W,BH);
+  x.globalCompositeOperation='source-over';
+  const vg = x.createRadialGradient(W/2,H/2,BH*.45,W/2,H/2,W*.62);
+  vg.addColorStop(0,'rgba(0,0,0,0)'); vg.addColorStop(1,'rgba(0,0,0,.55)');
+  x.fillStyle=vg; x.fillRect(0,BAR,W,BH);
+  const bg = x.createLinearGradient(0,H-BAR-300,0,H-BAR);
+  bg.addColorStop(0,'rgba(15,8,4,0)'); bg.addColorStop(1,'rgba(15,8,4,.78)');
+  x.fillStyle=bg; x.fillRect(0,H-BAR-300,W,300);
+  x.restore();
+
+  x.direction='rtl';
+  // opening title
+  const ta = fade(t,0.3,4.2,.6);
+  if (ta>0){
+    x.save(); x.globalAlpha=ta; textShadow(true); x.textAlign='center';
+    x.font='700 30px Tajawal'; x.fillStyle='#d4a24c'; x.fillText('فيلم قصير', W/2, 300);
+    x.font='700 120px Amiri'; x.fillStyle='#f5e6d3'; x.fillText('رحلة حبة قهوة', W/2, 420 + (1-ta)*20);
+    x.restore();
+  }
+  // chapter label in top bar
+  for (const [a,b,lab] of CHAPTERS){
+    const al = fade(t,a+.2,b-.1,.35); if(!al) continue;
+    x.save(); x.globalAlpha=al; x.textAlign='right'; x.font='700 30px Tajawal'; x.fillStyle='#d4a24c';
+    x.fillText(lab, W-80, BAR/2+11);
+    x.fillRect(W-80-x.measureText(lab).width-70, BAR/2-1, 50, 2);
+    x.restore();
+  }
+  // captions: phrase 1 then phrase 2 revealed in sync with the voice
+  for (const [s1,s2,e,p1,p2] of CAPS){
+    if (t < s1-.1 || t > e+.4) continue;
+    x.save(); textShadow(true); x.textAlign='right'; x.font='700 58px Tajawal';
+    const gap = 22, w1 = x.measureText(p1).width, w2 = x.measureText(p2).width, tw = w1+gap+w2;
+    const right = W/2 + tw/2, y = H-BAR-62;
+    const out = clamp((e+.4-t)/.4);
+    const a1 = clamp((t-s1)/.35)*out, a2 = clamp((t-s2)/.35)*out;
+    x.globalAlpha=a1; x.fillStyle='#f5e6d3'; x.fillText(p1, right, y + (1-a1)*14);
+    x.globalAlpha=a2; x.fillStyle='#ffd58a'; x.fillText(p2, right-w1-gap, y + (1-a2)*14);
+    x.globalAlpha=a1; x.shadowBlur=0; x.fillStyle='#d4a24c'; x.fillRect(W/2-40, y+30, 80*a1, 4);
+    x.restore();
+  }
+  // end card
+  if (t > 41.6){
+    const ea = clamp((t-41.6)/.9);
+    x.save(); x.fillStyle=`rgba(20,10,5,${.6*ea})`; x.fillRect(0,BAR,W,BH);
+    textShadow(true); x.textAlign='center';
+    const a1 = clamp((t-42.1)/.8), a2 = clamp((t-43.0)/.8);
+    x.globalAlpha=a1; x.font='700 112px Amiri'; x.fillStyle='#f5e6d3';
+    x.fillText('قدّر القهوة… قدّر الجهد.', W/2, H/2+10 + (1-a1)*24);
+    x.shadowBlur=0; x.fillStyle='#d4a24c'; x.fillRect(W/2-120*a1, H/2+55, 240*a1, 4);
+    x.globalAlpha=a2; textShadow(true); x.font='700 38px Tajawal'; x.fillStyle='#d4a24c';
+    x.fillText('رحلة حبة قهوة', W/2, H/2+130);
+    x.restore();
+  }
+  // fade from / to black
+  const k = Math.max(clamp(1-t/.6), clamp((t-(DUR-1.0))/1.0));
+  if (k>0){ x.fillStyle=`rgba(0,0,0,${k})`; x.fillRect(0,0,W,H); }
+}
+
+/* ---------- loading ---------- */
+const keys = [...new Set(SHOTS.map(s=>s[2]))];
+Promise.all([
+  ...keys.map(k=>new Promise((res,rej)=>{const i=new Image(); i.onload=()=>{IMG[k]=i;res()}; i.onerror=rej; i.src='panels/'+k+'.jpg';})),
+  document.fonts.load('700 60px Tajawal'), document.fonts.load('700 60px Amiri'),
+]).then(()=>document.fonts.ready).then(()=>{ draw(0); window.ready = true; });
+
+/* ---------- live player (browser) ---------- */
+if (new URLSearchParams(location.search).has('render')) document.body.classList.add('render');
+const aud = document.getElementById('aud'), btn = document.getElementById('play');
+let raf;
+function loop(){ draw(Math.min(aud.currentTime, DUR)); if(!aud.paused) raf=requestAnimationFrame(loop); }
+btn.onclick = ()=>{ if(aud.paused){ if(aud.ended) aud.currentTime=0; aud.play(); btn.textContent='❚❚ إيقاف'; loop(); } else { aud.pause(); btn.textContent='▶ تشغيل'; } };
+aud.onended = ()=>{ btn.textContent='↻ إعادة'; draw(DUR); };
+</script>
+</body>
+</html>
