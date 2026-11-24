@@ -1,0 +1,527 @@
+[
+ {
+  "type": "bed",
+  "file": "JW Rain",
+  "at": 0,
+  "to_event": "room",
+  "db": -22,
+  "fade_in": 0.8,
+  "fade_out": 0.9
+ },
+ {
+  "type": "bed",
+  "file": "JW Sub Drone",
+  "at": 0,
+  "to_event": "room",
+  "db": -20,
+  "fade_in": 1.5,
+  "fade_out": 1.0,
+  "env": [
+   [
+    0,
+    -3
+   ],
+   [
+    "push.dark",
+    2
+   ],
+   [
+    "hand",
+    0
+   ]
+  ]
+ },
+ {
+  "event": "push.dark",
+  "file": "Whoosh 3",
+  "db": -28,
+  "align": "start",
+  "lp": 3500
+ },
+ {
+  "event": "hand",
+  "file": "Soft Hit",
+  "db": -20,
+  "align": "peak",
+  "pitch": 0.7,
+  "dur": 0.7
+ },
+ {
+  "event": "bloom",
+  "file": "Whoosh 2",
+  "db": -30,
+  "align": "start",
+  "pitch": 0.8,
+  "lp": 3000
+ },
+ {
+  "event": "room",
+  "file": "JW Piano",
+  "db": -15,
+  "align": "start",
+  "dur": 9.45
+ },
+ {
+  "type": "bed",
+  "file": "JW Rain",
+  "event": "room",
+  "to_event": "light.off",
+  "db": -40,
+  "fade_in": 1.0,
+  "fade_out": 0.12,
+  "lp": 2500
+ },
+ {
+  "event": "flicker",
+  "offset": 0,
+  "file": "Synth Shutter",
+  "db": -27,
+  "align": "peak",
+  "pitch": 0.8
+ },
+ {
+  "event": "flicker",
+  "offset": 0.13,
+  "file": "Synth Shutter",
+  "db": -27,
+  "align": "peak",
+  "pitch": 0.9
+ },
+ {
+  "event": "flicker",
+  "offset": 0.27,
+  "file": "Synth Shutter",
+  "db": -27,
+  "align": "peak",
+  "pitch": 1.0
+ },
+ {
+  "event": "flicker",
+  "offset": 0.41,
+  "file": "Synth Shutter",
+  "db": -27,
+  "align": "peak",
+  "pitch": 1.1
+ },
+ {
+  "event": "light.off",
+  "file": "Soft Hit",
+  "db": -22,
+  "align": "peak",
+  "pitch": 0.6,
+  "dur": 0.6
+ },
+ {
+  "type": "bed",
+  "file": "JW Dark Pad",
+  "event": "coin.start",
+  "to": 31.9,
+  "db": -28,
+  "fade_in": 1.5,
+  "fade_out": 0.5,
+  "env": [
+   [
+    "coin.start",
+    -4
+   ],
+   [
+    24.4,
+    0
+   ],
+   [
+    24.6,
+    -14
+   ],
+   [
+    "decision",
+    -6
+   ],
+   [
+    31.0,
+    0
+   ]
+  ]
+ },
+ {
+  "event": "coin.start",
+  "offset": 0.0,
+  "file": "Whoosh 3",
+  "db": -34,
+  "align": "start",
+  "pitch": 1.5,
+  "lp": 6000
+ },
+ {
+  "event": "coin.start",
+  "offset": 2.1,
+  "file": "Whoosh 3",
+  "db": -34,
+  "align": "start",
+  "pitch": 1.5,
+  "lp": 6000
+ },
+ {
+  "event": "coin.start",
+  "offset": 4.2,
+  "file": "Whoosh 3",
+  "db": -34,
+  "align": "start",
+  "pitch": 1.5,
+  "lp": 6000
+ },
+ {
+  "event": "coin.hit",
+  "file": "JW Coin Ring",
+  "db": -9,
+  "align": "start"
+ },
+ {
+  "event": "coin.hit",
+  "file": "JW Impact",
+  "db": -22,
+  "align": "start",
+  "pitch": 1.5,
+  "dur": 1.2
+ },
+ {
+  "event": "coin.hit",
+  "offset": 0.12,
+  "file": "JW Coin Wobble",
+  "db": -15,
+  "align": "start"
+ },
+ {
+  "event": "snap.0",
+  "file": "Riser",
+  "db": -22,
+  "align": "end"
+ },
+ {
+  "event": "snap.0",
+  "file": "JW Pulse",
+  "db": -14,
+  "align": "start",
+  "dur": 13.4
+ },
+ {
+  "event": "snap.0",
+  "file": "Synth Tick",
+  "db": -24,
+  "align": "peak",
+  "pitch": 1.0
+ },
+ {
+  "event": "snap.1",
+  "file": "Synth Tick",
+  "db": -24,
+  "align": "peak",
+  "pitch": 1.04
+ },
+ {
+  "event": "snap.2",
+  "file": "Synth Tick",
+  "db": -24,
+  "align": "peak",
+  "pitch": 1.08
+ },
+ {
+  "event": "snap.3",
+  "file": "Synth Tick",
+  "db": -24,
+  "align": "peak",
+  "pitch": 1.12
+ },
+ {
+  "event": "snap.4",
+  "file": "Synth Tick",
+  "db": -24,
+  "align": "peak",
+  "pitch": 1.16
+ },
+ {
+  "event": "snap.5",
+  "file": "Synth Tick",
+  "db": -24,
+  "align": "peak",
+  "pitch": 1.2
+ },
+ {
+  "event": "snap.6",
+  "file": "Synth Tick",
+  "db": -24,
+  "align": "peak",
+  "pitch": 1.24
+ },
+ {
+  "event": "snap.7",
+  "file": "Synth Tick",
+  "db": -24,
+  "align": "peak",
+  "pitch": 1.28
+ },
+ {
+  "event": "snap.8",
+  "file": "Synth Tick",
+  "db": -24,
+  "align": "peak",
+  "pitch": 1.32
+ },
+ {
+  "event": "snap.9",
+  "file": "Synth Tick",
+  "db": -24,
+  "align": "peak",
+  "pitch": 1.36
+ },
+ {
+  "event": "snap.10",
+  "file": "Synth Tick",
+  "db": -24,
+  "align": "peak",
+  "pitch": 1.4
+ },
+ {
+  "event": "snap.11",
+  "file": "Synth Tick",
+  "db": -24,
+  "align": "peak",
+  "pitch": 1.44
+ },
+ {
+  "event": "fold",
+  "file": "Whoosh 1",
+  "db": -24,
+  "align": "start",
+  "pitch": 1.2
+ },
+ {
+  "event": "pencil.snap",
+  "file": "Synth Shutter",
+  "db": -15,
+  "align": "peak"
+ },
+ {
+  "event": "pencil.snap",
+  "file": "Whoosh 1",
+  "db": -22,
+  "align": "peak",
+  "pitch": 1.4
+ },
+ {
+  "event": "turn",
+  "file": "Whoosh 3",
+  "db": -31,
+  "align": "start",
+  "lp": 5000
+ },
+ {
+  "event": "corridor",
+  "file": "Whoosh 2",
+  "db": -24,
+  "align": "end"
+ },
+ {
+  "type": "bed",
+  "file": "JW Dark Pad",
+  "event": "corridor",
+  "to_event": "stop",
+  "db": -24,
+  "fade_in": 1.0,
+  "fade_out": 0.06,
+  "pitch": 1.0,
+  "env": [
+   [
+    "corridor",
+    -6
+   ],
+   [
+    53.0,
+    2
+   ]
+  ]
+ },
+ {
+  "type": "bed",
+  "file": "JW Sub Drone",
+  "event": "corridor",
+  "to_event": "stop",
+  "db": -24,
+  "fade_in": 2.0,
+  "fade_out": 0.06,
+  "env": [
+   [
+    "corridor",
+    -8
+   ],
+   [
+    54.5,
+    0
+   ]
+  ]
+ },
+ {
+  "event": "flash.0",
+  "file": "JW Drum",
+  "db": -22.0,
+  "align": "start",
+  "pitch": 0.96
+ },
+ {
+  "event": "flash.1",
+  "file": "JW Drum",
+  "db": -21.4,
+  "align": "start",
+  "pitch": 0.966
+ },
+ {
+  "event": "flash.2",
+  "file": "JW Drum",
+  "db": -20.9,
+  "align": "start",
+  "pitch": 0.972
+ },
+ {
+  "event": "flash.3",
+  "file": "JW Drum",
+  "db": -20.4,
+  "align": "start",
+  "pitch": 0.978
+ },
+ {
+  "event": "flash.4",
+  "file": "JW Drum",
+  "db": -19.8,
+  "align": "start",
+  "pitch": 0.984
+ },
+ {
+  "event": "flash.5",
+  "file": "JW Drum",
+  "db": -19.2,
+  "align": "start",
+  "pitch": 0.99
+ },
+ {
+  "event": "flash.6",
+  "file": "JW Drum",
+  "db": -18.7,
+  "align": "start",
+  "pitch": 0.996
+ },
+ {
+  "event": "flash.7",
+  "file": "JW Drum",
+  "db": -18.1,
+  "align": "start",
+  "pitch": 1.002
+ },
+ {
+  "event": "flash.8",
+  "file": "JW Drum",
+  "db": -17.6,
+  "align": "start",
+  "pitch": 1.008
+ },
+ {
+  "event": "flash.9",
+  "file": "JW Drum",
+  "db": -17.1,
+  "align": "start",
+  "pitch": 1.014
+ },
+ {
+  "event": "flash.10",
+  "file": "JW Drum",
+  "db": -16.5,
+  "align": "start",
+  "pitch": 1.02
+ },
+ {
+  "event": "flash.11",
+  "file": "JW Drum",
+  "db": -15.9,
+  "align": "start",
+  "pitch": 1.026
+ },
+ {
+  "event": "flash.12",
+  "file": "JW Drum",
+  "db": -15.4,
+  "align": "start",
+  "pitch": 1.032
+ },
+ {
+  "event": "flash.13",
+  "file": "JW Drum",
+  "db": -14.8,
+  "align": "start",
+  "pitch": 1.038
+ },
+ {
+  "event": "flash.14",
+  "file": "JW Drum",
+  "db": -14.3,
+  "align": "start",
+  "pitch": 1.044
+ },
+ {
+  "event": "lights.off",
+  "offset": 0,
+  "file": "Synth Shutter",
+  "db": -30,
+  "align": "peak",
+  "pitch": 0.7
+ },
+ {
+  "event": "lights.off",
+  "offset": 0.26,
+  "file": "Synth Shutter",
+  "db": -30,
+  "align": "peak",
+  "pitch": 0.7
+ },
+ {
+  "event": "lights.off",
+  "offset": 0.52,
+  "file": "Synth Shutter",
+  "db": -30,
+  "align": "peak",
+  "pitch": 0.7
+ },
+ {
+  "event": "lights.off",
+  "offset": 0.78,
+  "file": "Synth Shutter",
+  "db": -30,
+  "align": "peak",
+  "pitch": 0.7
+ },
+ {
+  "event": "lights.off",
+  "offset": 1.04,
+  "file": "Synth Shutter",
+  "db": -30,
+  "align": "peak",
+  "pitch": 0.7
+ },
+ {
+  "event": "stop",
+  "file": "Riser",
+  "db": -24,
+  "align": "end"
+ },
+ {
+  "event": "light.out",
+  "file": "JW Impact",
+  "db": -14,
+  "align": "start"
+ },
+ {
+  "event": "light.out",
+  "file": "Soft Hit",
+  "db": -19,
+  "align": "peak",
+  "pitch": 0.5,
+  "dur": 0.9
+ }
+]
