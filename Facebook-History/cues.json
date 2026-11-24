@@ -1,0 +1,41 @@
+[
+  {"type": "bed", "file": "Air Bed", "at": 0, "to": 20, "db": -30, "fade_in": 1.0, "fade_out": 1.2, "env": [[0, -4], ["count.end", 2], ["end.tile", 3], [20, -6]]},
+
+  {"event": "tile.pop", "file": "Synth Pop", "db": -14, "align": "peak"},
+  {"event": "flood.1", "file": "Soft Hit", "db": -17, "align": "peak", "pitch": 1.0, "dur": 0.6},
+
+  {"event": "dot.pop", "file": "Synth Pop", "db": -16, "align": "peak", "pitch": 0.8},
+  {"event": "ring.start", "offset": 0.00, "file": "Synth Tick", "db": -24, "align": "peak", "pitch": 0.90},
+  {"event": "ring.start", "offset": 0.09, "file": "Synth Tick", "db": -24, "align": "peak", "pitch": 0.96},
+  {"event": "ring.start", "offset": 0.18, "file": "Synth Tick", "db": -24, "align": "peak", "pitch": 1.02},
+  {"event": "ring.start", "offset": 0.27, "file": "Synth Tick", "db": -24, "align": "peak", "pitch": 1.08},
+  {"event": "ring.start", "offset": 0.36, "file": "Synth Tick", "db": -24, "align": "peak", "pitch": 1.14},
+  {"event": "ring.start", "offset": 0.45, "file": "Synth Tick", "db": -24, "align": "peak", "pitch": 1.20},
+  {"event": "ring.start", "offset": 0.54, "file": "Synth Tick", "db": -24, "align": "peak", "pitch": 1.26},
+  {"event": "ring.start", "offset": 0.63, "file": "Synth Tick", "db": -24, "align": "peak", "pitch": 1.32},
+  {"event": "flood.2", "file": "Soft Hit", "db": -17, "align": "peak", "pitch": 1.1, "dur": 0.6},
+
+  {"event": "grid.start", "file": "Whoosh 2", "db": -30, "align": "start", "dur": 1.4, "lp": 5000},
+  {"event": "flood.3", "file": "Soft Hit", "db": -17, "align": "peak", "pitch": 0.95, "dur": 0.6},
+
+  {"event": "like.pop", "file": "Synth Pop", "db": -12, "align": "peak", "pitch": 1.35},
+  {"event": "like.pop", "file": "Soft Hit", "db": -22, "align": "peak", "pitch": 1.2, "dur": 0.5},
+  {"event": "flood.4", "file": "Soft Hit", "db": -16, "align": "peak", "pitch": 0.9, "dur": 0.6},
+
+  {"event": "count.end", "file": "Riser", "db": -20, "align": "end"},
+  {"event": "count.end", "file": "Soft Hit", "db": -13, "align": "peak", "pitch": 0.85, "dur": 0.8},
+  {"event": "count.end", "offset": 0.02, "file": "Synth Pop", "db": -15, "align": "peak", "pitch": 1.2},
+  {"event": "flood.5", "file": "Soft Hit", "db": -17, "align": "peak", "pitch": 1.05, "dur": 0.6},
+
+  {"event": "tiles.in", "file": "Whoosh 1", "db": -29, "align": "start", "pan": -0.6},
+  {"event": "tiles.in", "file": "Whoosh 1", "db": -29, "align": "start", "pan": 0.6, "pitch": 1.1},
+  {"event": "tuck", "file": "Whoosh 3", "db": -30, "align": "start", "dur": 0.7},
+  {"event": "flood.6", "file": "Soft Hit", "db": -17, "align": "peak", "pitch": 1.0, "dur": 0.6},
+
+  {"event": "roll", "file": "Whoosh 1", "db": -31, "align": "start", "pitch": 1.25, "lp": 5000},
+  {"event": "flood.7", "file": "Soft Hit", "db": -17, "align": "peak", "pitch": 1.15, "dur": 0.6},
+
+  {"event": "end.tile", "file": "Synth Pop", "db": -13, "align": "peak"},
+  {"event": "end.tile", "file": "Soft Hit", "db": -20, "align": "peak", "pitch": 0.8, "dur": 0.8},
+  {"event": "loop", "file": "Soft Hit", "db": -19, "align": "peak", "pitch": 0.9, "dur": 0.6}
+]
