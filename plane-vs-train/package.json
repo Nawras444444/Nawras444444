@@ -1,0 +1,19 @@
+{
+  "name": "plane-vs-train",
+  "private": true,
+  "scripts": {
+    "studio": "remotion studio",
+    "render": "remotion render PlaneVsTrain out/raw.mp4"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.330",
+    "@remotion/google-fonts": "4.0.330",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "remotion": "4.0.330"
+  },
+  "devDependencies": {
+    "@types/react": "18.3.3",
+    "typescript": "5.5.4"
+  }
+}
