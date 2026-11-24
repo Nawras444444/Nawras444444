@@ -1,0 +1,20 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Storyboard</title><style>
+@font-face{font-family:AR;src:url("assets/fonts/NotoKufiArabic-Bold.ttf")}
+@font-face{font-family:UI;src:url("assets/fonts/Inter-Medium.otf")}
+*{box-sizing:border-box}body{margin:0;background:#07080B;color:#eee;font-family:UI,sans-serif}
+.b{width:1920px;padding:34px 30px}h1{margin:0 0 4px;font-size:40px}h1 span{color:#888;font-weight:400}.s{color:#aaa;font-size:17px;margin-bottom:22px}
+.row{display:flex;gap:22px;margin-bottom:26px;align-items:flex-start}.slot{width:160px;flex:none}.slot .n{font-size:30px;font-weight:800}.slot .t{color:#888;font-size:14px}.slot .ar{font-family:AR;direction:rtl;font-size:15px;line-height:1.6;margin-top:8px}
+.cuts{display:flex;gap:14px}.c{width:150px}.f{position:relative;width:150px;height:267px;border-radius:8px;overflow:hidden;background:#111}.f img{width:100%;height:100%;object-fit:cover}
+.lab{position:absolute;left:6px;top:6px;background:#000c;padding:2px 6px;border-radius:4px;font-size:12px}.d{font-size:12.5px;color:#bbb;margin-top:6px;line-height:1.35}.m{color:#D9B45A}.tr{color:#e0566b}
+</style></head><body><div class="b"><h1>John Wick · 30s <span>· 1080×1920 vertical · storyboard</span></h1>
+<div class="s">Your 18 artworks, full screen, each with one slow push. Every cut is a reveal: the next picture grows out of a shape from the subject (red/gold edge ring). Your voice line runs word by word in the lower third. Palette from 01/02: ink, red, gold, violet, white.</div><div id="g"></div></div>
+<script>
+const R=[
+ ['1','0–5s','كان يظن إن الماضي خلص.',[['05','0–1.7','push on the eye'],['17','1.7–3.4','circle from the face'],['11','3.4–5.0','violet edge ring']]],
+ ['2','5–10s','بيت هادئ، وجرو صغير ينام عند قدميه.',[['15','5.0–7.5','slow push, calm'],['06','7.5–10','reveal from the figure; drift up the letters']]],
+ ['3','10–15s','وفي ليلة مطر... أخذوا آخر شي يربطه بالحياة.',[['07','10–11.7','rain over it'],['04','11.7–13.4','red flood'],['20','13.4–15','fast streaks']]],
+ ['4','15–20s','والعملة الذهبية... عهد قديم انكسر.',[['03','15–16.7','logos cropped; gold ring'],['09','16.7–18.4','push to the face'],['19','18.4–20','violet bar sweeps']]],
+ ['5','20–25s','ما يرجع بغضب أعمى... يرجع بدقّة وتركيز.',[['08','20–21.3','pencil point reveal'],['14','21.3–22.6','snap'],['12','22.6–23.8','snap'],['16','23.8–25','snap on the beat']]],
+ ['6','25–30s','مو كل من يمشي بهدوء... ضعيف.',[['13','25–26.6','fire'],['18','26.6–28','push'],['10','28–30','END CARD: line + fan line, no drift']]]];
+document.getElementById('g').innerHTML=R.map(([n,t,ar,cs])=>`<div class="row"><div class="slot"><div class="n">${n}</div><div class="t">${t}</div><div class="ar">${ar}</div></div><div class="cuts">${cs.map(([p,tt,d])=>`<div class="c"><div class="f"><img src="assets/pictures/${p}.jpg"><div class="lab">${p}</div></div><div class="d"><span class="m">${tt}s</span> · ${d}</div></div>`).join('')}</div></div>`).join('');
+</script></body></html>
