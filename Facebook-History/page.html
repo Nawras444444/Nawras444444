@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Facebook history</title>
+<style>
+  @font-face { font-family: UI; src: url("assets/fonts/Inter-Medium.otf"); font-weight: 400; }
+  @font-face { font-family: UI; src: url("assets/fonts/InterDisplay-Bold.otf"); font-weight: 600; }
+  @font-face { font-family: UI; src: url("assets/fonts/InterDisplay-ExtraBold.otf"); font-weight: 800; }
+  html,body{margin:0;background:#000;height:100%} body{display:flex;align-items:center;justify-content:center} canvas{width:min(100vw,calc(100vh*16/9));aspect-ratio:16/9;display:block}
+</style></head><body><canvas id="c"></canvas>
+<script>
+// Facebook history: 20s spec ad, 2D canvas, one flat shape morphing into the next.
+// Page contract: canvas #c, renderAt(t), TOTAL, ready, EVENTS, ?t= (still), ?scale=2 (4K). Spec ad: not affiliated with Facebook.
+
+// ===== BEATS: every time lives here, re-timing is a one-line change =====
+const B = { s1: 0, s2: 1.8, s3: 4.0, s4: 6.4, s5: 8.8, s6: 11.8, s7: 14.6, s8: 17.3, END: 20 };
+const TR = 0.5;                                    // length of each shape-morph transition (it ends exactly on the next beat)
+const COUNT = { from: B.s5 + 0.35, to: B.s5 + 2.3 };   // billion counter runs from 0 to 1,000,000,000
+const TUCK = { from: B.s7 - TR - 0.75, to: B.s7 - TR };  // Instagram + WhatsApp tiles tuck behind the "f"
+const ROLL = { from: B.s7 + 0.6, to: B.s7 + 1.1 };     // "Facebook" rolls out, "Meta" rolls in
+const SHOTS = [B.s1, B.s2, B.s3, B.s4, B.s5, B.s6, B.s7, B.s8, B.END];
+
+const W = 1920, H = 1080, q = new URLSearchParams(location.search), SCALE = parseFloat(q.get('scale') || '1');
+const SUB = parseInt(q.get('sub') || '8', 10), FPS = parseFloat(q.get('fps') || '25'), SHUTTER = 0.5 / FPS;   // sub-frames over a 180-degree shutter
+const C = { blue: '#1877F2', yellow: '#FFC83D', purple: '#7B4DFF', navy: '#0A0B1E', white: '#FFFFFF' };
+const BG = [C.blue, C.yellow, C.purple, C.blue, C.navy, C.yellow, C.purple, C.blue];
+const CX = 960, HY = 620;                          // hero centre: headline sits above it
+
+const cv = document.getElementById('c'); cv.width = W * SCALE; cv.height = H * SCALE; const MAIN = cv.getContext('2d');
+const mk = () => { const c = document.createElement('canvas'); c.width = cv.width; c.height = cv.height; return c; };
+const WORK = mk(), ACC = mk();
+
+// ===== helpers =====
+const clamp01 = v => Math.max(0, Math.min(1, v)), lerp = (a, b, k) => a + (b - a) * k, prog = (t, a, b) => clamp01((t - a) / (b - a));
+const outExpo = k => (k = clamp01(k)) >= 1 ? 1 : 1 - Math.pow(2, -10 * k), outCubic = k => 1 - Math.pow(1 - clamp01(k), 3), outQuart = k => 1 - Math.pow(1 - clamp01(k), 4);
+const inOutCubic = k => { k = clamp01(k); return k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2; };
+const sine = k => 0.5 - 0.5 * Math.cos(Math.PI * clamp01(k));
+const hex = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+const mix = (a, b, k) => { const x = hex(a), y = hex(b); return `rgb(${x.map((v, i) => Math.round(lerp(v, y[i], k))).join(',')})`; };
+const fract = v => v - Math.floor(v), hash = (i, j) => fract(Math.sin(i * 127.1 + j * 311.7) * 43758.5453);
+const squash = (t, ts) => 1 - 0.08 * sine(prog(t, ts - 0.18, ts));   // ~8% anticipation just before a shape grows
+const shotAt = t => { for (let k = 0; k < 8; k++) if (t < SHOTS[k + 1]) return k; return 7; };
+
+function push(g, u, d, amt, cx = CX, cy = HY) {   // one continuous slow push, never reverses; returns its scale
+  const p = 1 + amt * sine(u / d); g.translate(cx, cy); g.scale(p, p); g.translate(-cx, -cy); return p;
+}
+function rrect(g, cx, cy, w, h, r) { g.beginPath(); g.roundRect(cx - w / 2, cy - h / 2, w, h, Math.min(r, w / 2, h / 2)); }
+
+// text: each word fades up from blurred to sharp with a small rise, leaves the same way. Brand font, sentence case.
+function words(g, str, cx, cy, size, weight, color, tIn, tOut, t, o = {}) {
+  const st = o.stagger ?? 0.07, dur = o.dur ?? 0.55, rise = o.rise ?? 26;
+  g.font = `${weight} ${size}px UI`; g.letterSpacing = (-0.03 * size) + 'px'; g.textAlign = 'left'; g.textBaseline = 'alphabetic'; g.fillStyle = color;
+  const ws = str.split(' '), sp = g.measureText(' ').width, wd = ws.map(w => g.measureText(w).width), total = wd.reduce((a, b) => a + b, 0) + sp * (ws.length - 1);
+  let x = cx - total / 2;
+  ws.forEach((w, i) => {
+    const pin = outCubic(prog(t, tIn + i * st, tIn + i * st + dur)), pout = sine(prog(t, tOut + i * st, tOut + i * st + dur * 0.7)), a = pin * (1 - pout);
+    if (a > 0.003) { g.globalAlpha = a; const b = (1 - a) * 14 * SCALE; g.filter = b > 0.3 ? `blur(${b}px)` : 'none'; g.fillText(w, x, cy + (1 - pin) * rise - pout * rise * 0.6); }
+    x += wd[i] + sp;
+  });
+  g.globalAlpha = 1; g.filter = 'none'; g.letterSpacing = '0px';
+}
+const headline = (g, str, k, color, t) => words(g, str, CX, 235, 104, 800, color, SHOTS[k] + 0.12, SHOTS[k + 1] - TR - 0.12, t);
+
+function tile(g, cx, cy, size, fill, fg, ga = 1) {   // the vector "f" tile: our own simple drawing, not an official mark
+  rrect(g, cx, cy, size, size, 0.26 * size); g.fillStyle = fill; g.fill();
+  if (ga > 0.003) { g.globalAlpha = ga; g.fillStyle = fg; g.font = `800 ${size * 0.95}px UI`; g.textAlign = 'center'; g.textBaseline = 'alphabetic'; g.fillText('f', cx + size * 0.035, cy + size * 0.315); g.globalAlpha = 1; }
+}
+
+// the shape-morph: the key object grows (rounded square -> circle), turns into the next shot's colour and floods the frame
+function flood(g, t, tStart, cx, cy, h0, r0, from, to, glyph, mixK = 0.35) {
+  const k = prog(t, tStart, tStart + TR); if (k <= 0) return;
+  const R = Math.hypot(Math.max(cx, W - cx), Math.max(cy, H - cy)) * 1.04, e = inOutCubic(k), h = lerp(h0, R, e);
+  rrect(g, cx, cy, 2 * h, 2 * h, h * lerp(r0, 1, clamp01(e * 1.6))); g.fillStyle = mix(from, to, clamp01(k / mixK)); g.fill();
+  if (glyph) glyph(clamp01(1 - k / 0.28));
+}
+
+// ===== shots =====
+function fGhost(g, cx, cy, size, sc) { return a => { g.save(); g.globalAlpha = a; g.fillStyle = C.blue; g.font = `800 ${size * 0.95 * sc}px UI`; g.textAlign = 'center'; g.textBaseline = 'alphabetic'; g.fillText('f', cx + size * 0.035, cy + size * 0.315 * sc); g.restore(); }; }
+function s1(g, t) {   // 2004. blue frame, the tile rises out of it
+  const k = 0, u = t - B.s1, d = B.s2 - B.s1, ts = B.s2 - TR;
+  g.save(); const p = push(g, u, d, 0.06); const pop = outExpo(prog(u, 0.05, 0.8)), size = 340;
+  if (t < ts) {
+    const sc = pop * squash(t, ts); tile(g, CX, HY, size * sc, C.white, C.blue, clamp01(pop * 1.4));
+    g.globalAlpha = pop * (Math.sin(u * 8) > 0 ? 1 : 0.25); g.fillStyle = C.white; g.beginPath(); g.arc(CX + 270, HY + 70, 14, 0, 7); g.fill(); g.globalAlpha = 1;   // blinking cursor dot
+  }
+  g.restore(); headline(g, '2004.', k, C.white, t);
+  flood(g, t, ts, CX, HY, size / 2 * 0.92 * p, 0.52, C.white, C.yellow, fGhost(g, CX, HY, size, 0.92 * p));
+}
+
+function s2(g, t) {   // Harvard first: one dot, then a ring of campuses at one shared speed
+  const k = 1, u = t - B.s2, d = B.s3 - B.s2, ts = B.s3 - TR;
+  g.save(); const p = push(g, u, d, 0.05);
+  const centre = outExpo(prog(u, 0.05, 0.55)) * squash(t, ts), r = 56 * centre;
+  const collapse = inOutCubic(prog(t, ts - 0.12, ts + 0.3)), rad = 250 * (1 - collapse), ang = 0.5 * u;
+  if (t < ts) {
+    for (let i = 0; i < 8; i++) { const pop = outExpo(prog(u, 0.5 + i * 0.09, 0.95 + i * 0.09)), a = ang + i / 8 * Math.PI * 2; g.fillStyle = C.purple; g.beginPath(); g.arc(CX + Math.cos(a) * rad, HY + Math.sin(a) * rad, 24 * pop * (1 - collapse * 0.4), 0, 7); g.fill(); }
+    g.fillStyle = C.navy; g.beginPath(); g.arc(CX, HY, r, 0, 7); g.fill();
+  }
+  g.restore(); headline(g, 'Harvard first.', k, C.navy, t);
+  flood(g, t, ts, CX, HY, 56 * 0.92 * p, 1, C.navy, C.purple);
+}
+
+function s3(g, t) {   // 2006. the grid of dots fills the frame: everyone
+  const k = 2, u = t - B.s3, d = B.s4 - B.s3, ts = B.s4 - TR;
+  g.save(); const p = push(g, u, d, 0.3);
+  if (t < ts) for (let i = -12; i <= 12; i++) for (let j = -7; j <= 7; j++) {
+    const dist = Math.hypot(i, j * 1.2), pop = outExpo(prog(u, 0.12 + dist * 0.045, 0.62 + dist * 0.045)); if (pop < 0.003) continue;
+    const x = CX + i * 120, y = HY + j * 120, sy = HY + (y - HY) * p, fade = clamp01((sy - 340) / 140); if (fade <= 0.01) continue;
+    const hero = i === 0 && j === 0, col = hero ? C.white : (hash(i, j) > 0.93 ? C.yellow : hash(j, i) > 0.92 ? C.blue : C.white);
+    g.globalAlpha = (hero ? 1 : 0.5 + 0.5 * hash(i + 3, j + 9)) * fade; g.fillStyle = col; g.beginPath(); g.arc(x, y, (hero ? 26 : 13) * pop * (hero ? squash(t, ts) : 1), 0, 7); g.fill();
+  }
+  g.globalAlpha = 1; g.restore(); headline(g, '2006. Open to everyone.', k, C.white, t);
+  flood(g, t, ts, CX, HY, 26 * 0.92 * p, 1, C.white, C.blue);
+}
+
+const THUMB = new Path2D('M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z');
+function s4(g, t) {   // 2009. the Like: a thumbs-up on a yellow disc
+  const k = 3, u = t - B.s4, d = B.s5 - B.s4, ts = B.s5 - TR;
+  g.save(); const p = push(g, u, d, 0.06); const pop = outExpo(prog(u, 0.05, 0.65)), sq = squash(t, ts), R = 138;
+  if (t < ts) {
+    const rp = prog(u, 0.08, 1.1); g.globalAlpha = 0.5 * (1 - rp) * pop; g.strokeStyle = C.white; g.lineWidth = 6; g.beginPath(); g.arc(CX, HY, R + 20 + 230 * outCubic(rp), 0, 7); g.stroke(); g.globalAlpha = 1;
+    g.fillStyle = C.yellow; g.beginPath(); g.arc(CX, HY, R * pop * sq, 0, 7); g.fill();
+    g.save(); g.translate(CX, HY); g.rotate(-0.21 * (1 - sine(u / d * 1.4))); const s = 6.2 * pop * sq; g.scale(s, s); g.translate(-12, -11); g.fillStyle = C.navy; g.fill(THUMB); g.restore();
+  }
+  g.restore(); headline(g, '2009. The Like button.', k, C.white, t);
+  flood(g, t, ts, CX, HY, R * 0.92 * p, 1, C.yellow, C.navy, a => {   // the thumb fades as the disc turns navy and grows
+    g.save(); g.globalAlpha = a; g.translate(CX, HY); const s = 6.2 * 0.92 * p; g.scale(s, s); g.translate(-12, -11); g.fillStyle = C.navy; g.fill(THUMB); g.restore();
+  }, 0.12);
+}
+
+const GLOWS = Array.from({ length: 26 }, (_, i) => ({ x: hash(i, 1) * 2200 - 140, y: hash(i, 2) * 1300 - 110, r: 90 + hash(i, 3) * 150, c: [C.blue, C.purple, C.yellow][i % 3], v: 14 + hash(i, 4) * 26 }));
+const DIG = '1,000,000,000';
+function s5(g, t) {   // 2012. one billion: a counter races up, then slows into the last digits
+  const k = 4, u = t - B.s5, d = B.s6 - B.s5, ts = B.s6 - TR, size = 190;
+  g.save(); const p = push(g, u, d, 0.05);
+  GLOWS.forEach(o => { const a = outExpo(prog(u, 0, 0.9)) * 0.3, x = o.x + o.v * u, gr = g.createRadialGradient(x, o.y, 0, x, o.y, o.r); gr.addColorStop(0, o.c); gr.addColorStop(1, o.c + '00'); g.globalAlpha = a; g.fillStyle = gr; g.fillRect(x - o.r, o.y - o.r, o.r * 2, o.r * 2); });
+  g.globalAlpha = 1;
+  g.font = `800 ${size}px UI`; g.letterSpacing = (-0.03 * size) + 'px'; g.textAlign = 'left'; g.textBaseline = 'alphabetic';
+  const dw = g.measureText('0').width, cw = g.measureText(',').width, cells = DIG.split('').map(c => c === ',' ? cw : dw), total = cells.reduce((a, b) => a + b, 0), x0 = CX - total / 2;
+  const tq = Math.round(t * FPS) / FPS;   // one number per video frame, so motion-blur sub-frames don't smear the digits together
+  const val = Math.round(1e9 * outQuart(prog(tq, COUNT.from, COUNT.to))), s = val.toLocaleString('en-US').padStart(DIG.length, ' ');
+  const gr = g.createLinearGradient(x0, 0, x0 + total, 0); gr.addColorStop(0, '#4DA3FF'); gr.addColorStop(0.5, C.yellow); gr.addColorStop(1, '#9B7CFF'); g.fillStyle = gr;
+  const appear = outCubic(prog(u, 0.05, 0.5)); g.globalAlpha = appear; let x = x0;
+  for (let i = 0; i < s.length; i++) { if (s[i] !== ' ') g.fillText(s[i], x, HY + 40 + (1 - appear) * 24); x += cells[i]; }
+  g.globalAlpha = 1; g.letterSpacing = '0px'; g.restore();
+  headline(g, '2012. One billion people.', k, C.white, t);
+  const zx = CX + total / 2 - dw / 2, zy = HY + 40 - size * 0.36;   // the last zero becomes the circle that floods yellow
+  flood(g, t, ts, CX + (zx - CX) * p, HY + (zy - HY) * p, size * 0.34 * p, 1, C.yellow, C.yellow);
+}
+
+function lens(g, cx, cy, sc) { g.strokeStyle = C.white; g.lineWidth = 15 * sc; g.beginPath(); g.arc(cx, cy, 58 * sc, 0, 7); g.stroke(); g.fillStyle = C.white; g.beginPath(); g.arc(cx, cy, 24 * sc, 0, 7); g.fill(); }
+function bubble(g, cx, cy, sc) { g.fillStyle = C.white; rrect(g, cx, cy - 8 * sc, 150 * sc, 108 * sc, 34 * sc); g.fill(); g.beginPath(); g.moveTo(cx - 44 * sc, cy + 40 * sc); g.lineTo(cx - 62 * sc, cy + 82 * sc); g.lineTo(cx - 4 * sc, cy + 44 * sc); g.closePath(); g.fill(); }
+function s6(g, t) {   // Instagram + WhatsApp: two generic tiles (a lens, a chat bubble) slide in, then tuck behind the "f"
+  const k = 5, u = t - B.s6, d = B.s7 - B.s6, ts = B.s7 - TR;
+  g.save(); const p = push(g, u, d, 0.05);
+  const slide = outExpo(prog(u, 0.1, 0.95)), tuck = inOutCubic(prog(t, TUCK.from, TUCK.to)), off = lerp(1250, 380, slide) * (1 - tuck) + 0, ssz = 270 * (1 - 0.1 * tuck), fpop = outExpo(prog(u, 0.05, 0.6));
+  if (t < ts) {
+    const lx = CX - off, rx = CX + off; rrect(g, lx, HY, ssz, ssz, 0.26 * ssz); g.fillStyle = C.purple; g.fill(); lens(g, lx, HY, ssz / 270);
+    rrect(g, rx, HY, ssz, ssz, 0.26 * ssz); g.fillStyle = C.blue; g.fill(); bubble(g, rx, HY, ssz / 270);
+    tile(g, CX, HY, 300 * fpop * squash(t, ts), C.white, C.blue, clamp01(fpop * 1.3));
+  }
+  g.restore(); words(g, 'Instagram. WhatsApp.', CX, 235, 104, 800, C.navy, B.s6 + 0.55, B.s7 - TR - 0.12, t, { stagger: 0.6 });
+  flood(g, t, ts, CX, HY, 150 * 0.92 * p, 0.52, C.white, C.purple, fGhost(g, CX, HY, 300, 0.92 * p));
+}
+
+function rollWord(g, str, size, yBase, a, dy, blur, color) {
+  if (a <= 0.003) return; g.globalAlpha = a; g.filter = blur > 0.3 ? `blur(${blur * SCALE}px)` : 'none'; g.font = `800 ${size}px UI`; g.letterSpacing = (-0.03 * size) + 'px'; g.textAlign = 'center'; g.textBaseline = 'alphabetic'; g.fillStyle = color; g.fillText(str, CX, yBase + dy);
+  g.globalAlpha = 1; g.filter = 'none'; g.letterSpacing = '0px';
+}
+function s7(g, t) {   // 2021. the name rolls: "Facebook" up and out, "Meta" in from below
+  const k = 6, u = t - B.s7, d = B.s8 - B.s7, ts = B.s8 - TR;
+  g.save(); const p = push(g, u, d, 0.05);
+  const fIn = outCubic(prog(u, 0.05, 0.5)), roll = sine(prog(t, ROLL.from, ROLL.to)), mIn = outCubic(prog(t, ROLL.from + 0.3, ROLL.to + 0.15)), shrink = sine(prog(t, ts - 0.3, ts - 0.04));
+  if (t < ts) {
+    rollWord(g, 'Facebook', 190, HY + 70, fIn * (1 - clamp01(roll * 1.5)), -150 * roll + (1 - fIn) * 30, roll * 14, C.white);   // fades out fast so it never collides with "Meta"
+    rollWord(g, 'Meta', 260 * (1 - 0.45 * shrink), HY + 95 - 20 * shrink, mIn * (1 - shrink), (1 - mIn) * 160, (1 - mIn) * 14, C.white);   // shrinks into the tile that pops in next
+  }
+  words(g, 'The app keeps its name.', CX, HY + 250, 50, 400, 'rgba(255,255,255,.88)', ROLL.to + 0.05, ts - 0.3, t, { rise: 18 });
+  const pop = outExpo(prog(t, ts - 0.14, ts)); if (pop > 0) tile(g, CX, HY, 340 * pop * squash(t, ts), C.white, C.blue, clamp01(pop * 1.4));
+  g.restore(); headline(g, '2021. Now Meta.', k, C.white, t);
+  flood(g, t, ts, CX, HY, 170 * 0.92 * p, 0.52, C.white, C.blue, fGhost(g, CX, HY, 340, 0.92 * p));
+}
+
+function s8(g, t) {   // end card, dead centre, no camera drift; then the tile melts back into blue so it loops into shot 1
+  const k = 7, u = t - B.s8, ts = B.END - TR, size = 340, cy = 560;
+  const pop = outExpo(prog(u, 0.05, 0.75)), pulse = 0.5 + 0.5 * Math.sin(u * 2.4);
+  if (t < ts) {
+    const gr = g.createRadialGradient(CX, cy, 120, CX, cy, 520); gr.addColorStop(0, 'rgba(255,200,61,' + (0.16 + 0.1 * pulse) * pop + ')'); gr.addColorStop(1, 'rgba(255,200,61,0)'); g.fillStyle = gr; g.fillRect(0, 0, W, H);
+    tile(g, CX, cy, size * pop * squash(t, ts), C.white, C.blue, clamp01(pop * 1.4));
+  }
+  words(g, 'Keep scrolling.', CX, 235, 104, 800, C.white, B.s8 + 0.12, B.END - TR - 0.35, t);
+  words(g, 'Spec ad. Not affiliated with Facebook.', CX, 985, 34, 400, 'rgba(255,255,255,.85)', B.s8 + 0.9, B.END - TR - 0.3, t, { stagger: 0.05 });
+  flood(g, t, ts, CX, cy, size / 2 * 0.92, 0.52, C.white, C.blue, fGhost(g, CX, cy, size, 0.92));
+}
+const DRAW = [s1, s2, s3, s4, s5, s6, s7, s8];
+
+function scene(g, t) {
+  const k = shotAt(t); g.fillStyle = BG[k]; g.fillRect(0, 0, W, H); DRAW[k](g, t);
+}
+function render(t) {
+  const A = ACC.getContext('2d'); A.setTransform(1, 0, 0, 1, 0, 0); A.globalAlpha = 1; A.clearRect(0, 0, ACC.width, ACC.height);
+  for (let i = 0; i < SUB; i++) {
+    const ts = SUB === 1 ? t : Math.max(0, Math.min(B.END - 1e-3, t + (i / (SUB - 1) - 0.5) * SHUTTER)), g = WORK.getContext('2d');
+    g.setTransform(SCALE, 0, 0, SCALE, 0, 0); g.globalAlpha = 1; g.filter = 'none'; scene(g, ts);
+    A.globalAlpha = 1 / (i + 1); A.drawImage(WORK, 0, 0);
+  }
+  MAIN.setTransform(1, 0, 0, 1, 0, 0); MAIN.globalAlpha = 1; MAIN.drawImage(ACC, 0, 0);
+}
+
+// beats for sound sync: [{name, t}]
+window.EVENTS = [
+  { name: 'tile.pop', t: B.s1 + 0.2 }, { name: 'flood.1', t: B.s2 - TR + 0.15 }, { name: 'dot.pop', t: B.s2 + 0.1 }, { name: 'ring.start', t: B.s2 + 0.5 }, { name: 'flood.2', t: B.s3 - TR + 0.15 },
+  { name: 'grid.start', t: B.s3 + 0.15 }, { name: 'flood.3', t: B.s4 - TR + 0.15 }, { name: 'like.pop', t: B.s4 + 0.1 }, { name: 'flood.4', t: B.s5 - TR + 0.15 },
+  { name: 'count.start', t: COUNT.from }, { name: 'count.end', t: COUNT.to }, { name: 'flood.5', t: B.s6 - TR + 0.15 }, { name: 'tiles.in', t: B.s6 + 0.1 }, { name: 'tuck', t: TUCK.from },
+  { name: 'flood.6', t: B.s7 - TR + 0.15 }, { name: 'roll', t: ROLL.from }, { name: 'flood.7', t: B.s8 - TR + 0.15 }, { name: 'end.tile', t: B.s8 + 0.15 }, { name: 'loop', t: B.END - TR + 0.15 }, { name: 'end', t: B.END }
+];
+window.TOTAL = B.END; window.renderAt = t => render(t);
+window.ready = Promise.all(['400 40px UI', '600 40px UI', '800 40px UI'].map(f => document.fonts.load(f))).catch(() => {}).then(() => { if (q.has('t')) render(parseFloat(q.get('t'))); else (function tick(n) { render((n / 1000) % B.END); requestAnimationFrame(tick); })(0); return true; });
+</script></body></html>
