@@ -194,9 +194,32 @@ function pencil3D(g, yaw, pitch, R, o) {
   return pr(tf(tip));
 }
 
+// ===== the user's character sheet (their image): panels used as photos =====
+const SHEET = new Image(); SHEET.src = 'assets/reference/character-sheet.png';
+const CROP = {
+  // fig and head stop short of the panel border at x 342
+  fig: [0, 0, 338, 1100], head: [0, 0, 338, 560], turn: [343, 10, 739, 408],
+  faces: [[344, 432, 163, 213], [510, 432, 142, 213], [655, 432, 150, 213], [808, 432, 134, 213], [945, 432, 137, 213]],
+  details: [[358, 662, 142, 194], [507, 662, 133, 194], [643, 662, 142, 194], [790, 662, 142, 194]]   // lapel, tie, belt, shoe
+};
+const SPR = {};
+function feathered(c, fl, fr, ft, fb) {   // a crop with soft edges, so it melts into the dark
+  const cv = document.createElement('canvas'); cv.width = c[2]; cv.height = c[3]; const g = cv.getContext('2d');
+  g.drawImage(SHEET, c[0], c[1], c[2], c[3], 0, 0, c[2], c[3]);
+  g.globalCompositeOperation = 'source-atop';   // darken the photo's own background toward its sides, so no box shows
+  const d = g.createLinearGradient(0, 0, c[2], 0); d.addColorStop(0, 'rgba(4,5,10,0.85)'); d.addColorStop(0.3, 'rgba(4,5,10,0)'); d.addColorStop(0.7, 'rgba(4,5,10,0)'); d.addColorStop(1, 'rgba(4,5,10,0.85)'); g.fillStyle = d; g.fillRect(0, 0, c[2], c[3]);
+  g.globalCompositeOperation = 'destination-in';
+  const h = g.createLinearGradient(0, 0, c[2], 0); h.addColorStop(0, 'rgba(0,0,0,0)'); h.addColorStop(fl / c[2], '#000'); h.addColorStop(1 - fr / c[2], '#000'); h.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = h; g.fillRect(0, 0, c[2], c[3]);
+  const v = g.createLinearGradient(0, 0, 0, c[3]); v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(ft / c[3], '#000'); v.addColorStop(1 - fb / c[3], '#000'); v.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = v; g.fillRect(0, 0, c[2], c[3]);
+  return cv;
+}
+function buildSprites() { SPR.fig = feathered(CROP.fig, 70, 70, 16, 300); SPR.head = feathered(CROP.head, 95, 85, 8, 220); }
+function photoCard(g, c, x, y, w, h, r = 12) { g.save(); g.beginPath(); g.roundRect(x, y, w, h, r); g.clip(); g.drawImage(SHEET, c[0], c[1], c[2], c[3], x, y, w, h); g.restore(); }
+
 // ===== scenes =====
 function alley(g, t) {   // shot 1: the alley, one slow push that ends in the hand, then black
-  const k = Math.pow(prog(t, B.s1, T.dark[1]), 2.4), z = Math.exp(Math.log(6.5) * k), F = [1048, 566];
+  const FK = 900 / 1100, FX = 960 - CROP.fig[2] * FK / 2, FY = 150;   // the photo's size and place
+  const k = Math.pow(prog(t, B.s1, T.dark[1]), 2.4), z = Math.exp(Math.log(6.5) * k), F = [FX + 118 * FK, FY + 742 * FK];   // push target: his hand
   g.fillStyle = '#04050a'; g.fillRect(0, 0, W, H);
   g.save(); g.translate(lerp(F[0], 960, k), lerp(F[1], 540, k)); g.scale(z, z); g.translate(-F[0], -F[1]);
   glow(g, 960, 470, 560, '#4664aa', 0.2);
@@ -206,28 +229,36 @@ function alley(g, t) {   // shot 1: the alley, one slow push that ends in the ha
   const cg = g.createLinearGradient(0, 60, 0, 870); cg.addColorStop(0, 'rgba(170,195,255,0.26)'); cg.addColorStop(1, 'rgba(170,195,255,0.03)'); g.fillStyle = cg; poly(g, [[935, 62], [985, 62], [1230, 870], [690, 870]]);
   glow(g, 960, 58, 90, '#cfdcff', 0.9); g.fillStyle = '#e8eeff'; ell(g, 960, 58, 30, 8);
   glow(g, 960, 900, 260, '#6d8fe0', 0.16); g.fillStyle = 'rgba(140,170,240,0.12)'; ell(g, 960, 872, 150, 16);
-  rim(g, '#6d93f0', 3.2 / z, -2.6 / z, 0, c => manFront(g, 960, 862, 0.66, { fill: c }));
-  manFront(g, 960, 862, 0.66, { fill: C.ink, shirt: '#1b1d24' });
+  g.drawImage(SPR.fig, FX, FY, CROP.fig[2] * FK, 1100 * FK);
+  const dg = g.createLinearGradient(0, FY + 600, 0, FY + 900); dg.addColorStop(0, 'rgba(4,5,10,0)'); dg.addColorStop(1, 'rgba(4,5,10,0.9)'); g.fillStyle = dg; g.fillRect(FX - 40, FY + 600, CROP.fig[2] * FK + 80, 320);
   g.restore();
   rain(g, t, 240, 1500, 'rgba(165,190,255,0.30)', 34, 1.4, 0);
   shade(g, sine(prog(t, T.dark[0], T.dark[1])));
   vignette(g, 0.75);
 }
 
-function fistScene(g, t) {   // shot 2: the hand, blue rim; the rim blooms into the warm room
-  const ein = outCubic(prog(t, B.s2, B.s2 + T.ease)), z = lerp(0.93, 1, ein) * (1 + 0.06 * sine(prog(t, B.s2, B.s3))), tight = 1 + 0.012 * sine(prog(t, 5.0, 6.2));
+function fistScene(g, t) {   // shot 2: the five faces from the sheet appear one by one as cards in cold rim light; then the bloom
+  const ein = outCubic(prog(t, B.s2, B.s2 + T.ease)), z = lerp(0.93, 1, ein) * (1 + 0.06 * sine(prog(t, B.s2, B.s3)));
   g.fillStyle = '#03050a'; g.fillRect(0, 0, W, H); glow(g, 1150, 380, 900, '#2a4a9a', 0.22);
   rain(g, t, 120, 900, 'rgba(120,150,230,0.16)', 22, 1, 7);
   g.save(); g.translate(960, 540); g.scale(z, z); g.translate(-960, -540);
-  rim(g, '#7c9fff', 3, -4, 0, c => fist(g, 960, 560, tight, { fill: c }));
-  fist(g, 960, 560, tight, { fill: '#030304', detail: true });
+  const K = 1.55, gap = 26, ws = CROP.faces.map(c => c[2] * K), hh = 213 * K, tot = ws.reduce((a, b) => a + b, 0) + gap * 4; let x = 960 - tot / 2;
+  CROP.faces.forEach((c, i) => {
+    const order = [2, 1, 3, 0, 4].indexOf(i), p = outCubic(prog(t, B.s2 + 0.1 + order * 0.16, B.s2 + 0.8 + order * 0.16)), spread = (i - 2) * 10 * sine(prog(t, B.s2, B.s3));
+    if (p > 0.003) {
+      const y = 470 - hh / 2 + (1 - p) * 34; g.globalAlpha = p; photoCard(g, c, x + spread, y, ws[i], hh, 14);
+      g.strokeStyle = 'rgba(124,159,255,0.7)'; g.lineWidth = 2; g.beginPath(); g.moveTo(x + spread + 14, y); g.lineTo(x + spread + ws[i] - 14, y); g.stroke();
+      const sh = g.createLinearGradient(0, y, 0, y + hh); sh.addColorStop(0, 'rgba(3,5,10,0)'); sh.addColorStop(1, 'rgba(3,5,10,0.55)'); g.fillStyle = sh; g.beginPath(); g.roundRect(x + spread, y, ws[i], hh, 14); g.fill(); g.globalAlpha = 1;
+    }
+    x += ws[i] + gap;
+  });
   g.restore();
   rain(g, t, 40, 2200, 'rgba(170,195,255,0.07)', 90, 7, 11); rain(g, t, 40, 2200, 'rgba(170,195,255,0.10)', 90, 3, 11);
   shade(g, 1 - ein);
   vignette(g, 0.7);
   const k = prog(t, T.bloom[0], T.bloom[1]);
   if (k > 0) {
-    const e = inOutCubic(k), x = lerp(1020, 1109, e), y = lerp(410, 372, e);
+    const e = inOutCubic(k), x = lerp(1076, 1109, e), y = lerp(305, 372, e);   // from the middle card's lit corner to the lamp
     g.globalCompositeOperation = 'lighter';   // phase 1: the rim light swells into a glow and warms from blue to amber
     const a = Math.sin(Math.PI * clamp01(k / 0.85)), col = mix('#7c9fff', C.amber, clamp01(k / 0.6));
     const gr = g.createRadialGradient(x, y, 0, x, y, lerp(120, 1500, e)); gr.addColorStop(0, col.replace('rgb(', 'rgba(').replace(')', `,${0.9 * a})`)); gr.addColorStop(0.4, col.replace('rgb(', 'rgba(').replace(')', `,${0.35 * a})`)); gr.addColorStop(1, col.replace('rgb(', 'rgba(').replace(')', ',0)'));
@@ -301,21 +332,30 @@ const SEGS = [   // [beat, points in man units, colour]
   [7, [[-156, -470], [-112, -466], [-114, -428]], '#E8E8EE'], [8, [[156, -470], [112, -466], [114, -428]], '#E8E8EE'],
   [10, [[0, -1000], [0, -430]], 'rgba(232,232,238,0.35)'], [11, [[-10, -560], [10, -560]], '#E8E8EE']
 ];
-function drawingScene(g, t) {   // shot 7: lines snap on with the pulse and draw the suit; the silhouette fills in
+const MAINC = { x: 370, y: 144, w: 1182, h: 653 }, DET = [[120, 200], [120, 500], [1621, 200], [1621, 500]], DW = 179, DH = 244;
+function drawingScene(g, t) {   // shot 7: the spec sheet. Frames snap on with the pulse; the user's photos fill them; then it all folds into the pencil
   g.fillStyle = '#05060a'; g.fillRect(0, 0, W, H); glow(g, 960, 520, 900, '#1d2c55', 0.35);
-  const z = 1 + 0.1 * sine(prog(t, B.s7, B.s8)), fold = inOutCubic(prog(t, T.fold[0], T.fold[1]));
+  const z = 1 + 0.1 * sine(prog(t, B.s7, B.s8)), fold = inOutCubic(prog(t, T.fold[0], T.fold[1])), bt = b => B.s7 + b * T.beat;
   g.save(); g.translate(960, 540); g.scale(z, z); g.translate(-960, -540);
-  const fa = sine(prog(t, 34.4, 37.6)) * (1 - fold);
-  if (fa > 0) { g.globalAlpha = fa; manFront(g, MX, MY, MS, { fill: '#000', shirt: '#cfd2d8' }); g.globalAlpha = 1; }
-  const S = p => [MX + p[0] * MS, MY + p[1] * MS], F = p => [lerp(p[0], 960 + Math.max(-336, Math.min(336, (p[0] - 960) * 1.63)), fold), lerp(p[1], 540, fold)];   // folds onto the pencil's line (672 px)
-  const line = (pts, frac, col, lw) => { let tot = 0; const L = []; for (let i = 1; i < pts.length; i++) { const d = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]); L.push(d); tot += d; }
-    let left = tot * frac; g.strokeStyle = col; g.lineWidth = lw; g.lineCap = 'round'; g.lineJoin = 'round'; g.beginPath(); g.moveTo(pts[0][0], pts[0][1]);
-    for (let i = 1; i < pts.length && left > 0; i++) { const s = Math.min(1, left / L[i - 1]); g.lineTo(lerp(pts[i - 1][0], pts[i][0], s), lerp(pts[i - 1][1], pts[i][1], s)); left -= L[i - 1]; } g.stroke(); };
-  // line 0: the coin's gold edge becomes the chest guide line
-  const s0 = outExpo(prog(t, B.s7, B.s7 + 0.35)), half = lerp(1250, 170 * MS, s0);
-  line([F([960 - half, 540]), F([960 + half, 540])], 1, mix(C.gold, '#8a8f9c', s0), lerp(3, 2, s0));
-  SEGS.forEach(([b, pts, col]) => { const ts = B.s7 + b * T.beat, d = outExpo(prog(t, ts, ts + 0.16)); if (d > 0) line(pts.map(S).map(F), d, col, 2.6); });
-  const hc = outExpo(prog(t, B.s7 + 9 * T.beat, B.s7 + 9 * T.beat + 0.2)); if (hc > 0) { const c = F(S([0, -905])); g.strokeStyle = 'rgba(232,232,238,0.6)'; g.lineWidth = 2; g.beginPath(); g.arc(c[0], c[1], 74 * MS * (1 - fold), -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * hc); g.stroke(); }
+  const F = p => [lerp(p[0], 960 + Math.max(-336, Math.min(336, (p[0] - 960) * 0.382)), fold), lerp(p[1], 540, fold)];
+  const rect = (x, y, w, h) => { const a = F([x, y]), b = F([x + w, y + h]); return [a[0], a[1], b[0] - a[0], b[1] - a[1]]; };
+  const card = (c, x, y, w, h, open, fillA, col) => {   // a frame that opens from its centre line, with the photo inside it
+    const cy = y + h / 2, hh = h * open, R = rect(x, cy - hh / 2, w, hh); if (R[3] < 0.5 && fold < 1) { const L = F([x, cy]), Rr = F([x + w, cy]); g.strokeStyle = col; g.lineWidth = 2; g.beginPath(); g.moveTo(L[0], L[1]); g.lineTo(Rr[0], Rr[1]); g.stroke(); return; }
+    if (fillA > 0.003) { g.save(); g.beginPath(); g.rect(R[0], R[1], R[2], R[3]); g.clip(); g.globalAlpha = fillA * (1 - fold); const s2 = rect(x, y, w, h); g.drawImage(SHEET, c[0], c[1], c[2], c[3], s2[0], s2[1], s2[2], s2[3]); g.restore(); g.globalAlpha = 1; }
+    g.strokeStyle = col; g.lineWidth = 2; g.strokeRect(R[0], R[1], R[2], R[3]);
+  };
+  // line 0: the coin's gold edge shrinks to the sheet's width; on beat 1 the main frame opens out of it
+  const s0 = outExpo(prog(t, B.s7, B.s7 + 0.35)), half = lerp(1250, MAINC.w / 2, s0), op = outExpo(prog(t, bt(1), bt(1) + 0.3));
+  if (op < 0.02) { const L = F([960 - half, 540]), Rr = F([960 + half, 540]); g.strokeStyle = mix(C.gold, '#cfd2d8', s0); g.lineWidth = lerp(3, 2, s0); g.beginPath(); g.moveTo(L[0], L[1]); g.lineTo(Rr[0], Rr[1]); g.stroke(); }
+  else card(CROP.turn, MAINC.x, MAINC.y, MAINC.w, MAINC.h, op, sine(prog(t, bt(1) + 0.1, bt(1) + 0.8)), 'rgba(232,232,238,0.85)');
+  // beats 2-5: the four details (lapel, tie, belt, shoe)
+  DET.forEach(([x, y], i) => { const o = outExpo(prog(t, bt(2 + i), bt(2 + i) + 0.22)); if (o > 0) card(CROP.details[i], x, y, DW, DH, o, sine(prog(t, bt(2 + i) + 0.05, bt(2 + i) + 0.6)), i === 1 ? C.red : 'rgba(232,232,238,0.85)'); });
+  // beats 6-9: corner brackets on the main frame; beat 10: a red underline under the tie; beat 11: a dimension line
+  [[MAINC.x, MAINC.y, 1, 1], [MAINC.x + MAINC.w, MAINC.y, -1, 1], [MAINC.x, MAINC.y + MAINC.h, 1, -1], [MAINC.x + MAINC.w, MAINC.y + MAINC.h, -1, -1]].forEach(([x, y, sx, sy], i) => {
+    const d = outExpo(prog(t, bt(6 + i), bt(6 + i) + 0.16)); if (d <= 0) return; const a = F([x - sx * 14, y + sy * 40 * d]), b = F([x - sx * 14, y - sy * 14]), c2 = F([x + sx * 40 * d, y - sy * 14]);
+    g.strokeStyle = 'rgba(232,232,238,0.9)'; g.lineWidth = 2.6; g.beginPath(); g.moveTo(a[0], a[1]); g.lineTo(b[0], b[1]); g.lineTo(c2[0], c2[1]); g.stroke(); });
+  const u = outExpo(prog(t, bt(10), bt(10) + 0.16)); if (u > 0) { const a = F([120, 762]), b = F([120 + DW * u, 762]); g.strokeStyle = C.red; g.lineWidth = 3; g.beginPath(); g.moveTo(a[0], a[1]); g.lineTo(b[0], b[1]); g.stroke(); }
+  const m = outExpo(prog(t, bt(11), bt(11) + 0.2)); if (m > 0) { const y = 830, a = F([960 - MAINC.w / 2 * m, y]), b = F([960 + MAINC.w / 2 * m, y]); g.strokeStyle = 'rgba(232,232,238,0.5)'; g.lineWidth = 1.6; g.beginPath(); g.moveTo(a[0], a[1]); g.lineTo(b[0], b[1]); [a, b].forEach(p => { g.moveTo(p[0], p[1] - 10); g.lineTo(p[0], p[1] + 10); }); g.stroke(); }
   g.restore();
   vignette(g, 0.7);
 }
@@ -359,16 +399,18 @@ function corridorScene(g, t) {   // shots 9-10: the corridor; he walks toward us
   // the symbols gather behind him, in gold light, at the far end
   const gk = outCubic(prog(t, 47.0, 49.5)), bob = Math.sin(t * 1.3) * 4;
   glow(g, 960, 430, 150, C.gold, 0.28 * gk * (1 - 0.6 * prog(t, T.lightsOff[0], T.lightsOff[1])));
-  if (gk > 0) { coinSpin(g, lerp(700, 930, gk), 420 + bob, 20, Math.cos(t * 1.6)); pencil2D(g, lerp(1220, 995, gk), 425 - bob, 70, -0.5, gk); }
+  const symA = 1 - sine(prog(t, 54.9, 55.8));   // they sit behind him: they go when he is lit
+  if (gk > 0 && symA > 0.003) { g.globalAlpha = symA; coinSpin(g, lerp(700, 930, gk), 420 + bob, 20, Math.cos(t * 1.6)); g.globalAlpha = 1; pencil2D(g, lerp(1220, 995, gk), 425 - bob, 70, -0.5, gk * symA); }
   // him: walking toward camera at one steady pace, slowing to a stop
   const s = prog(t, T.walk[0], T.walk[1]), zm = lerp(14, 2.7, 1 - Math.pow(1 - s, 2)), amp = 1 - prog(t, 54.4, 55.2), ph = (t - B.s9) * Math.PI * 2 * 0.9;
   const ms = FL * 1.85 / zm / 990, feet = YH(zm, 0), lift = [Math.max(0, Math.sin(ph)) * 40 * amp, Math.max(0, -Math.sin(ph)) * 40 * amp], bobm = -Math.abs(Math.sin(ph)) * 8 * amp;
-  const L10 = 1 - prog(t, T.lightOut[0], T.lightOut[1]);
-  rim(g, rgba('#9bb6ff', Math.min(1, lv * 1.6) * L10), 0, -2.2 / Z, 0, c => manFront(g, 960, feet, ms, { fill: c, lift, bob: bobm }));
-  rim(g, rgba('#8a909e', 0.55 * L10 * prog(t, 53.5, 55.5)), 2.4 / Z, -2.4 / Z, 0, c => manFront(g, 960, feet, ms, { fill: c, lift, bob: bobm }));
+  const L10 = 1 - prog(t, T.lightOut[0], T.lightOut[1]), rv = sine(prog(t, 54.9, 55.8)) * L10, sil = 1 - sine(prog(t, 54.9, 55.8));   // rv: the light finds his face; sil: the silhouette gives way
+  rim(g, rgba('#9bb6ff', Math.min(1, lv * 1.6) * L10 * sil), 0, -2.2 / Z, 0, c => manFront(g, 960, feet, ms, { fill: c, lift, bob: bobm }));
+  rim(g, rgba('#8a909e', 0.55 * L10 * prog(t, 53.5, 55.5) * sil), 2.4 / Z, -2.4 / Z, 0, c => manFront(g, 960, feet, ms, { fill: c, lift, bob: bobm }));
   glow(g, 960, feet - 820 * ms, 260 * ms * 4, '#8a909e', 0.1 * L10 * prog(t, 53.5, 55.5));
-  manFront(g, 960, feet, ms, { fill: C.ink, lift, bob: bobm, shirt: mix('#05060a', '#2a2d35', L10) });
+  g.globalAlpha = Math.max(0.0, sil); manFront(g, 960, feet, ms, { fill: C.ink, lift, bob: bobm, shirt: mix('#05060a', '#2a2d35', L10) }); g.globalAlpha = 1;
   g.restore();
+  if (rv > 0.003) { const K = 1.6; g.globalAlpha = rv; g.drawImage(SPR.head, 960 - 212 * K, 247 - 12 * K, CROP.head[2] * K, 560 * K); g.globalAlpha = 1; }   // the light finds his face
   vignette(g, 0.75);
   shade(g, 0.88 * sine(prog(t, T.lightOut[0], T.lightOut[1])));   // the light goes out
 }
@@ -403,5 +445,5 @@ window.EVENTS = [
   { name: 'light.out', t: T.lightOut[0] }, { name: 'last.line', t: T.lastLine }, { name: 'end', t: B.END }
 ].sort((a, b) => a.t - b.t);
 window.TOTAL = B.END; window.renderAt = t => render(t);
-window.ready = Promise.all(['700 48px AR', '400 48px AR', '400 24px UI'].map(f => document.fonts.load(f, 'ابت'))).catch(() => {}).then(() => { if (q.has('t')) render(parseFloat(q.get('t'))); else (function tick(n) { render((n / 1000) % B.END); requestAnimationFrame(tick); })(0); return true; });
+window.ready = Promise.all([...['700 48px AR', '400 48px AR', '400 24px UI'].map(f => document.fonts.load(f, 'ابت')), SHEET.decode()]).catch(() => {}).then(() => { buildSprites(); if (q.has('t')) render(parseFloat(q.get('t'))); else (function tick(n) { render((n / 1000) % B.END); requestAnimationFrame(tick); })(0); return true; });
 </script></body></html>

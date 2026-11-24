@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="ar"><head><meta charset="utf-8"><title>John Wick</title>
+<style>
+  @font-face { font-family: AR; src: url("assets/fonts/NotoKufiArabic-Bold.ttf"); font-weight: 700; }
+  @font-face { font-family: AR; src: url("assets/fonts/NotoKufiArabic-Regular.ttf"); font-weight: 400; }
+  @font-face { font-family: UI; src: url("assets/fonts/Inter-Medium.otf"); font-weight: 400; }
+  html,body{margin:0;background:#000;height:100%} body{display:flex;align-items:center;justify-content:center} canvas{width:min(100vw,calc(100vh*16/9));aspect-ratio:16/9;display:block}
+</style></head><body><canvas id="c"></canvas>
+<script>
+// John Wick: 60s fan-made tribute, 2D canvas. The character is a silhouette (no actor likeness).
+// Page contract: canvas #c, renderAt(t), TOTAL, ready, EVENTS, ?t= (still), ?scale=. Not affiliated with Lionsgate or the John Wick films.
+
+// ===== BEATS: every time lives here, re-timing is a one-line change =====
+const B = { s1: 0, s2: 4, s3: 8, s4: 13, s5: 18, s6: 24.5, s7: 32, s8: 39, s9: 46, s10: 55, END: 60 };
+const T = {
+  dark: [3.55, 4.0],            // the push into the hand ends in black
+  ease: 0.55,                   // each new shot eases in 93% -> 100%
+  bloom: [7.15, 8.0],           // the blue rim light blooms into the warm room
+  pan: [8.0, 17.0],             // one slow drift from the chair to the puppy
+  flicker: [16.9, 17.45], shrink: [17.45, 18.0],   // the lamp flickers, then its glow shrinks to a gold point
+  wobble: [24.62, 26.3],        // the coin wobbles and settles flat
+  edge: [31.0, 32.0],           // the camera drops level, the coin becomes a gold line
+  beat: 0.5,                    // pulse: one line snaps on per beat in shot 7
+  fold: [38.3, 39.0],           // the lines fold into the pencil
+  snap: [39.0, 39.35], turn: [39.35, 45.4], into: [45.4, 46.0],
+  flash0: 46.4, flashGap: 0.5,  // corridor lights come on, far to near
+  walk: [46.0, 55.2], lightsOff: [53.9, 55.0], zoom: [53.3, 55.9],
+  lightOut: [56.4, 57.0], lastLine: 57.1, fan: 58.4, fade: [59.2, 59.95]
+};
+const LINES = [   // the script's voiceover, on screen: [text, in, out]
+  ['في عالم تحكمه القواعد والظلال...', 0.6, 3.2],
+  ['بعض الأسماء تصير أسطورة، حتى لو حاول صاحبها يختفي.', 4.5, 6.9],
+  ['كان في لحظة ظن فيها إن الحرب خلصت...', 8.7, 12.3],
+  ['وإن السلام ممكن يُشترى.', 13.5, 16.5],
+  ['بس لما يلمسوا آخر شيء يربطك بالحياة...', 18.8, 23.6],
+  ['جون ويك ما يرجع بدافع الانتقام الأعمى...', 32.7, 37.9],
+  ['يرجع بدقّة، وتركيز، وقانون خاص فيه.', 39.7, 44.9],
+  ['لما يقرر يمشي في الممر الأخير... الكل يعرف إن المعركة صارت شخصية.', 46.8, 53.5]
+];
+const DECISION = { text: 'الهدوء يتحول إلى قرار لا رجعة فيه.', in: 25.8, out: 30.6 };
+const LAST = 'مو كل من يمشي بهدوء... ضعيف.';
+
+const W = 1920, H = 1080, q = new URLSearchParams(location.search), SCALE = parseFloat(q.get('scale') || '1');
+const SUB = parseInt(q.get('sub') || '6', 10), FPS = parseFloat(q.get('fps') || '25'), SHUTTER = 0.5 / FPS;
+const C = { bk: '#07080B', gold: '#D9B45A', red: '#C8102E', blue: '#3B6FD9', amber: '#F2B46B', ink: '#020203' };
+const cv = document.getElementById('c'); cv.width = W * SCALE; cv.height = H * SCALE; const MAIN = cv.getContext('2d');
+const mk = () => { const c = document.createElement('canvas'); c.width = cv.width; c.height = cv.height; return c; };
+const WORK = mk(), ACC = mk();
+
+// ===== helpers =====
+const clamp01 = v => Math.max(0, Math.min(1, v)), lerp = (a, b, k) => a + (b - a) * k, prog = (t, a, b) => clamp01((t - a) / (b - a));
+const outExpo = k => (k = clamp01(k)) >= 1 ? 1 : 1 - Math.pow(2, -10 * k), outCubic = k => 1 - Math.pow(1 - clamp01(k), 3);
+const inOutCubic = k => { k = clamp01(k); return k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2; };
+const sine = k => 0.5 - 0.5 * Math.cos(Math.PI * clamp01(k));
+const hex = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+const mix = (a, b, k) => { const x = hex(a), y = hex(b); return `rgb(${x.map((v, i) => Math.round(lerp(v, y[i], clamp01(k)))).join(',')})`; };
+const rgba = (h, a) => { const x = hex(h); return `rgba(${x[0]},${x[1]},${x[2]},${clamp01(a)})`; };
+const fract = v => v - Math.floor(v), hash = (i, j) => fract(Math.sin(i * 127.1 + j * 311.7) * 43758.5453);
+function ell(g, x, y, rx, ry, rot = 0) { g.beginPath(); g.ellipse(x, y, Math.max(0.01, rx), Math.max(0.01, ry), rot, 0, Math.PI * 2); g.fill(); }
+function rr(g, x, y, w, h, r) { g.beginPath(); g.roundRect(x, y, w, h, r); g.fill(); }
+function poly(g, pts) { g.beginPath(); pts.forEach((p, i) => i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1])); g.closePath(); g.fill(); }
+function glow(g, x, y, r, col, a) { if (a <= 0.002) return; const gr = g.createRadialGradient(x, y, 0, x, y, r); gr.addColorStop(0, rgba(col, a)); gr.addColorStop(1, rgba(col, 0)); g.fillStyle = gr; g.fillRect(x - r, y - r, r * 2, r * 2); }
+function vignette(g, a) { const gr = g.createRadialGradient(W / 2, H / 2, 420, W / 2, H / 2, 1250); gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(1, `rgba(0,0,0,${a})`); g.fillStyle = gr; g.fillRect(0, 0, W, H); }
+function shade(g, a, col = '#000') { if (a > 0.002) { g.fillStyle = rgba(col, a); g.fillRect(0, 0, W, H); } }
+function rim(g, col, dx, dy, blur, fn) {   // light along one edge of a silhouette: two offset copies under it (no blur filter, which is slow)
+  g.save(); g.globalAlpha = 0.35; g.translate(dx * 1.7, dy * 1.7); fn(col); g.restore(); g.save(); g.translate(dx, dy); fn(col); g.restore(); g.globalAlpha = 1;
+}
+function rain(g, t, n, speed, col, len, lw, seed, slant = 0.12) {
+  g.strokeStyle = col; g.lineWidth = lw; g.lineCap = 'round'; g.beginPath();
+  for (let i = 0; i < n; i++) { const sp = speed * (0.8 + 0.4 * hash(i, seed + 3)), y = ((hash(i, seed + 2) * 1300 + t * sp) % 1300) - 110, x = hash(i, seed + 1) * 2200 - 140 - y * slant; g.moveTo(x, y); g.lineTo(x - len * slant, y + len); }
+  g.stroke();
+}
+
+// Arabic line: word by word (right to left), each word fades up from blurred to sharp with a small rise. No letter spacing (it breaks the joins).
+function arText(g, str, cx, cy, size, weight, color, tIn, tOut, t, o = {}) {
+  const st = o.stagger ?? 0.09, dur = o.dur ?? 0.6, rise = o.rise ?? 22, maxW = o.maxW ?? 1500, lh = o.lh ?? size * 1.7;
+  g.font = `${weight} ${size}px AR`; g.direction = 'rtl'; g.textAlign = 'right'; g.textBaseline = 'alphabetic';
+  const ws = str.split(' '), sp = g.measureText(' ').width, wd = ws.map(w => g.measureText(w).width), lines = []; let cur = [], cw = 0;
+  ws.forEach((w, i) => { const add = cur.length ? sp + wd[i] : wd[i]; if (cur.length && cw + add > maxW) { lines.push(cur); cur = []; cw = 0; } cw += cur.length ? sp + wd[i] : wd[i]; cur.push(i); });
+  if (cur.length) lines.push(cur);
+  lines.forEach((ln, li) => {
+    const tot = ln.reduce((a, i) => a + wd[i], 0) + sp * (ln.length - 1); let x = cx + tot / 2; const y = cy + (li - (lines.length - 1) / 2) * lh;
+    ln.forEach(i => {
+      const pin = outCubic(prog(t, tIn + i * st, tIn + i * st + dur)), pout = sine(prog(t, tOut + i * st * 0.5, tOut + i * st * 0.5 + dur * 0.7)), a = pin * (1 - pout);
+      if (a > 0.003) { g.globalAlpha = a; const b = (1 - a) * 12 * SCALE; g.filter = b > 0.3 ? `blur(${b}px)` : 'none'; g.fillStyle = (o.colors && o.colors[ws[i]]) || color; g.fillText(ws[i], x, y + (1 - pin) * rise - pout * rise * 0.5); }
+      x -= wd[i] + sp;
+    });
+  });
+  g.globalAlpha = 1; g.filter = 'none'; g.direction = 'ltr';
+}
+function latin(g, str, cx, cy, size, color, tIn, tOut, t) {
+  const a = outCubic(prog(t, tIn, tIn + 0.6)) * (1 - sine(prog(t, tOut, tOut + 0.5))); if (a <= 0.003) return;
+  g.globalAlpha = a; g.font = `400 ${size}px UI`; g.textAlign = 'center'; g.textBaseline = 'alphabetic'; g.fillStyle = color; g.fillText(str, cx, cy + (1 - a) * 10); g.globalAlpha = 1;
+}
+
+// ===== the character and the symbols, all drawn as vector silhouettes (our own drawings) =====
+function manFront(g, x, y, s, o = {}) {   // standing, facing camera, ~990 units tall, feet at (x, y)
+  const f = o.fill || '#000', lift = o.lift || [0, 0];
+  g.save(); g.translate(x, y + (o.bob || 0) * s); g.scale(s, s); g.fillStyle = f;
+  g.beginPath(); g.moveTo(-104, -440); g.lineTo(-6, -440); g.lineTo(-14, -34 - lift[0]); g.lineTo(-94, -34 - lift[0]); g.closePath(); g.fill();
+  g.beginPath(); g.moveTo(104, -440); g.lineTo(6, -440); g.lineTo(14, -34 - lift[1]); g.lineTo(94, -34 - lift[1]); g.closePath(); g.fill();
+  rr(g, -106, -42 - lift[0], 94, 42, 14); rr(g, 12, -42 - lift[1], 94, 42, 14);
+  g.beginPath(); g.moveTo(-26, -812); g.lineTo(-126, -792); g.bezierCurveTo(-150, -786, -156, -748, -154, -706); g.lineTo(-156, -470); g.lineTo(-112, -466); g.lineTo(-114, -428);
+  g.lineTo(114, -428); g.lineTo(112, -466); g.lineTo(156, -470); g.lineTo(154, -706); g.bezierCurveTo(156, -748, 150, -786, 126, -792); g.lineTo(26, -812); g.closePath(); g.fill();
+  ell(g, -134, -446, 21, 30); ell(g, 134, -446, 21, 30);
+  g.fillRect(-20, -858, 40, 60); ell(g, 0, -902, 48, 62);
+  g.beginPath(); g.moveTo(-64, -905); g.bezierCurveTo(-72, -990, 72, -990, 64, -905); g.bezierCurveTo(70, -860, 76, -820, 62, -790); g.lineTo(40, -800);
+  g.bezierCurveTo(44, -840, 40, -872, 30, -884); g.lineTo(-30, -884); g.bezierCurveTo(-40, -872, -44, -840, -40, -800); g.lineTo(-62, -790); g.bezierCurveTo(-76, -820, -70, -860, -64, -905); g.closePath(); g.fill();
+  if (o.shirt) { g.fillStyle = o.shirt; poly(g, [[-24, -810], [24, -810], [0, -690]]); g.fillStyle = f; poly(g, [[-9, -804], [9, -804], [13, -706], [0, -676], [-13, -706]]); }
+  g.restore();
+}
+function seated(g, x, y, s, o = {}) {   // side view, facing right, in an armchair
+  const f = o.fill || '#000'; g.save(); g.translate(x, y); g.scale(s, s); g.fillStyle = f; g.strokeStyle = f;
+  rr(g, -190, -560, 74, 560, 22); rr(g, -190, -262, 350, 96, 20); rr(g, -160, -372, 300, 52, 22); g.fillRect(118, -170, 26, 170); g.fillRect(-186, -170, 26, 170);
+  poly(g, [[-112, -596], [8, -598], [44, -300], [-118, -290]]); rr(g, -118, -336, 270, 96, 44);
+  poly(g, [[118, -326], [178, -330], [192, -34], [136, -34]]); rr(g, 128, -42, 104, 40, 16);
+  g.lineWidth = 58; g.lineCap = 'round'; g.lineJoin = 'round'; g.beginPath(); g.moveTo(-34, -548); g.lineTo(-22, -392); g.lineTo(104, -384); g.stroke(); ell(g, 124, -384, 30, 22);
+  g.fillRect(-58, -640, 40, 60); ell(g, -36, -690, 48, 60);
+  g.beginPath(); g.moveTo(-80, -700); g.bezierCurveTo(-86, -772, 10, -782, 14, -712); g.lineTo(-10, -716); g.bezierCurveTo(-40, -722, -50, -690, -56, -640); g.lineTo(-94, -598); g.bezierCurveTo(-102, -640, -94, -680, -80, -700); g.closePath(); g.fill();
+  g.restore();
+}
+function puppy(g, x, y, s, o = {}) {   // lying down, facing left toward the chair
+  const f = o.fill || '#000', br = o.breath || 1; g.save(); g.translate(x, y); g.scale(s, s); g.fillStyle = f; g.strokeStyle = f;
+  g.lineWidth = 14; g.lineCap = 'round'; g.beginPath(); g.moveTo(118, -62); g.quadraticCurveTo(170, -80, 182, -128); g.stroke();
+  g.save(); g.translate(0, -10); g.scale(1, br); ell(g, 0, -42, 128, 56); g.restore();
+  ell(g, 86, -52, 64, 52); rr(g, -210, -34, 120, 32, 14); rr(g, 40, -30, 110, 28, 12);
+  ell(g, -128, -100, 54, 48); ell(g, -184, -84, 40, 28);
+  g.save(); g.translate(-112, -92); g.rotate(0.25); ell(g, 0, 10, 24, 46); g.restore();
+  g.restore();
+}
+function fist(g, x, y, s, o = {}) {   // close-up: suit sleeve, shirt cuff, clenched fist
+  const f = o.fill || '#000'; g.save(); g.translate(x, y); g.scale(s, s); g.fillStyle = f;
+  poly(g, [[-1300, -150], [-250, -178], [-214, 170], [-1300, 210]]);
+  g.beginPath(); g.moveTo(-232, -150); g.bezierCurveTo(-120, -196, 40, -204, 150, -176);
+  [[-120, 40], [-46, 38], [26, 37], [96, 34]].forEach(([cy, r], i) => { g.arc(196 - i * 6, cy, r + 6, -Math.PI * 0.62, Math.PI * 0.5); });
+  g.bezierCurveTo(150, 168, 60, 172, 0, 168); g.lineTo(-210, 160); g.closePath(); g.fill();
+  if (o.detail) {
+    g.fillStyle = '#41454f'; poly(g, [[-264, -176], [-238, -177], [-204, 168], [-228, 170]]);
+    g.strokeStyle = '#191b22'; g.lineWidth = 5; g.lineCap = 'round';
+    g.strokeStyle = '#262a33'; g.lineWidth = 4; for (let k = 0; k < 3; k++) { const yy = -83 + k * 72; g.beginPath(); g.moveTo(110, yy); g.quadraticCurveTo(190, yy - 6, 236 - k * 6, yy + 2); g.stroke(); }
+    g.fillStyle = '#0b0c10'; g.beginPath(); g.moveTo(-80, -10); g.bezierCurveTo(0, -60, 120, -62, 176, -34); g.bezierCurveTo(206, -18, 198, 18, 168, 22); g.bezierCurveTo(90, 30, 0, 44, -70, 52); g.closePath(); g.fill();
+    g.strokeStyle = '#3a4feb'; g.globalAlpha = 0.55; g.lineWidth = 3; g.beginPath(); g.moveTo(-60, -22); g.bezierCurveTo(10, -62, 120, -64, 176, -34); g.stroke(); g.globalAlpha = 1;
+    g.strokeStyle = '#1e2129'; g.lineWidth = 3; g.beginPath(); g.moveTo(176, -34); g.bezierCurveTo(206, -18, 198, 18, 168, 22); g.bezierCurveTo(90, 30, 0, 44, -70, 52); g.stroke();
+  }
+  g.restore();
+}
+function coinFace(g, r) {
+  const gr = g.createLinearGradient(-r, -r, r, r); gr.addColorStop(0, '#F6DA92'); gr.addColorStop(0.5, '#D9B45A'); gr.addColorStop(1, '#7E5E1C');
+  g.fillStyle = gr; ell(g, 0, 0, r, r);
+  g.strokeStyle = 'rgba(88,62,18,0.85)'; g.lineWidth = r * 0.05; g.beginPath(); g.arc(0, 0, r * 0.83, 0, 7); g.stroke(); g.beginPath(); g.arc(0, 0, r * 0.4, 0, 7); g.stroke();
+  g.lineWidth = r * 0.025; g.beginPath(); for (let k = 0; k < 28; k++) { const a = k / 28 * Math.PI * 2; g.moveTo(Math.cos(a) * r * 0.88, Math.sin(a) * r * 0.88); g.lineTo(Math.cos(a) * r * 0.96, Math.sin(a) * r * 0.96); } g.stroke();
+  g.fillStyle = 'rgba(110,80,26,0.6)'; ell(g, 0, 0, r * 0.17, r * 0.17);
+}
+function coinSpin(g, x, y, r, c) {   // a coin turning about its vertical axis; c = cos(angle)
+  const sx = Math.max(0.03, Math.abs(c)), th = r * 0.11 * Math.sqrt(Math.max(0, 1 - c * c)), side = Math.sign(c) || 1;
+  g.fillStyle = '#6e5118'; ell(g, x + th * side, y, r * sx, r); g.fillRect(Math.min(x, x + th * side), y - r, th, 2 * r);
+  g.save(); g.translate(x, y); g.scale(sx, 1); coinFace(g, r); g.restore();
+  g.lineWidth = 3; g.strokeStyle = rgba(C.red, 0.7); g.beginPath(); g.ellipse(x, y, r * sx, r, 0, Math.PI / 2, Math.PI * 1.5); g.stroke();
+  g.strokeStyle = rgba(C.blue, 0.7); g.beginPath(); g.ellipse(x, y, r * sx, r, 0, -Math.PI / 2, Math.PI / 2); g.stroke();
+}
+function coinTilt(g, x, y, rx, ry, rot, r) {   // a coin seen at an angle (lying or wobbling)
+  const th = Math.min(r * 0.1, r * 0.1 * Math.sqrt(Math.max(0, 1 - (ry / rx) ** 2)));
+  g.fillStyle = '#6e5118'; g.save(); g.translate(x, y + th); g.rotate(rot); ell(g, 0, 0, rx, ry); g.restore();
+  g.save(); g.translate(x, y); g.rotate(rot); g.scale(rx / r, ry / r); coinFace(g, r); g.restore();
+}
+function pencil2D(g, x, y, len, ang, a = 1) {
+  g.save(); g.globalAlpha = a; g.translate(x, y); g.rotate(ang); const w = len * 0.07;
+  g.fillStyle = '#3a3f4d'; g.fillRect(-len / 2, -w / 2, len * 0.78, w); g.fillStyle = '#4a5061'; g.fillRect(-len / 2, -w / 2, len * 0.78, w * 0.3);
+  g.fillStyle = '#9aa0ab'; g.fillRect(-len / 2 - len * 0.06, -w / 2, len * 0.06, w);
+  g.fillStyle = '#c9a77a'; poly(g, [[len * 0.28, -w / 2], [len / 2, 0], [len * 0.28, w / 2]]); g.fillStyle = '#15161a'; poly(g, [[len * 0.43, -w * 0.16], [len / 2, 0], [len * 0.43, w * 0.16]]);
+  g.restore(); g.globalAlpha = 1;
+}
+
+// a pencil in 3D: a hexagonal prism, a metal ferrule, a sharpened wood cone and a graphite tip
+function pencil3D(g, yaw, pitch, R, o) {
+  const f = 1400, D = 1400, shrink = o.shrink ?? 1, PS = 1.6;   // PS: pencil size
+  const ring = (x, r) => Array.from({ length: 6 }, (_, k) => { const a = k * Math.PI / 3 + Math.PI / 6; return [x, r * Math.cos(a), r * Math.sin(a)]; });
+  const rot = p => { const x = p[0], y = p[1], z = p[2]; const x1 = x * Math.cos(yaw) + z * Math.sin(yaw), z1 = -x * Math.sin(yaw) + z * Math.cos(yaw); return [x1, y * Math.cos(pitch) - z1 * Math.sin(pitch), y * Math.sin(pitch) + z1 * Math.cos(pitch)]; };
+  const tf = p => rot([(210 + (p[0] - 210) * shrink) * PS, p[1] * shrink * PS, p[2] * shrink * PS]);
+  const pr = p => [o.cx + f * p[0] / (D + p[2]) + o.dx, o.cy + f * p[1] / (D + p[2]) + o.dy];
+  const A = ring(-210, R), Bm = ring(-178, R), Cb = ring(150, R), G = ring(192, R * 0.3), tip = [210, 0, 0];
+  const faces = [];
+  const side = (P, Q, col) => { for (let k = 0; k < 6; k++) { const k2 = (k + 1) % 6, b = k * Math.PI / 3 + Math.PI / 3; faces.push({ p: [P[k], P[k2], Q[k2], Q[k]], n: [0, Math.cos(b), Math.sin(b)], col }); } };
+  side(A, Bm, [170, 176, 188]); side(Bm, Cb, [58, 64, 80]);
+  for (let k = 0; k < 6; k++) { const k2 = (k + 1) % 6, b = k * Math.PI / 3 + Math.PI / 3, nx = 0.18; faces.push({ p: [Cb[k], Cb[k2], tip], n: [nx, Math.cos(b), Math.sin(b)], col: [201, 167, 122], z: 0 }); faces.push({ p: [G[k], G[k2], tip], n: [nx, Math.cos(b), Math.sin(b)], col: [28, 29, 34], top: 1 }); }
+  faces.push({ p: A.slice(), n: [-1, 0, 0], col: [120, 124, 134] });
+  const L = (v => { const l = Math.hypot(...v); return v.map(c => c / l); })([-0.5, -0.8, -0.45]);
+  const vis = faces.map(fc => {
+    const P = fc.p.map(tf), n = rot(fc.n), cz = P.reduce((a, p) => a + p[2], 0) / P.length, cx = P.reduce((a, p) => a + p[0], 0) / P.length, cy = P.reduce((a, p) => a + p[1], 0) / P.length;
+    const facing = n[0] * cx + n[1] * cy + n[2] * (cz + D) < 0, lit = 0.3 + 0.7 * Math.max(0, n[0] * L[0] + n[1] * L[1] + n[2] * L[2]);
+    return { P, cz, facing, lit, col: fc.col, top: fc.top };
+  }).filter(v => v.facing).sort((a, b) => (b.cz - a.cz) || ((a.top || 0) - (b.top || 0)));
+  vis.forEach(v => { g.fillStyle = `rgb(${v.col.map(c => Math.round(c * v.lit)).join(',')})`; g.strokeStyle = g.fillStyle; g.lineWidth = 1; g.beginPath(); v.P.map(pr).forEach((p, i) => i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1])); g.closePath(); g.fill(); g.stroke(); });
+  return pr(tf(tip));
+}
+
+// ===== scenes =====
+function alley(g, t) {   // shot 1: the alley, one slow push that ends in the hand, then black
+  const k = Math.pow(prog(t, B.s1, T.dark[1]), 2.4), z = Math.exp(Math.log(6.5) * k), F = [1048, 566];
+  g.fillStyle = '#04050a'; g.fillRect(0, 0, W, H);
+  g.save(); g.translate(lerp(F[0], 960, k), lerp(F[1], 540, k)); g.scale(z, z); g.translate(-F[0], -F[1]);
+  glow(g, 960, 470, 560, '#4664aa', 0.2);
+  g.fillStyle = '#07090f'; poly(g, [[-200, -200], [640, 250], [640, 800], [-200, 1300]]); poly(g, [[2120, -200], [1280, 250], [1280, 800], [2120, 1300]]);
+  g.fillStyle = '#0a0d15'; for (let i = 0; i < 5; i++) { const y = 300 + i * 100; poly(g, [[520 - i * 8, y], [600, y + 18], [600, y + 50], [520 - i * 8, y + 36]]); poly(g, [[1400 + i * 8, y], [1320, y + 18], [1320, y + 50], [1400 + i * 8, y + 36]]); }
+  const gr = g.createLinearGradient(0, 800, 0, 1080); gr.addColorStop(0, '#0a0d16'); gr.addColorStop(1, '#03040a'); g.fillStyle = gr; poly(g, [[640, 800], [1280, 800], [2120, 1300], [-200, 1300]]);
+  const cg = g.createLinearGradient(0, 60, 0, 870); cg.addColorStop(0, 'rgba(170,195,255,0.26)'); cg.addColorStop(1, 'rgba(170,195,255,0.03)'); g.fillStyle = cg; poly(g, [[935, 62], [985, 62], [1230, 870], [690, 870]]);
+  glow(g, 960, 58, 90, '#cfdcff', 0.9); g.fillStyle = '#e8eeff'; ell(g, 960, 58, 30, 8);
+  glow(g, 960, 900, 260, '#6d8fe0', 0.16); g.fillStyle = 'rgba(140,170,240,0.12)'; ell(g, 960, 872, 150, 16);
+  rim(g, '#6d93f0', 3.2 / z, -2.6 / z, 0, c => manFront(g, 960, 862, 0.66, { fill: c }));
+  manFront(g, 960, 862, 0.66, { fill: C.ink, shirt: '#1b1d24' });
+  g.restore();
+  rain(g, t, 240, 1500, 'rgba(165,190,255,0.30)', 34, 1.4, 0);
+  shade(g, sine(prog(t, T.dark[0], T.dark[1])));
+  vignette(g, 0.75);
+}
+
+function fistScene(g, t) {   // shot 2: the hand, blue rim; the rim blooms into the warm room
+  const ein = outCubic(prog(t, B.s2, B.s2 + T.ease)), z = lerp(0.93, 1, ein) * (1 + 0.06 * sine(prog(t, B.s2, B.s3))), tight = 1 + 0.012 * sine(prog(t, 5.0, 6.2));
+  g.fillStyle = '#03050a'; g.fillRect(0, 0, W, H); glow(g, 1150, 380, 900, '#2a4a9a', 0.22);
+  rain(g, t, 120, 900, 'rgba(120,150,230,0.16)', 22, 1, 7);
+  g.save(); g.translate(960, 540); g.scale(z, z); g.translate(-960, -540);
+  rim(g, '#7c9fff', 3, -4, 0, c => fist(g, 960, 560, tight, { fill: c }));
+  fist(g, 960, 560, tight, { fill: '#030304', detail: true });
+  g.restore();
+  rain(g, t, 40, 2200, 'rgba(170,195,255,0.07)', 90, 7, 11); rain(g, t, 40, 2200, 'rgba(170,195,255,0.10)', 90, 3, 11);
+  shade(g, 1 - ein);
+  vignette(g, 0.7);
+  const k = prog(t, T.bloom[0], T.bloom[1]);
+  if (k > 0) {
+    const e = inOutCubic(k), x = lerp(1020, 1109, e), y = lerp(410, 372, e);
+    g.globalCompositeOperation = 'lighter';   // phase 1: the rim light swells into a glow and warms from blue to amber
+    const a = Math.sin(Math.PI * clamp01(k / 0.85)), col = mix('#7c9fff', C.amber, clamp01(k / 0.6));
+    const gr = g.createRadialGradient(x, y, 0, x, y, lerp(120, 1500, e)); gr.addColorStop(0, col.replace('rgb(', 'rgba(').replace(')', `,${0.9 * a})`)); gr.addColorStop(0.4, col.replace('rgb(', 'rgba(').replace(')', `,${0.35 * a})`)); gr.addColorStop(1, col.replace('rgb(', 'rgba(').replace(')', ',0)'));
+    g.fillStyle = gr; g.fillRect(0, 0, W, H);
+    g.globalCompositeOperation = 'source-over';
+    const w = inOutCubic(prog(k, 0.4, 1)), r = lerp(80, 2300, w);   // phase 2: a soft warm wash (the room's colour) grows from the light and fills the frame
+    if (w > 0) { const wg = g.createRadialGradient(x, y, r * 0.45, x, y, r); wg.addColorStop(0, '#5c3d1e'); wg.addColorStop(1, 'rgba(92,61,30,0)'); g.fillStyle = wg; g.fillRect(0, 0, W, H); }
+  }
+}
+
+function lampLevel(t) {   // 1 = lamp on; flickers, then dies
+  let L = 1; const fk = prog(t, T.flicker[0], T.flicker[1]);
+  if (fk > 0 && fk < 1) L = [1, 0.3, 0.95, 0.12, 0.8, 0.25, 1, 0.5][Math.min(7, Math.floor(fk * 8))];
+  return L * (1 - prog(t, T.shrink[0], T.shrink[0] + 0.3));
+}
+function room(g, t) {   // shots 3-4: the quiet house, one slow drift from the chair to the puppy
+  const ein = outCubic(prog(t, B.s3, B.s3 + T.ease)), pan = sine(prog(t, T.pan[0], T.pan[1])), cx = lerp(880, 1300, pan), z = lerp(0.93, 1, ein) * (1 + 0.05 * pan), L = lampLevel(t);
+  g.fillStyle = '#120b06'; g.fillRect(0, 0, W, H);
+  g.save(); g.translate(960, 540); g.scale(z, z); g.translate(-cx, -540);
+  const wg = g.createLinearGradient(0, 0, 0, 850); wg.addColorStop(0, '#1a1109'); wg.addColorStop(1, '#22160b'); g.fillStyle = wg; g.fillRect(-200, -200, 2600, 1050);
+  g.fillStyle = '#0d0805'; g.fillRect(-200, 850, 2600, 500); g.fillStyle = '#1b1209'; g.fillRect(-200, 846, 2600, 6);
+  g.fillStyle = '#0a0604'; g.fillRect(1290, 190, 240, 380); const gg = g.createLinearGradient(0, 200, 0, 560); gg.addColorStop(0, '#0d1626'); gg.addColorStop(1, '#070b14'); g.fillStyle = gg; g.fillRect(1302, 202, 216, 356);
+  g.save(); g.beginPath(); g.rect(1302, 202, 216, 356); g.clip(); g.translate(1100, 0); rain(g, t, 30, 700, 'rgba(110,140,210,0.25)', 16, 1, 21); g.restore();
+  g.fillStyle = '#0a0604'; g.fillRect(1406, 202, 8, 356); g.fillRect(1302, 376, 216, 8);
+  glow(g, 1040, 360, 1000, C.amber, 0.42 * L); glow(g, 1040, 350, 170, '#FFD9A0', 0.55 * L);
+  g.fillStyle = '#050302'; g.fillRect(1036, 380, 8, 470); ell(g, 1040, 850, 60, 10);
+  g.fillStyle = mix('#2a1a0c', '#F7CF95', L); poly(g, [[972, 300], [1108, 300], [1130, 386], [950, 386]]);
+  for (let i = 0; i < 46; i++) { const x = 780 + hash(i, 5) * 560 + Math.sin(t * 0.4 + i) * 18 + (t - 8) * 7, y = 200 + hash(i, 6) * 560 - (t - 8) * 9 * (0.5 + hash(i, 7)), d = Math.hypot(x - 1040, y - 380) / 520; g.globalAlpha = 0.35 * L * clamp01(1 - d); g.fillStyle = '#FFE2B0'; ell(g, x, ((y % 760) + 760) % 760 + 120, 2.2, 2.2); }
+  g.globalAlpha = 1;
+  rim(g, rgba(C.amber, 0.85 * L), 3, -2.4, 0, c => seated(g, 720, 850, 0.95, { fill: c }));
+  seated(g, 720, 850, 0.95, { fill: '#050302' });
+  const br = 1 + 0.04 * Math.sin((t - 8) * Math.PI * 2 / 2.4);
+  rim(g, rgba(C.amber, 0.9 * L), -2.6, -2.4, 0, c => puppy(g, 1330, 850, 1.0, { fill: c, breath: br }));
+  puppy(g, 1330, 850, 1.0, { fill: '#050302', breath: br });
+  g.restore();
+  shade(g, (1 - L) * 0.9);
+  shade(g, 1 - ein, '#5c3d1e');
+  vignette(g, 0.65);
+  const k = prog(t, T.shrink[0], T.shrink[1]);
+  if (k > 0) { const e = inOutCubic(k), lx = (1040 - cx) * z + 960, ly = (360 - 540) * z + 540, x = lerp(lx, 960, e), y = lerp(ly, 200, e), r = lerp(70, 6, e); glow(g, x, y, r * 5, C.gold, 0.5); g.fillStyle = mix(C.amber, C.gold, e); ell(g, x, y, r, r); }
+}
+
+const FLOOR = 800, COIN_R = 92, SPIN = 7 / 6.5;
+function coinScene(g, t) {   // shots 5-6: the coin falls in slow motion, hits, wobbles, settles; then turns edge-on into a gold line
+  g.fillStyle = '#030305'; g.fillRect(0, 0, W, H);
+  const lin = sine(prog(t, B.s5, B.s5 + 0.8)), edge = inOutCubic(prog(t, T.edge[0], T.edge[1]));
+  glow(g, 240, 540, 980, C.red, 0.34 * lin * (1 - edge)); glow(g, 1680, 540, 980, C.blue, 0.3 * lin * (1 - edge));
+  const fy = lerp(1300, FLOOR, sine(prog(t, 21.0, B.s6)));
+  g.fillStyle = rgba('#1a1c24', 1 - edge); g.fillRect(0, fy, W, 2); glow(g, 960, fy + 6, 360, C.red, 0.12 * (1 - edge) * prog(t, 23, 25));
+  if (t < B.s6) {
+    const p = prog(t, B.s5, B.s6), y = lerp(200, FLOOR - COIN_R, Math.pow(p, 1.7)), r = lerp(6, COIN_R, Math.pow(p, 1.15));
+    coinSpin(g, 960, y, r, Math.cos(Math.PI * 2 * SPIN * (t - B.s5)));
+  } else {
+    const bounce = Math.sin(Math.PI * prog(t, B.s6, T.wobble[0])) * 16, w = prog(t, T.wobble[0], T.wobble[1]);
+    const phi = (Math.PI / 2) * Math.pow(1 - w, 1.3), psi = Math.PI * 2 * (3 * w + 9 * w * w), k = lerp(0.3, 1, Math.sin(phi));
+    let rx = COIN_R, ry = COIN_R * k, rot = 0.3 * Math.sin(phi) * Math.sin(psi), x = 960 + Math.sin(psi) * 6 * Math.sin(phi), y = FLOOR - ry - bounce;
+    const push = 1 + 0.06 * sine(prog(t, T.wobble[1], T.edge[0]));
+    rx *= push; ry *= push; y = FLOOR - ry - bounce;
+    rx = lerp(rx, 1250, edge * edge); ry = lerp(ry, 1.2, edge); y = lerp(y, 540, edge); rot *= 1 - edge;
+    coinTilt(g, x, y, rx, ry, rot, COIN_R);
+    if (edge > 0) { g.strokeStyle = rgba(C.gold, edge); g.lineWidth = 3; g.beginPath(); g.moveTo(x - rx, y); g.lineTo(x + rx, y); g.stroke(); }
+  }
+  vignette(g, 0.7);
+}
+
+const MS = 1.2, MX = 960, MY = 1278;   // shot 7 drawing: the man's units -> screen
+const SEGS = [   // [beat, points in man units, colour]
+  [1, [[-26, -812], [-126, -792], [-152, -750], [-154, -706], [-156, -470]], '#E8E8EE'], [2, [[26, -812], [126, -792], [152, -750], [154, -706], [156, -470]], '#E8E8EE'],
+  [3, [[-26, -812], [-70, -640], [-14, -556]], '#E8E8EE'], [4, [[26, -812], [70, -640], [14, -556]], '#E8E8EE'],
+  [5, [[-114, -428], [114, -428]], '#E8E8EE'], [6, [[0, -806], [0, -664]], C.red],
+  [7, [[-156, -470], [-112, -466], [-114, -428]], '#E8E8EE'], [8, [[156, -470], [112, -466], [114, -428]], '#E8E8EE'],
+  [10, [[0, -1000], [0, -430]], 'rgba(232,232,238,0.35)'], [11, [[-10, -560], [10, -560]], '#E8E8EE']
+];
+function drawingScene(g, t) {   // shot 7: lines snap on with the pulse and draw the suit; the silhouette fills in
+  g.fillStyle = '#05060a'; g.fillRect(0, 0, W, H); glow(g, 960, 520, 900, '#1d2c55', 0.35);
+  const z = 1 + 0.1 * sine(prog(t, B.s7, B.s8)), fold = inOutCubic(prog(t, T.fold[0], T.fold[1]));
+  g.save(); g.translate(960, 540); g.scale(z, z); g.translate(-960, -540);
+  const fa = sine(prog(t, 34.4, 37.6)) * (1 - fold);
+  if (fa > 0) { g.globalAlpha = fa; manFront(g, MX, MY, MS, { fill: '#000', shirt: '#cfd2d8' }); g.globalAlpha = 1; }
+  const S = p => [MX + p[0] * MS, MY + p[1] * MS], F = p => [lerp(p[0], 960 + Math.max(-336, Math.min(336, (p[0] - 960) * 1.63)), fold), lerp(p[1], 540, fold)];   // folds onto the pencil's line (672 px)
+  const line = (pts, frac, col, lw) => { let tot = 0; const L = []; for (let i = 1; i < pts.length; i++) { const d = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]); L.push(d); tot += d; }
+    let left = tot * frac; g.strokeStyle = col; g.lineWidth = lw; g.lineCap = 'round'; g.lineJoin = 'round'; g.beginPath(); g.moveTo(pts[0][0], pts[0][1]);
+    for (let i = 1; i < pts.length && left > 0; i++) { const s = Math.min(1, left / L[i - 1]); g.lineTo(lerp(pts[i - 1][0], pts[i][0], s), lerp(pts[i - 1][1], pts[i][1], s)); left -= L[i - 1]; } g.stroke(); };
+  // line 0: the coin's gold edge becomes the chest guide line
+  const s0 = outExpo(prog(t, B.s7, B.s7 + 0.35)), half = lerp(1250, 170 * MS, s0);
+  line([F([960 - half, 540]), F([960 + half, 540])], 1, mix(C.gold, '#8a8f9c', s0), lerp(3, 2, s0));
+  SEGS.forEach(([b, pts, col]) => { const ts = B.s7 + b * T.beat, d = outExpo(prog(t, ts, ts + 0.16)); if (d > 0) line(pts.map(S).map(F), d, col, 2.6); });
+  const hc = outExpo(prog(t, B.s7 + 9 * T.beat, B.s7 + 9 * T.beat + 0.2)); if (hc > 0) { const c = F(S([0, -905])); g.strokeStyle = 'rgba(232,232,238,0.6)'; g.lineWidth = 2; g.beginPath(); g.arc(c[0], c[1], 74 * MS * (1 - fold), -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * hc); g.stroke(); }
+  g.restore();
+  vignette(g, 0.7);
+}
+
+const PROBE = document.createElement('canvas').getContext('2d');
+function pencilScene(g, t) {   // shot 8: the pencil snaps in, then turns slowly to point at the camera; its tip becomes the corridor's far point
+  g.fillStyle = '#04050a'; g.fillRect(0, 0, W, H); glow(g, 960, 540, 800, C.blue, 0.14);
+  g.strokeStyle = 'rgba(220,226,240,0.12)'; g.lineWidth = 1.5; g.beginPath();
+  for (let i = 0; i < 14; i++) { const y = 540 + (hash(i, 31) - 0.5) * 760, dir = i % 2 ? 1 : -1, x = ((hash(i, 32) * 2400 + dir * (t - B.s8) * (260 + hash(i, 33) * 300)) % 2400 + 2400) % 2400 - 240; g.moveTo(x, y); g.lineTo(x + 220, y); }
+  g.stroke();
+  const snap = outExpo(prog(t, T.snap[0], T.snap[1])), turn = sine(prog(t, T.turn[0], T.turn[1])), into = inOutCubic(prog(t, T.into[0], T.into[1]));
+  const yaw = turn * 1.5, pitch = -0.16 * turn, R = lerp(1.2, 17, snap), VP = [960, 470];
+  const probe = pencil3D(PROBE, yaw, pitch, R, { cx: 960, cy: 540, dx: 0, dy: 0, shrink: 1 - 0.97 * into });   // where the tip lands, so it can be steered onto the corridor's far point
+  pencil3D(g, yaw, pitch, R, { cx: 960, cy: 540, dx: (VP[0] - probe[0]) * into, dy: (VP[1] - probe[1]) * into, shrink: 1 - 0.97 * into });
+  if (into > 0) { g.strokeStyle = rgba('#2a2f3c', into); g.lineWidth = 2; g.beginPath(); [[-1.1, 0.95], [1.1, 0.95], [-1.1, -0.85], [1.1, -0.85]].forEach(([dx, dy]) => { const L = 2200 * into; const n = Math.hypot(dx, dy); g.moveTo(VP[0], VP[1]); g.lineTo(VP[0] + dx / n * L, VP[1] + dy / n * L); }); g.stroke(); }
+  vignette(g, 0.7);
+}
+
+const VP = [960, 470], FL = 785, HW = 1.1, FH = 0.95, CH = 0.85;
+const XL = z => VP[0] - FL * HW / z, XR = z => VP[0] + FL * HW / z, YH = (z, h) => VP[1] + FL * (FH - h) / z;
+const PANELS = Array.from({ length: 15 }, (_, i) => 16 - i);   // depth of each light, far to near
+function panelLevel(t, i) {
+  const on = T.flash0 + i * T.flashGap; let b = t < on ? 0.04 : 0.45 + 0.55 * Math.exp(-(t - on) * 6);
+  const off = T.lightsOff[0] + i * (T.lightsOff[1] - T.lightsOff[0]) / (PANELS.length - 1); return lerp(b, 0.02, prog(t, off, off + 0.12));
+}
+function corridorScene(g, t) {   // shots 9-10: the corridor; he walks toward us as the lights come on, then go out; the camera closes in and stops
+  g.fillStyle = '#030407'; g.fillRect(0, 0, W, H);
+  const zk = inOutCubic(prog(t, T.zoom[0], T.zoom[1])), Z = (1 + 0.04 * sine(prog(t, B.s9, T.zoom[0]))) * lerp(1, 3, zk), Fp = [960, 300];
+  g.save(); g.translate(lerp(Fp[0], 960, zk), lerp(Fp[1], 520, zk)); g.scale(Z, Z); g.translate(-Fp[0], -Fp[1]);
+  const zf = 40, zn = 0.35;
+  g.fillStyle = '#090b11'; poly(g, [[XL(zf), YH(zf, 1.8)], [XL(zf), YH(zf, 0)], [XL(zn), YH(zn, 0)], [XL(zn), YH(zn, 1.8)]]); poly(g, [[XR(zf), YH(zf, 1.8)], [XR(zf), YH(zf, 0)], [XR(zn), YH(zn, 0)], [XR(zn), YH(zn, 1.8)]]);
+  g.fillStyle = '#05060a'; poly(g, [[XL(zf), YH(zf, 1.8)], [XR(zf), YH(zf, 1.8)], [XR(zn), YH(zn, 1.8)], [XL(zn), YH(zn, 1.8)]]);
+  const fg = g.createLinearGradient(0, VP[1], 0, 1400); fg.addColorStop(0, '#0b0d14'); fg.addColorStop(1, '#040509'); g.fillStyle = fg; poly(g, [[XL(zf), YH(zf, 0)], [XR(zf), YH(zf, 0)], [XR(zn), YH(zn, 0)], [XL(zn), YH(zn, 0)]]);
+  let lv = 0;
+  PANELS.forEach((z, i) => {
+    const b = panelLevel(t, i); lv += b / PANELS.length; const z2 = z + 0.4;
+    g.fillStyle = mix('#11141d', '#a9c0ff', b);
+    poly(g, [[XL(z), YH(z, 1.55)], [XL(z2), YH(z2, 1.55)], [XL(z2), YH(z2, 0.2)], [XL(z), YH(z, 0.2)]]); poly(g, [[XR(z), YH(z, 1.55)], [XR(z2), YH(z2, 1.55)], [XR(z2), YH(z2, 0.2)], [XR(z), YH(z, 0.2)]]);
+    glow(g, XL(z), YH(z, 0), FL * 0.9 / z, '#7e9cf0', 0.12 * b); glow(g, XR(z), YH(z, 0), FL * 0.9 / z, '#7e9cf0', 0.12 * b);
+  });
+  // the symbols gather behind him, in gold light, at the far end
+  const gk = outCubic(prog(t, 47.0, 49.5)), bob = Math.sin(t * 1.3) * 4;
+  glow(g, 960, 430, 150, C.gold, 0.28 * gk * (1 - 0.6 * prog(t, T.lightsOff[0], T.lightsOff[1])));
+  if (gk > 0) { coinSpin(g, lerp(700, 930, gk), 420 + bob, 20, Math.cos(t * 1.6)); pencil2D(g, lerp(1220, 995, gk), 425 - bob, 70, -0.5, gk); }
+  // him: walking toward camera at one steady pace, slowing to a stop
+  const s = prog(t, T.walk[0], T.walk[1]), zm = lerp(14, 2.7, 1 - Math.pow(1 - s, 2)), amp = 1 - prog(t, 54.4, 55.2), ph = (t - B.s9) * Math.PI * 2 * 0.9;
+  const ms = FL * 1.85 / zm / 990, feet = YH(zm, 0), lift = [Math.max(0, Math.sin(ph)) * 40 * amp, Math.max(0, -Math.sin(ph)) * 40 * amp], bobm = -Math.abs(Math.sin(ph)) * 8 * amp;
+  const L10 = 1 - prog(t, T.lightOut[0], T.lightOut[1]);
+  rim(g, rgba('#9bb6ff', Math.min(1, lv * 1.6) * L10), 0, -2.2 / Z, 0, c => manFront(g, 960, feet, ms, { fill: c, lift, bob: bobm }));
+  rim(g, rgba('#8a909e', 0.55 * L10 * prog(t, 53.5, 55.5)), 2.4 / Z, -2.4 / Z, 0, c => manFront(g, 960, feet, ms, { fill: c, lift, bob: bobm }));
+  glow(g, 960, feet - 820 * ms, 260 * ms * 4, '#8a909e', 0.1 * L10 * prog(t, 53.5, 55.5));
+  manFront(g, 960, feet, ms, { fill: C.ink, lift, bob: bobm, shirt: mix('#05060a', '#2a2d35', L10) });
+  g.restore();
+  vignette(g, 0.75);
+  shade(g, 0.88 * sine(prog(t, T.lightOut[0], T.lightOut[1])));   // the light goes out
+}
+
+// ===== frame =====
+function scene(g, t) {
+  if (t < B.s2) alley(g, t); else if (t < B.s3) fistScene(g, t); else if (t < B.s5) room(g, t); else if (t < B.s7) coinScene(g, t);
+  else if (t < B.s8) drawingScene(g, t); else if (t < B.s9) pencilScene(g, t); else corridorScene(g, t);
+  LINES.forEach(([s, a, b]) => arText(g, s, 960, 975, 48, 700, '#F2F2F4', a, b, t, { maxW: 1350, lh: 74 }));
+  arText(g, DECISION.text, 960, 400, 80, 700, '#FFFFFF', DECISION.in, DECISION.out, t, { colors: { 'قرار': C.red }, stagger: 0.12, dur: 0.75 });
+  arText(g, LAST, 960, 560, 68, 400, '#FFFFFF', T.lastLine, T.fade[0], t, { stagger: 0.12, dur: 0.8 });
+  latin(g, 'Fan-made tribute. Not affiliated with Lionsgate or the John Wick films.', 960, 1010, 24, '#8b8f99', T.fan, T.fade[0], t);
+  shade(g, sine(prog(t, T.fade[0], T.fade[1])));
+}
+function render(t) {
+  const A = ACC.getContext('2d'); A.setTransform(1, 0, 0, 1, 0, 0); A.globalAlpha = 1; A.clearRect(0, 0, ACC.width, ACC.height);
+  for (let i = 0; i < SUB; i++) {
+    const ts = SUB === 1 ? t : Math.max(0, Math.min(B.END - 1e-3, t + (i / (SUB - 1) - 0.5) * SHUTTER)), g = WORK.getContext('2d');
+    g.setTransform(SCALE, 0, 0, SCALE, 0, 0); g.globalAlpha = 1; g.filter = 'none'; g.direction = 'ltr'; scene(g, ts);
+    A.globalAlpha = 1 / (i + 1); A.drawImage(WORK, 0, 0);
+  }
+  MAIN.setTransform(1, 0, 0, 1, 0, 0); MAIN.globalAlpha = 1; MAIN.drawImage(ACC, 0, 0);
+}
+
+window.EVENTS = [
+  { name: 'rain', t: 0 }, { name: 'push.dark', t: T.dark[0] }, { name: 'hand', t: B.s2 }, { name: 'fist.tight', t: 5.0 }, { name: 'bloom', t: T.bloom[0] + 0.2 }, { name: 'room', t: B.s3 },
+  { name: 'puppy', t: B.s4 }, { name: 'flicker', t: T.flicker[0] }, { name: 'light.off', t: T.shrink[0] }, { name: 'coin.start', t: B.s5 }, { name: 'coin.hit', t: B.s6 },
+  { name: 'coin.settle', t: T.wobble[1] }, { name: 'decision', t: DECISION.in }, { name: 'edge', t: T.edge[0] }, { name: 'snap.0', t: B.s7 },
+  ...SEGS.map(([b]) => ({ name: 'snap.' + b, t: B.s7 + b * T.beat })), { name: 'snap.9', t: B.s7 + 9 * T.beat }, { name: 'fold', t: T.fold[0] },
+  { name: 'pencil.snap', t: T.snap[0] }, { name: 'turn', t: T.turn[0] }, { name: 'into', t: T.into[0] }, { name: 'corridor', t: B.s9 },
+  ...PANELS.map((_, i) => ({ name: 'flash.' + i, t: T.flash0 + i * T.flashGap })), { name: 'lights.off', t: T.lightsOff[0] }, { name: 'stop', t: T.walk[1] },
+  { name: 'light.out', t: T.lightOut[0] }, { name: 'last.line', t: T.lastLine }, { name: 'end', t: B.END }
+].sort((a, b) => a.t - b.t);
+window.TOTAL = B.END; window.renderAt = t => render(t);
+window.ready = Promise.all(['700 48px AR', '400 48px AR', '400 24px UI'].map(f => document.fonts.load(f, 'ابت'))).catch(() => {}).then(() => { if (q.has('t')) render(parseFloat(q.get('t'))); else (function tick(n) { render((n / 1000) % B.END); requestAnimationFrame(tick); })(0); return true; });
+</script></body></html>
