@@ -1,0 +1,231 @@
+[
+ {
+  "file": "voice_30s",
+  "at": 0,
+  "db": -3,
+  "align": "start"
+ },
+ {
+  "type": "bed",
+  "file": "JW Rain",
+  "at": 0,
+  "to": 5.2,
+  "db": -30,
+  "fade_in": 0.5,
+  "fade_out": 0.6
+ },
+ {
+  "type": "bed",
+  "file": "JW Sub Drone",
+  "at": 0,
+  "to": 10.2,
+  "db": -24,
+  "fade_in": 1.0,
+  "fade_out": 0.8
+ },
+ {
+  "file": "JW Piano",
+  "at": 5.0,
+  "db": -21,
+  "align": "start",
+  "dur": 5.0
+ },
+ {
+  "type": "bed",
+  "file": "JW Dark Pad",
+  "at": 10.0,
+  "to": 20.2,
+  "db": -26,
+  "fade_in": 0.6,
+  "fade_out": 0.4
+ },
+ {
+  "type": "bed",
+  "file": "JW Rain",
+  "at": 10.0,
+  "to": 15.2,
+  "db": -28,
+  "fade_in": 0.3,
+  "fade_out": 0.4
+ },
+ {
+  "file": "JW Coin Ring",
+  "at": 15.0,
+  "db": -15,
+  "align": "start"
+ },
+ {
+  "file": "JW Pulse",
+  "at": 20.0,
+  "db": -19,
+  "align": "start",
+  "dur": 5.0
+ },
+ {
+  "file": "JW Drum",
+  "at": 25.0,
+  "db": -22,
+  "align": "start"
+ },
+ {
+  "file": "JW Drum",
+  "at": 25.5,
+  "db": -21,
+  "align": "start"
+ },
+ {
+  "file": "JW Drum",
+  "at": 26.0,
+  "db": -20,
+  "align": "start"
+ },
+ {
+  "file": "JW Drum",
+  "at": 26.5,
+  "db": -19,
+  "align": "start"
+ },
+ {
+  "file": "JW Drum",
+  "at": 27.0,
+  "db": -18,
+  "align": "start"
+ },
+ {
+  "file": "JW Drum",
+  "at": 27.5,
+  "db": -17,
+  "align": "start"
+ },
+ {
+  "file": "Riser",
+  "at": 28.0,
+  "db": -24,
+  "align": "end"
+ },
+ {
+  "file": "JW Impact",
+  "at": 28.0,
+  "db": -14,
+  "align": "start"
+ },
+ {
+  "event": "cut.17",
+  "file": "Whoosh 1",
+  "db": -28,
+  "align": "start",
+  "pitch": 0.9
+ },
+ {
+  "event": "cut.11",
+  "file": "Whoosh 1",
+  "db": -28,
+  "align": "start",
+  "pitch": 0.9
+ },
+ {
+  "event": "cut.15",
+  "file": "Whoosh 1",
+  "db": -28,
+  "align": "start",
+  "pitch": 0.9
+ },
+ {
+  "event": "cut.06",
+  "file": "Whoosh 1",
+  "db": -28,
+  "align": "start",
+  "pitch": 0.9
+ },
+ {
+  "event": "cut.07",
+  "file": "Whoosh 1",
+  "db": -28,
+  "align": "start",
+  "pitch": 0.9
+ },
+ {
+  "event": "cut.04",
+  "file": "Whoosh 1",
+  "db": -28,
+  "align": "start",
+  "pitch": 0.9
+ },
+ {
+  "event": "cut.20",
+  "file": "Synth Shutter",
+  "db": -24,
+  "align": "peak",
+  "pitch": 1.2
+ },
+ {
+  "event": "cut.03",
+  "file": "Whoosh 1",
+  "db": -28,
+  "align": "start",
+  "pitch": 0.9
+ },
+ {
+  "event": "cut.09",
+  "file": "Whoosh 1",
+  "db": -28,
+  "align": "start",
+  "pitch": 0.9
+ },
+ {
+  "event": "cut.19",
+  "file": "Whoosh 1",
+  "db": -28,
+  "align": "start",
+  "pitch": 0.9
+ },
+ {
+  "event": "cut.08",
+  "file": "Whoosh 1",
+  "db": -28,
+  "align": "start",
+  "pitch": 0.9
+ },
+ {
+  "event": "cut.14",
+  "file": "Synth Shutter",
+  "db": -24,
+  "align": "peak",
+  "pitch": 1.2
+ },
+ {
+  "event": "cut.12",
+  "file": "Synth Shutter",
+  "db": -24,
+  "align": "peak",
+  "pitch": 1.2
+ },
+ {
+  "event": "cut.16",
+  "file": "Synth Shutter",
+  "db": -24,
+  "align": "peak",
+  "pitch": 1.2
+ },
+ {
+  "event": "cut.13",
+  "file": "Whoosh 1",
+  "db": -28,
+  "align": "start",
+  "pitch": 0.9
+ },
+ {
+  "event": "cut.18",
+  "file": "Whoosh 1",
+  "db": -28,
+  "align": "start",
+  "pitch": 0.9
+ },
+ {
+  "event": "cut.10",
+  "file": "Whoosh 1",
+  "db": -28,
+  "align": "start",
+  "pitch": 0.9
+ }
+]

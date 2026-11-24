@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="ar"><head><meta charset="utf-8"><title>John Wick 30s</title>
+<style>
+  @font-face { font-family: AR; src: url("assets/fonts/NotoKufiArabic-Bold.ttf"); font-weight: 700; }
+  @font-face { font-family: UI; src: url("assets/fonts/Inter-Medium.otf"); font-weight: 400; }
+  html,body{margin:0;background:#000;height:100%} body{display:flex;align-items:center;justify-content:center} canvas{height:min(100vh,calc(100vw*16/9));aspect-ratio:9/16;display:block}
+</style></head><body><canvas id="c"></canvas>
+<script>
+// John Wick 30s: vertical, built from the user's own 18 artworks. Every cut is a reveal: the next picture grows out of a shape
+// from its subject, with an accent ring on the edge. Page contract: canvas #c, renderAt(t), TOTAL, ready, EVENTS, ?t=, ?scale=.
+
+// ===== BEATS: every time lives here =====
+const END = 30, SLOT = 5;
+const ACC = ['#8338EC', '#D9B45A', '#C8102E', '#D9B45A', '#C8102E', '#FB5607'];   // one accent per section (palettes 01/02)
+// [start, picture, crop [x,y,w,h] or null, focus (0..1 in the crop), fit, reveal: 'circle' | 'rect', extra]
+const CUTS = [
+  [0.0, '05', null, [0.62, 0.37], 'cover', 'circle'], [1.7, '17', null, [0.52, 0.30], 'cover', 'circle'], [3.4, '11', null, [0.25, 0.32], 'cover', 'circle'],
+  [5.0, '15', null, [0.50, 0.33], 'cover', 'circle'], [7.5, '06', null, [0.50, 0.80], 'cover', 'circle', 'driftUp'],
+  [10.0, '07', null, [0.38, 0.60], 'cover', 'circle', 'rain'], [11.7, '04', [163, 0, 440, 1307], [0.40, 0.53], 'cover', 'circle'], [13.4, '20', [44, 0, 654, 1308], [0.72, 0.45], 'cover', 'rect', 'streaks'],
+  [15.0, '03', [0, 300, 736, 913], [0.50, 0.06], 'contain', 'circle'], [16.7, '09', null, [0.50, 0.38], 'cover', 'circle'], [18.4, '19', null, [0.50, 0.35], 'contain', 'circle', 'bar,top'],
+  [20.0, '08', null, [0.48, 0.72], 'cover', 'circle'], [21.3, '14', null, [0.60, 0.22], 'cover', 'rect'], [22.6, '12', null, [0.45, 0.22], 'contain', 'rect'], [23.8, '16', null, [0.30, 0.35], 'cover', 'rect'],
+  [25.0, '13', null, [0.40, 0.22], 'cover', 'circle'], [26.6, '18', null, [0.55, 0.35], 'cover', 'circle'], [28.0, '10', null, [0.50, 0.33], 'cover', 'circle', 'hold']
+];
+const LINES = ['كان يظن إن الماضي خلص.', 'بيت هادئ، وجرو صغير ينام عند قدميه.', 'وفي ليلة مطر... أخذوا آخر شي يربطه بالحياة.', 'والعملة الذهبية... عهد قديم انكسر.', 'ما يرجع بغضب أعمى... يرجع بدقّة وتركيز.', 'مو كل من يمشي بهدوء... ضعيف.'];
+const REV = { circle: 0.5, rect: 0.28 };   // reveal lengths
+
+const W = 1080, H = 1920, q = new URLSearchParams(location.search), SCALE = parseFloat(q.get('scale') || '1');
+const SUB = parseInt(q.get('sub') || '4', 10), FPS = 25, SHUTTER = 0.5 / FPS;
+const cv = document.getElementById('c'); cv.width = W * SCALE; cv.height = H * SCALE; const MAIN = cv.getContext('2d');
+const mk = (w = cv.width, h = cv.height) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
+const WORK = mk(), ACCU = mk();
+const clamp01 = v => Math.max(0, Math.min(1, v)), lerp = (a, b, k) => a + (b - a) * k, prog = (t, a, b) => clamp01((t - a) / (b - a));
+const outCubic = k => 1 - Math.pow(1 - clamp01(k), 3), inOutCubic = k => { k = clamp01(k); return k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2; };
+const sine = k => 0.5 - 0.5 * Math.cos(Math.PI * clamp01(k)), fract = v => v - Math.floor(v), hash = (i, j) => fract(Math.sin(i * 127.1 + j * 311.7) * 43758.5453);
+const rgba = (h, a) => `rgba(${parseInt(h.slice(1, 3), 16)},${parseInt(h.slice(3, 5), 16)},${parseInt(h.slice(5, 7), 16)},${clamp01(a)})`;
+
+// ===== pictures =====
+const IMG = {}, BG = {};
+function load(n) { return new Promise(r => { const im = new Image(); im.onload = () => { IMG[n] = im; r(); }; im.onerror = r; im.src = `assets/pictures/${n}.jpg`; }); }
+function crop(c) { const im = IMG[c[1]]; return c[2] || [0, 0, im.width, im.height]; }
+function buildBg(c) {   // a dark, blurred fill behind pictures that don't fill the frame
+  const im = IMG[c[1]], cr = crop(c), b = mk(270, 480), g = b.getContext('2d'), s = Math.max(270 / cr[2], 480 / cr[3]);
+  g.filter = 'blur(10px) brightness(0.45)'; g.drawImage(im, cr[0], cr[1], cr[2], cr[3], 135 - cr[2] * s / 2, 240 - cr[3] * s / 2, cr[2] * s, cr[3] * s); BG[c[1]] = b;
+}
+function layout(c, push) {   // where the picture sits on screen (cover or contain), pushed in around its focus point
+  const cr = crop(c), s0 = c[4] === 'cover' ? Math.max(W / cr[2], H / cr[3]) : Math.min(W / cr[2], H / cr[3]), s = s0 * push;
+  const fx = c[3][0] * cr[2], fy = c[3][1] * cr[3], w = cr[2] * s, h = cr[3] * s;
+  let x = W / 2 - w / 2, y = H / 2 - h / 2;
+  const ax = x + fx * s0 * (push - 1) * 0, k = push - 1; x -= (fx - cr[2] / 2) * s0 * k; y -= (fy - cr[3] / 2) * s0 * k;   // push toward the focus
+  if (c[4] === 'cover') { x = Math.min(0, Math.max(W - w, x)); y = Math.min(0, Math.max(H - h, y)); }
+  if ((c[6] || '').includes('top')) y = 40 - (h - cr[3] * s0) * c[3][1];   // pinned to the top, so its own lettering clears the voice line
+  return { x, y, w, h, s, fx: x + fx * s, fy: y + fy * s };
+}
+function drawCut(g, i, t) {
+  const c = CUTS[i], next = CUTS[i + 1], t0 = c[0], t1 = next ? next[0] + REV[next[5]] : END, u = prog(t, t0, t1);
+  const hold = c[6] === 'hold', drift = c[6] === 'driftUp', push = drift ? 1.35 : hold ? 1 + 0.03 * outCubic(prog(t, t0, t0 + 0.6)) : 1 + 0.09 * sine(u * 0.85 + 0.15 * u), L = layout(c, push), cr = crop(c);
+  if (drift) L.y = lerp(H - L.h, (H - L.h) * 0.2, sine(u));   // camera travels up from the figure to the letters
+  if (c[4] === 'contain') g.drawImage(BG[c[1]], 0, 0, W, H); else { g.fillStyle = '#07080B'; g.fillRect(0, 0, W, H); }
+  const dy = 0;
+  g.drawImage(IMG[c[1]], cr[0], cr[1], cr[2], cr[3], L.x, L.y + dy, L.w, L.h);
+  if (c[6] === 'rain') rain(g, t, 260, 2200, 'rgba(255,170,160,0.28)', 46, 2, 1);
+  if (c[6] === 'streaks') { g.strokeStyle = 'rgba(255,90,90,0.35)'; g.lineWidth = 3; g.beginPath(); for (let k = 0; k < 40; k++) { const y = hash(k, 3) * H, x = ((hash(k, 4) * 1600 + t * 2600) % 1600) - 300; g.moveTo(x, y); g.lineTo(x + 220, y); } g.stroke(); }
+  if ((c[6] || '').includes('bar')) { const b = sine(prog(t, t0 + 0.3, t0 + 1.2)); g.fillStyle = rgba('#8338EC', 0.35); g.fillRect(-W + b * W * 2, L.y + L.h * 0.27, W, L.h * 0.07); }
+  return L;
+}
+function rain(g, t, n, speed, col, len, lw, seed) {
+  g.strokeStyle = col; g.lineWidth = lw; g.lineCap = 'round'; g.beginPath();
+  for (let i = 0; i < n; i++) { const sp = speed * (0.8 + 0.4 * hash(i, seed + 3)), y = ((hash(i, seed + 2) * 2200 + t * sp) % 2200) - 140, x = hash(i, seed + 1) * 1300 - 110 - y * 0.1; g.moveTo(x, y); g.lineTo(x - len * 0.1, y + len); }
+  g.stroke();
+}
+
+// ===== text: the voice line, word by word (right to left), fading up from blurred to sharp =====
+function arText(g, str, cx, cy, size, color, tIn, tOut, t, o = {}) {
+  const st = o.stagger ?? 0.08, dur = o.dur ?? 0.5, rise = 20, maxW = o.maxW ?? 900, lh = size * 1.65;
+  g.font = `700 ${size}px AR`; g.direction = 'rtl'; g.textAlign = 'right'; g.textBaseline = 'alphabetic';
+  const ws = str.split(' '), sp = g.measureText(' ').width, wd = ws.map(w => g.measureText(w).width), lines = []; let cur = [], cw = 0;
+  ws.forEach((w, i) => { const add = cur.length ? sp + wd[i] : wd[i]; if (cur.length && cw + add > maxW) { lines.push(cur); cur = []; cw = 0; } cw += cur.length ? sp + wd[i] : wd[i]; cur.push(i); });
+  if (cur.length) lines.push(cur);
+  lines.forEach((ln, li) => {
+    const tot = ln.reduce((a, i) => a + wd[i], 0) + sp * (ln.length - 1); let x = cx + tot / 2; const y = cy + (li - (lines.length - 1) / 2) * lh;
+    ln.forEach(i => {
+      const pin = outCubic(prog(t, tIn + i * st, tIn + i * st + dur)), pout = sine(prog(t, tOut, tOut + 0.35)), a = pin * (1 - pout);
+      if (a > 0.003) { g.globalAlpha = a; const b = (1 - pin) * 10 * SCALE; g.filter = b > 0.3 ? `blur(${b}px)` : 'none'; g.fillStyle = color; g.fillText(ws[i], x, y + (1 - pin) * rise); }
+      x -= wd[i] + sp;
+    });
+  });
+  g.globalAlpha = 1; g.filter = 'none'; g.direction = 'ltr';
+}
+
+// ===== frame =====
+function scene(g, t) {
+  let i = 0; while (i + 1 < CUTS.length && t >= CUTS[i + 1][0]) i++;
+  // the outgoing picture keeps moving underneath while the new one grows out of its shape
+  const c = CUTS[i], k = prog(t, c[0], c[0] + REV[c[5]]);
+  if (i > 0 && k < 1) drawCut(g, i - 1, t);
+  if (i === 0 || k >= 1) drawCut(g, i, t);
+  else {
+    const L = layout(c, 1), e = inOutCubic(k), R = Math.hypot(Math.max(L.fx, W - L.fx), Math.max(L.fy, H - L.fy)) * 1.03, acc = ACC[Math.min(5, Math.floor(c[0] / SLOT))];
+    g.save(); g.beginPath();
+    if (c[5] === 'circle') { const r = lerp(8, R, e); g.arc(L.fx, L.fy, r, 0, Math.PI * 2); g.clip(); drawCut(g, i, t); g.restore(); g.strokeStyle = rgba(acc, 1 - e * 0.6); g.lineWidth = lerp(14, 4, e); g.beginPath(); g.arc(L.fx, L.fy, r, 0, Math.PI * 2); g.stroke(); }
+    else { const hw = lerp(30, W * 1.1, e), hh = lerp(30, H * 1.1, e); g.rect(L.fx - hw, L.fy - hh, hw * 2, hh * 2); g.clip(); drawCut(g, i, t); g.restore(); g.strokeStyle = rgba(acc, 1 - e * 0.6); g.lineWidth = lerp(12, 4, e); g.strokeRect(L.fx - hw, L.fy - hh, hw * 2, hh * 2); }
+  }
+  // lower-third: a dark gradient so the line always reads, then the line
+  const gr = g.createLinearGradient(0, H * 0.66, 0, H); gr.addColorStop(0, 'rgba(7,8,11,0)'); gr.addColorStop(1, 'rgba(7,8,11,0.88)'); g.fillStyle = gr; g.fillRect(0, H * 0.66, W, H * 0.34);
+  LINES.forEach((s, n) => { const a = n * SLOT + 0.35, b = n === 5 ? END + 1 : (n + 1) * SLOT - 0.4; arText(g, s, W / 2, 1600, 62, '#E9ECEF', a, b, t); });
+  // a thin accent bar under the line, in the section's colour
+  const n = Math.min(5, Math.floor(t / SLOT)), bw = 160 * outCubic(prog(t, n * SLOT + 0.3, n * SLOT + 0.9)) * (n === 5 ? 1 : 1 - sine(prog(t, (n + 1) * SLOT - 0.4, (n + 1) * SLOT - 0.05)));
+  g.fillStyle = ACC[n]; g.fillRect(W / 2 - bw / 2, 1740, bw, 6);
+  // end card: the fan line
+  const fa = outCubic(prog(t, 28.6, 29.2)); if (fa > 0) { g.globalAlpha = fa * 0.85; g.font = '400 24px UI'; g.textAlign = 'center'; g.fillStyle = '#E9ECEF'; g.fillText('Fan-made tribute. Not affiliated with Lionsgate or the John Wick films.', W / 2, 1860); g.globalAlpha = 1; }
+  // vignette + grain
+  const v = g.createRadialGradient(W / 2, H / 2, 500, W / 2, H / 2, 1150); v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,0.55)'); g.fillStyle = v; g.fillRect(0, 0, W, H);
+}
+function render(t) {
+  const A = ACCU.getContext('2d'); A.setTransform(1, 0, 0, 1, 0, 0); A.globalAlpha = 1; A.clearRect(0, 0, ACCU.width, ACCU.height);
+  for (let i = 0; i < SUB; i++) {
+    const ts = SUB === 1 ? t : Math.max(0, Math.min(END - 1e-3, t + (i / (SUB - 1) - 0.5) * SHUTTER)), g = WORK.getContext('2d');
+    g.setTransform(SCALE, 0, 0, SCALE, 0, 0); g.globalAlpha = 1; g.filter = 'none'; scene(g, ts); A.globalAlpha = 1 / (i + 1); A.drawImage(WORK, 0, 0);
+  }
+  MAIN.setTransform(1, 0, 0, 1, 0, 0); MAIN.drawImage(ACCU, 0, 0);
+}
+window.EVENTS = [...CUTS.map((c, i) => ({ name: 'cut.' + c[1], t: c[0] })), ...LINES.map((_, n) => ({ name: 'line.' + (n + 1), t: n * SLOT + 0.4 })), { name: 'endcard', t: 28.0 }, { name: 'end', t: END }].sort((a, b) => a.t - b.t);
+window.TOTAL = END; window.renderAt = t => render(t);
+window.ready = Promise.all([...new Set(CUTS.map(c => c[1]))].map(load).concat([document.fonts.load('700 62px AR', 'ابت'), document.fonts.load('400 24px UI')])).then(() => {
+  CUTS.forEach(c => { if (c[4] === 'contain') buildBg(c); });
+  if (q.has('t')) render(parseFloat(q.get('t'))); else (function tick(n) { render((n / 1000) % END); requestAnimationFrame(tick); })(0); return true;
+});
+</script></body></html>
