@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Storyboard</title>
+<style>
+  @font-face { font-family: Brand; src: url("assets/fonts/Inter-Medium.otf"); font-weight: 400; }
+  @font-face { font-family: Brand; src: url("assets/fonts/InterDisplay-Bold.otf"); font-weight: 600; }
+  @font-face { font-family: Brand; src: url("assets/fonts/InterDisplay-ExtraBold.otf"); font-weight: 700 800; }
+  * { box-sizing: border-box; } html, body { margin: 0; background: #0A0B1E; color: #f2f2f4; font-family: Brand, system-ui, sans-serif; }
+  .board { width: 1920px; padding: 40px 30px; } h1 { margin: 0 0 6px; font-size: 42px; font-weight: 800; letter-spacing: -1.2px; } h1 span { color: #8a8a94; font-weight: 400; }
+  .sub { font-size: 18px; color: #b9b9c1; margin-bottom: 26px; max-width: 1700px; line-height: 1.45; }
+  .grid { display: grid; grid-template-columns: repeat(4, 450px); gap: 30px 26px; }
+  .frame { position: relative; width: 450px; height: 253px; border-radius: 10px; overflow: hidden; background: #111; }
+  .num { position: absolute; left: 12px; top: 10px; width: 44px; height: 44px; border-radius: 50%; background: #fff; color: #000; font-weight: 800; font-size: 22px; display: flex; align-items: center; justify-content: center; z-index: 3; }
+  .hl { position: absolute; left: 0; right: 0; top: 16px; text-align: center; font-weight: 800; font-size: 24px; letter-spacing: -0.8px; z-index: 2; }
+  .viz { position: absolute; inset: 0; }
+  .t { font-size: 13px; color: #7d7d87; margin-top: 10px; } .b { font-size: 19px; font-weight: 800; margin: 2px 0 4px; }
+  .d { font-size: 14.5px; color: #b9b9c1; line-height: 1.45; }
+  .mv { margin-top: 7px; font-size: 13.5px; color: #FFC83D; line-height: 1.4; } .tr { margin-top: 7px; font-size: 13.5px; color: #9B7CFF; line-height: 1.4; }
+  /* mini compositions */
+  .tile { position: absolute; width: 76px; height: 76px; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 60px; line-height: 1; padding-bottom: 8px; }
+  .c { position: absolute; border-radius: 50%; }
+  .abs { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+</style></head><body>
+<div class="board"><h1>Facebook history <span>· 20s · storyboard</span></h1>
+  <div class="sub">A journey from a dorm room to Meta, in blue, yellow and purple. Yellow = what moves, purple = how this shot becomes the next. Frames are rough sketches: the build uses vector shapes and Inter. A spec ad, not affiliated with Facebook.</div>
+  <div class="grid" id="g"></div></div>
+<script>
+const CX = 225, CY = 140;
+const dots = (n, r, size, col, cx = CX, cy = CY) => Array.from({length: n}, (_, i) => { const a = i / n * Math.PI * 2; return `<div class="c" style="width:${size}px;height:${size}px;background:${col};left:${cx + Math.cos(a) * r - size / 2}px;top:${cy + Math.sin(a) * r - size / 2}px"></div>`; }).join('');
+const grid = () => { let s = ''; for (let y = 0; y < 5; y++) for (let x = 0; x < 11; x++) s += `<div class="c" style="width:11px;height:11px;background:#fff;opacity:${0.55 + ((x * 7 + y * 3) % 5) * 0.1};left:${CX - 110 + x * 22 - 5.5}px;top:${CY - 44 + y * 22 - 5.5}px"></div>`; return s; };
+const ftile = (col, fg, x = CX, y = CY, s = 1) => `<div class="tile" style="background:${col};color:${fg};left:${x - 38}px;top:${y - 38}px;transform:scale(${s})">f</div>`;
+// [time, viz html, field colour, headline, title, description, motion, transition]
+const S = [
+ ['0.0–1.8s', ftile('#fff', '#1877F2', CX, CY + 20), '#1877F2', '2004.', 'The dorm room', 'Blue fills the frame. The “f” tile rises out of a blue disc. A single dot beside it blinks like a cursor.', 'Slow push-in on the tile. A small squash (8%) just before the next shot.', 'The tile grows and floods yellow: shot 2.'],
+ ['1.8–4.0s', `<div class="c" style="width:44px;height:44px;background:#0A0B1E;left:${CX - 22}px;top:${CY + 18 - 22}px"></div>` + dots(8, 70, 20, '#7B4DFF', CX, CY + 18), '#FFC83D', 'Harvard first.', 'Campus by campus', 'One dark dot is Harvard. Others appear around it, one per campus, on an even ring.', 'The ring turns at one shared speed, evenly spaced. Slow camera drift.', 'The ring closes into a purple disc that grows: shot 3.'],
+ ['4.0–6.4s', grid(), '#7B4DFF', '2006. Open to everyone.', 'Everyone', 'The grid of dots fills out in all directions: people joining.', 'Dots cascade in from the edges. The camera pushes through the grid.', 'One dot grows into a rounded blue card: shot 4.'],
+ ['6.4–8.8s', `<div class="c abs" style="width:104px;height:104px;background:#FFC83D;margin-top:18px"></div><div class="abs" style="font-size:58px;margin-top:18px;line-height:1">👍</div>`, '#1877F2', '2009. The Like button.', 'Like', 'A thumbs-up in a yellow disc. Rebuilt as clean vector in the build.', 'The disc pops in, then rotates 12° as the camera drifts. Never reverses.', 'The disc grows and floods navy: shot 5.'],
+ ['8.8–11.8s', `<div class="abs" style="margin-top:22px;font-weight:800;font-size:44px;letter-spacing:-1.5px;background:linear-gradient(90deg,#4DA3FF,#FFC83D,#9B7CFF);-webkit-background-clip:text;color:transparent;white-space:nowrap">1,000,000,000</div>`, '#0A0B1E', '2012. One billion people.', 'A billion', 'A counter races up to one billion in a gradient, over a field of glowing dots.', 'Counter counts fast, then slows into the last digits. Soft depth of field behind.', 'The last zero becomes a circle that grows into the yellow: shot 6.'],
+ ['11.8–14.6s', `<div class="tile" style="background:#7B4DFF;left:${CX - 130}px;top:${CY - 30}px;width:60px;height:60px;border-radius:16px"></div><div class="tile" style="background:#1877F2;left:${CX + 70}px;top:${CY - 30}px;width:60px;height:60px;border-radius:16px"></div>` + ftile('#fff', '#1877F2', CX, CY + 20), '#FFC83D', 'Instagram. WhatsApp.', 'Joining up', 'Two generic tiles (a lens, a chat bubble: not their real logos) slide in from each side.', 'Both tiles fly to the “f” tile at the same speed and tuck behind it.', 'The three tiles merge into a purple disc: shot 7.'],
+ ['14.6–17.3s', `<div class="abs" style="font-weight:800;font-size:96px;letter-spacing:-4px;margin-top:20px;color:#fff">Meta</div>`, '#7B4DFF', '2021. Now Meta.', 'A new name', 'The company is renamed. The word “Facebook” rolls up and out, “Meta” rolls in from below.', 'Text roll behind a soft top/bottom fade. Small caption: the app keeps its name.', 'The “M” loop shrinks into the “f” tile: shot 8.'],
+ ['17.3–20.0s', ftile('#fff', '#1877F2', CX, CY - 8) + `<div class="abs" style="top:auto;bottom:16px;transform:translateX(-50%);font-size:12px;opacity:.85;white-space:nowrap">Spec ad. Not affiliated with Facebook.</div>`, '#1877F2', 'Keep scrolling.', 'Loop', 'The “f” tile sits dead centre in blue, with the spec line low and small. No camera drift on this shot.', 'A very slow glow pulse on the tile only.', 'The tile squashes and grows back into the blue of shot 1: a clean loop.']
+];
+document.getElementById('g').innerHTML = S.map(([t, viz, bg, hl, b, d, mv, tr], i) => `<div><div class="frame" style="background:${bg}"><div class="num">${i + 1}</div><div class="viz">${viz}</div>${hl ? `<div class="hl">${hl}</div>` : ''}</div>
+  <div class="t">${t}</div><div class="b">${b}</div><div class="d">${d}</div><div class="mv">${mv}</div><div class="tr">→ ${tr}</div></div>`).join('');
+</script></body></html>
