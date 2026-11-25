@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>أهداف كريستيانو رونالدو - 987 هدف</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;800;900&family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-paper: #f6f3ec;
+      --yellow: #facc15;
+      --yellow-dark: #eab308;
+      --red: #b91c1c;
+      --black: #111111;
+      --gray-bar: #d6d3cd;
+      --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: #1a1a1a;
+      font-family: 'Cairo', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+      color: var(--black);
+    }
+
+    /* أزرار التحكم أعلى التصميم */
+    .controls {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn {
+      background: var(--yellow);
+      color: var(--black);
+      border: none;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-family: 'Cairo', sans-serif;
+      font-weight: 800;
+      font-size: 14px;
+      cursor: pointer;
+      transition: transform 0.2s, background 0.2s;
+    }
+
+    .btn:hover {
+      background: #fde047;
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background: #333;
+      color: #fff;
+    }
+
+    .btn-secondary:hover {
+      background: #444;
+    }
+
+    /* لوحة الإنفوجرافيك الرئيسية */
+    .poster {
+      position: relative;
+      width: 100%;
+      max-width: 720px;
+      aspect-ratio: 3 / 4;
+      background: var(--bg-paper);
+      background-image:
+        radial-gradient(rgba(0,0,0,0.04) 1px, transparent 0),
+        radial-gradient(rgba(185,28,28,0.06) 1px, transparent 0);
+      background-size: 18px 18px;
+      background-position: 0 0, 9px 9px;
+      overflow: hidden;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.55);
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 18px 20px 14px;
+    }
+
+    /* خلفية ضربات الفرشاة الحمراء والصفراء */
+    .brush-red {
+      position: absolute;
+      left: -40px;
+      top: 18%;
+      width: 260px;
+      height: 360px;
+      background: repeating-linear-gradient(
+        -25deg,
+        rgba(185, 28, 28, 0.85) 0px,
+        rgba(185, 28, 28, 0.85) 14px,
+        transparent 14px,
+        transparent 22px
+      );
+      clip-path: polygon(0 10%, 95% 0, 75% 45%, 100% 60%, 60% 100%, 0 90%);
+      opacity: 0;
+      transform: translateX(-60px);
+      transition: all 0.8s var(--ease-out);
+      z-index: 1;
+    }
+
+    .brush-red.show {
+      opacity: 0.9;
+      transform: translateX(0);
+    }
+
+    /* الهيدر */
+    .header {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(-40px);
+      transition: all 0.8s var(--ease-out);
+    }
+
+    .header.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .title-banner {
+      display: inline-block;
+      background: var(--black);
+      color: var(--yellow);
+      padding: 6px 36px;
+      font-size: clamp(22px, 4.2vw, 38px);
+      font-weight: 900;
+      transform: skewX(-12deg);
+      border-left: 8px solid var(--red);
+      border-right: 8px solid var(--red);
+      box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+    }
+
+    .title-banner span {
+      display: inline-block;
+      transform: skewX(12deg);
+    }
+
+    .subtitle-banner {
+      display: inline-block;
+      background: var(--yellow);
+      color: var(--black);
+      padding: 2px 24px;
+      margin-top: -6px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: clamp(13px, 2.2vw, 20px);
+      font-weight: 900;
+      transform: skewX(-12deg);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+    }
+
+    .subtitle-banner span {
+      display: inline-block;
+      transform: skewX(12deg);
+    }
+
+    /* المحتوى الرئيسي (يمين بيانات - يسار صورة اللاعب) */
+    .main-grid {
+      position: relative;
+      z-index: 5;
+      display: grid;
+      grid-template-columns: 1.35fr 0.95fr;
+      gap: 14px;
+      flex: 1;
+      margin-top: 10px;
+      align-items: stretch;
+    }
+
+    /* عمود البيانات (يمين في RTL، لكن في الصورة البيانات يمين واللاعب يسار) */
+    /* نستخدم dir="ltr" داخل الشبكة لمطابقة الصورة تماماً: اللاعب يسار والبيانات يمين */
+    .main-grid {
+      direction: ltr;
+      grid-template-columns: 0.95fr 1.35fr;
+    }
+
+    /* عمود اللاعب */
+    .player-col {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: center;
+    }
+
+    .crown {
+      position: absolute;
+      top: 0;
+      left: 8px;
+      font-size: 42px;
+      transform: rotate(-22deg) scale(0);
+      opacity: 0;
+      transition: all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+      z-index: 8;
+      filter: drop-shadow(0 4px 4px rgba(0,0,0,0.25));
+    }
+
+    .crown.show {
+      opacity: 1;
+      transform: rotate(-22deg) scale(1);
+    }
+
+    .player-photo-box {
+      position: relative;
+      width: 100%;
+      height: 88%;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      opacity: 0;
+      transform: translateX(-70px);
+      transition: all 0.9s var(--ease-out);
+      z-index: 4;
+    }
+
+    .player-photo-box.show {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .player-photo-box img {
+      max-width: 115%;
+      max-height: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 10px 18px rgba(0,0,0,0.35));
+    }
+
+    .player-placeholder {
+      width: 90%;
+      height: 92%;
+      border: 3px dashed rgba(185,28,28,0.45);
+      border-radius: 16px;
+      background: rgba(255,255,255,0.65);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 16px;
+      color: #444;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .trophy-group {
+      position: absolute;
+      bottom: 4px;
+      left: 4px;
+      display: flex;
+      align-items: flex-end;
+      gap: 6px;
+      z-index: 9;
+      opacity: 0;
+      transform: translateY(40px) scale(0.8);
+      transition: all 0.8s var(--ease-out);
+    }
+
+    .trophy-group.show {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    .trophy-icon {
+      font-size: 56px;
+      filter: drop-shadow(0 6px 8px rgba(0,0,0,0.35));
+    }
+
+    .mini-chart {
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+      height: 44px;
+      padding-bottom: 6px;
+    }
+
+    .mini-bar {
+      width: 8px;
+      background: #fff;
+      border: 1.5px solid var(--black);
+      border-radius: 2px;
+      height: 0;
+      transition: height 0.7s var(--ease-out);
+    }
+
+    .trophy-group.show .mini-bar:nth-child(1) { height: 16px; transition-delay: 0.1s; }
+    .trophy-group.show .mini-bar:nth-child(2) { height: 26px; transition-delay: 0.25s; }
+    .trophy-group.show .mini-bar:nth-child(3) { height: 38px; transition-delay: 0.4s; }
+
+    /* عمود الإحصائيات (اليمين) */
+    .stats-col {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 10px;
+      padding-top: 4px;
+    }
+
+    /* 1. الرقم الضخم 987 */
+    .big-stat-row {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--yellow);
+      padding: 10px 18px;
+      border-radius: 14px;
+      transform: rotate(-2deg) scale(0.75);
+      opacity: 0;
+      box-shadow: 0 8px 20px rgba(234, 179, 8, 0.35);
+      transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .big-stat-row.show {
+      opacity: 1;
+      transform: rotate(-2deg) scale(1);
+    }
+
+    .big-number-wrap {
+      line-height: 0.9;
+    }
+
+    .big-number {
+      font-family: 'Montserrat', sans-serif;
+      font-size: clamp(54px, 9vw, 86px);
+      font-weight: 900;
+      color: var(--black);
+      letter-spacing: -2px;
+    }
+
+    .big-label {
+      font-family: 'Montserrat', sans-serif;
+      font-size: clamp(20px, 3.2vw, 30px);
+      font-weight: 900;
+      color: var(--black);
+      text-align: right;
+      margin-top: 2px;
+    }
+
+    .soccer-ball {
+      font-size: 62px;
+      transform: translateX(60px) rotate(180deg);
+      opacity: 0;
+      transition: all 0.8s var(--ease-out);
+    }
+
+    .soccer-ball.show {
+      opacity: 1;
+      transform: translateX(0) rotate(0deg);
+    }
+
+    /* 2. الدائرة النسبية + 13 هدف */
+    .middle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin: 2px 0;
+    }
+
+    .ring-box {
+      position: relative;
+      width: 128px;
+      height: 128px;
+      flex-shrink: 0;
+      opacity: 0;
+      transform: scale(0.7);
+      transition: all 0.8s var(--ease-out);
+    }
+
+    .ring-box.show {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .ring-svg {
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+    }
+
+    .ring-bg {
+      fill: none;
+      stroke: #e5e2db;
+      stroke-width: 13;
+    }
+
+    .ring-progress {
+      fill: none;
+      stroke: var(--yellow);
+      stroke-width: 13;
+      stroke-linecap: butt;
+      stroke-dasharray: 326.7;
+      stroke-dashoffset: 326.7;
+      transition: stroke-dashoffset 1.3s var(--ease-out);
+    }
+
+    .ring-outline {
+      fill: none;
+      stroke: var(--black);
+      stroke-width: 2;
+    }
+
+    .ring-text {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+    }
+
+    .ring-percent {
+      font-size: 22px;
+      line-height: 1.1;
+    }
+
+    .ring-sub {
+      font-size: 13px;
+      color: #333;
+    }
+
+    .arrow-divider {
+      font-size: 34px;
+      color: var(--red);
+      opacity: 0;
+      transform: translateX(-20px);
+      transition: all 0.6s var(--ease-out);
+    }
+
+    .arrow-divider.show {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .remaining-box {
+      flex: 1;
+      background: var(--yellow);
+      border-radius: 12px;
+      padding: 8px 12px;
+      text-align: center;
+      direction: rtl;
+      opacity: 0;
+      transform: translateX(35px);
+      transition: all 0.8s var(--ease-out);
+      box-shadow: 0 5px 14px rgba(0,0,0,0.08);
+    }
+
+    .remaining-box.show {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .remaining-num {
+      font-family: 'Montserrat', sans-serif;
+      font-size: clamp(36px, 6vw, 52px);
+      font-weight: 900;
+      color: var(--red);
+      line-height: 0.95;
+    }
+
+    .remaining-text {
+      font-size: clamp(13px, 2vw, 17px);
+      font-weight: 900;
+      color: var(--black);
+      line-height: 1.25;
+      margin-top: 2px;
+    }
+
+    /* 3. جدول الأندية والمنتخب */
+    .clubs-card {
+      background: rgba(255, 255, 255, 0.72);
+      border: 2px solid var(--black);
+      border-radius: 14px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .club-row {
+      display: grid;
+      grid-template-columns: 34px 115px 1fr 54px;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 10px;
+      border-bottom: 1.5px solid rgba(0,0,0,0.18);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.65s var(--ease-out);
+    }
+
+    .club-row:last-child {
+      border-bottom: none;
+    }
+
+    .club-row.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .club-badge {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 900;
+      color: #fff;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .club-name {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--black);
+      white-space: nowrap;
+    }
+
+    .bar-track {
+      width: 100%;
+      height: 16px;
+      background: var(--gray-bar);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--yellow-dark), var(--yellow));
+      border-radius: 4px;
+      transition: width 1s var(--ease-out);
+    }
+
+    .club-goals {
+      background: var(--yellow);
+      color: var(--black);
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      font-size: 15px;
+      text-align: center;
+      padding: 3px 6px;
+      border-radius: 6px;
+    }
+
+    /* الفوتر */
+    .footer {
+      position: relative;
+      z-index: 10;
+      margin-top: 10px;
+      background: var(--black);
+      color: #fff;
+      text-align: center;
+      padding: 7px 14px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: clamp(10px, 1.7vw, 13px);
+      font-weight: 800;
+      letter-spacing: 0.4px;
+      border-left: 10px solid var(--yellow);
+      border-right: 10px solid var(--yellow);
+      opacity: 0;
+      transform: translateY(35px);
+      transition: all 0.7s var(--ease-out);
+    }
+
+    .footer.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 560px) {
+      .poster {
+        aspect-ratio: auto;
+        min-height: 740px;
+      }
+      .club-row {
+        grid-template-columns: 28px 92px 1fr 46px;
+        gap: 6px;
+      }
+      .club-name {
+        font-size: 11px;
+      }
+    }
+
+    /* صورة اللاعب والشعارات الحقيقية */
+    .player-photo-box { height: 100%; align-items: flex-start; }
+    .player-photo-box img { width: 118%; max-width: none; max-height: 100%; margin-left: -6%; object-fit: contain; object-position: top left; filter: none;
+      -webkit-mask-image: linear-gradient(#000 88%, transparent); mask-image: linear-gradient(#000 88%, transparent); }
+    .brush-red { display: none; }
+    .club-badge { width: 32px; height: 32px; border-radius: 0; box-shadow: none; object-fit: contain; mix-blend-mode: multiply; }
+  </style>
+</head>
+<body>
+
+  <!-- أزرار التحكم -->
+  <div class="controls">
+    <button class="btn" id="replayBtn">إعادة تشغيل الحركة</button>
+    <label class="btn btn-secondary" for="imageUpload">إضافة صورة رونالدو</label>
+    <input type="file" id="imageUpload" accept="image/*" style="display: none;" />
+  </div>
+
+  <!-- لوحة الإنفوجرافيك -->
+  <div class="poster" id="poster">
+    <div class="brush-red" id="brushRed"></div>
+
+    <!-- العنوان -->
+    <header class="header" id="header">
+      <div class="title-banner"><span>أهداف كريستيانو رونالدو</span></div>
+      <br />
+      <div class="subtitle-banner"><span>Cristiano Ronaldo's Goals</span></div>
+    </header>
+
+    <!-- المحتوى -->
+    <main class="main-grid">
+      <!-- العمود الأيسر: الصورة والتاج والكأس -->
+      <section class="player-col">
+        <div class="crown" id="crown">👑</div>
+        <div class="player-photo-box" id="playerBox">
+          <div class="player-placeholder" id="placeholder" style="display:none" onclick="document.getElementById('imageUpload').click()">
+            اضغط هنا لإضافة<br>صورة كريستيانو رونالدو<br>(يفضل بصيغة PNG مفرغة)
+          </div>
+          <img id="playerImg" alt="Cristiano Ronaldo" src="assets/player.png" />
+        </div>
+
+        <div class="trophy-group" id="trophyGroup">
+          <div class="trophy-icon">🏆</div>
+          <div class="mini-chart">
+            <div class="mini-bar"></div>
+            <div class="mini-bar"></div>
+            <div class="mini-bar"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- العمود الأيمن: الأرقام والإحصائيات -->
+      <section class="stats-col">
+        <!-- 987 GOALS -->
+        <div class="big-stat-row" id="bigStat">
+          <div class="big-number-wrap">
+            <div class="big-number" id="totalGoals">0</div>
+            <div class="big-label">GOALS</div>
+          </div>
+          <div class="soccer-ball" id="soccerBall">⚽</div>
+        </div>
+
+        <!-- 98.7% و 13 هدف -->
+        <div class="middle-row">
+          <div class="ring-box" id="ringBox">
+            <svg class="ring-svg" viewBox="0 0 120 120">
+              <circle class="ring-bg" cx="60" cy="60" r="52"></circle>
+              <circle class="ring-progress" id="ringProgress" cx="60" cy="60" r="52"></circle>
+              <circle class="ring-outline" cx="60" cy="60" r="58.5"></circle>
+              <circle class="ring-outline" cx="60" cy="60" r="45.5"></circle>
+            </svg>
+            <div class="ring-text">
+              <div class="ring-percent" id="ringPercent">0.0%</div>
+              <div class="ring-sub">/ 1,000</div>
+            </div>
+          </div>
+
+          <div class="arrow-divider" id="arrowDivider">➜</div>
+
+          <div class="remaining-box" id="remainingBox">
+            <div class="remaining-num" id="remainingNum">0</div>
+            <div class="remaining-text">هدفًا للوصول<br>إلى 1000</div>
+          </div>
+        </div>
+
+        <!-- قائمة الأندية -->
+        <div class="clubs-card" id="clubsCard">
+          <div class="club-row" data-goals="450" data-max="450">
+            <img class="club-badge" src="assets/rm.png" alt="">
+            <div class="club-name">Real Madrid</div>
+            <div class="bar-track"><div class="bar-fill"></div></div>
+            <div class="club-goals">0</div>
+          </div>
+          <div class="club-row" data-goals="146" data-max="450">
+            <img class="club-badge" src="assets/pt.png" alt="">
+            <div class="club-name">Portugal</div>
+            <div class="bar-track"><div class="bar-fill"></div></div>
+            <div class="club-goals">0</div>
+          </div>
+          <div class="club-row" data-goals="145" data-max="450">
+            <img class="club-badge" src="assets/mu.png" alt="">
+            <div class="club-name">Man United</div>
+            <div class="bar-track"><div class="bar-fill"></div></div>
+            <div class="club-goals">0</div>
+          </div>
+          <div class="club-row" data-goals="140" data-max="450">
+            <img class="club-badge" src="assets/an.png" alt="">
+            <div class="club-name">Al Nassr</div>
+            <div class="bar-track"><div class="bar-fill"></div></div>
+            <div class="club-goals">0</div>
+          </div>
+          <div class="club-row" data-goals="101" data-max="450">
+            <img class="club-badge" src="assets/jv.png" alt="">
+            <div class="club-name">Juventus</div>
+            <div class="bar-track"><div class="bar-fill"></div></div>
+            <div class="club-goals">0</div>
+          </div>
+          <div class="club-row" data-goals="5" data-max="450">
+            <img class="club-badge" src="assets/sp.png" alt="">
+            <div class="club-name">Sporting CP</div>
+            <div class="bar-track"><div class="bar-fill"></div></div>
+            <div class="club-goals">0</div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- الفوتر -->
+    <footer class="footer" id="footer">
+      Official senior goals • Club + Portugal • Updated 24 Nov 2026
+    </footer>
+  </div>
+
+  <script>
+    // دالة عدّاد رقمي سلس
+    function animateNumber(el, target, duration, isDecimal = false, suffix = '') {
+      const startTime = performance.now();
+      function update(now) {
+        const progress = Math.min((now - startTime) / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const current = target * eased;
+        el.textContent = (isDecimal ? current.toFixed(1) : Math.round(current)) + suffix;
+        if (progress < 1) requestAnimationFrame(update);
+      }
+      requestAnimationFrame(update);
+    }
+
+    let timers = [];
+
+    function schedule(fn, delay) {
+      const id = setTimeout(fn, delay);
+      timers.push(id);
+    }
+
+    function resetAnimation() {
+      timers.forEach(clearTimeout);
+      timers = [];
+
+      const ids = [
+        'brushRed', 'header', 'playerBox', 'crown', 'trophyGroup',
+        'bigStat', 'soccerBall', 'ringBox', 'arrowDivider', 'remainingBox', 'footer'
+      ];
+      ids.forEach(id => document.getElementById(id).classList.remove('show'));
+
+      document.getElementById('totalGoals').textContent = '0';
+      document.getElementById('ringPercent').textContent = '0.0%';
+      document.getElementById('remainingNum').textContent = '0';
+      document.getElementById('ringProgress').style.strokeDashoffset = 326.7;
+
+      document.querySelectorAll('.club-row').forEach(row => {
+        row.classList.remove('show');
+        row.querySelector('.bar-fill').style.width = '0%';
+        row.querySelector('.club-goals').textContent = '0';
+      });
+    }
+
+    // تسلسل الحركة بالتوالي وبسرعة متوسطة
+    function playSequence() {
+      resetAnimation();
+
+      // 1. العنوان والخلفية
+      schedule(() => {
+        document.getElementById('brushRed').classList.add('show');
+        document.getElementById('header').classList.add('show');
+      }, 200);
+
+      // 2. صورة اللاعب
+      schedule(() => {
+        document.getElementById('playerBox').classList.add('show');
+      }, 800);
+
+      // 3. التاج والكأس
+      schedule(() => {
+        document.getElementById('crown').classList.add('show');
+        document.getElementById('trophyGroup').classList.add('show');
+      }, 1400);
+
+      // 4. الرقم الرئيسي 987 والكرة
+      schedule(() => {
+        document.getElementById('bigStat').classList.add('show');
+        animateNumber(document.getElementById('totalGoals'), 987, 1300);
+      }, 2000);
+
+      schedule(() => {
+        document.getElementById('soccerBall').classList.add('show');
+      }, 2400);
+
+      // 5. الدائرة النسبية 98.7%
+      schedule(() => {
+        document.getElementById('ringBox').classList.add('show');
+        const circumference = 326.7;
+        const offset = circumference - (98.7 / 100) * circumference;
+        document.getElementById('ringProgress').style.strokeDashoffset = offset;
+        animateNumber(document.getElementById('ringPercent'), 98.7, 1300, true, '%');
+      }, 3100);
+
+      // 6. السهم الأحمر و 13 هدف
+      schedule(() => {
+        document.getElementById('arrowDivider').classList.add('show');
+      }, 4000);
+
+      schedule(() => {
+        document.getElementById('remainingBox').classList.add('show');
+        animateNumber(document.getElementById('remainingNum'), 13, 900);
+      }, 4400);
+
+      // 7. صفوف الأندية بالتوالي واحداً تلو الآخر
+      const rows = document.querySelectorAll('.club-row');
+      rows.forEach((row, index) => {
+        const startDelay = 5200 + index * 480;
+        schedule(() => {
+          row.classList.add('show');
+          const goals = parseInt(row.dataset.goals, 10);
+          const max = parseInt(row.dataset.max, 10);
+          const percent = Math.max((goals / max) * 100, 3);
+          row.querySelector('.bar-fill').style.width = percent + '%';
+          animateNumber(row.querySelector('.club-goals'), goals, 850);
+        }, startDelay);
+      });
+
+      // 8. الشريط السفلي (الفوتر)
+      schedule(() => {
+        document.getElementById('footer').classList.add('show');
+      }, 5200 + rows.length * 480 + 300);
+    }
+
+    // رفع صورة رونالدو من الجهاز
+    document.getElementById('imageUpload').addEventListener('change', function (e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function (event) {
+        const img = document.getElementById('playerImg');
+        img.src = event.target.result;
+        img.style.display = 'block';
+        document.getElementById('placeholder').style.display = 'none';
+      };
+      reader.readAsDataURL(file);
+    });
+
+    document.getElementById('replayBtn').addEventListener('click', playSequence);
+
+    // تشغيل تلقائي عند فتح الصفحة
+    window.addEventListener('load', playSequence);
+  </script>
+</body>
+</html>
