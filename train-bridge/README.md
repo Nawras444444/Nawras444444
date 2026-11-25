@@ -1,6 +1,6 @@
-# The Train on the Broken Bridge — 9:16 Remotion short
+# The Train on the Broken Bridge — 16:9 Remotion video
 
-1080×1920 · 30 fps · 1710 frames (57 s) · Arabic RTL captions.
+1920×1080 (16:9) · 30 fps · 1710 frames (57 s) · Arabic RTL captions.
 
 ## Commands
 ```bash

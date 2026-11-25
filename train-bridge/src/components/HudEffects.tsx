@@ -30,8 +30,8 @@ const makeDrops = (n: number, seed: string, near: boolean): Drop[] =>
 /** Procedural diagonal rain streaks (two depth layers). */
 export const RainOverlay: React.FC<{ frame: number; intensity: number; speed: number }> = React.memo(
   ({ frame, intensity, speed }) => {
-    const far = useMemo(() => makeDrops(120, "far", false), []);
-    const near = useMemo(() => makeDrops(45, "near", true), []);
+    const far = useMemo(() => makeDrops(70, "far", false), []);
+    const near = useMemo(() => makeDrops(14, "near", true), []);
     const slant = 0.32;
     const render = (drops: Drop[], key: string) =>
       drops.map((d, i) => {
@@ -63,9 +63,9 @@ export const RainOverlay: React.FC<{ frame: number; intensity: number; speed: nu
 /** Drifting low-opacity fog banks. */
 export const FogLayer: React.FC<{ frame: number; density: number }> = React.memo(({ frame, density }) => {
   const banks = [
-    { y: 1000, h: 520, speed: 1.1, off: 0, o: 0.22 },
-    { y: 640, h: 420, speed: -0.7, off: 700, o: 0.14 },
-    { y: 1180, h: 380, speed: 1.8, off: 1400, o: 0.18 },
+    { y: HEIGHT * 0.62, h: 420, speed: 1.1, off: 0, o: 0.18 },
+    { y: HEIGHT * 0.35, h: 320, speed: -0.7, off: 700, o: 0.1 },
+    { y: HEIGHT * 0.82, h: 300, speed: 1.8, off: 1400, o: 0.14 },
   ];
   return (
     <AbsoluteFill style={{ pointerEvents: "none" }}>
@@ -110,8 +110,8 @@ export const Weather: React.FC = () => {
   if (!panel) return null;
   const speedy = panel.sceneNumber === 4 || panel.sceneNumber === 5;
   const calm = panel.id === "07_4";
-  const rainI = panel.exterior ? (calm ? 0.55 : 1) : panel.sceneNumber === 3 || panel.sceneNumber === 8 ? 0.25 : 0.35;
-  const fog = panel.exterior ? (panel.id === "02_4" || panel.id === "05_1" ? 1.8 : 1) : 0;
+  const rainI = panel.exterior ? (calm ? 0.35 : 0.6) : 0;
+  const fog = panel.exterior ? (panel.id === "02_4" || panel.id === "05_1" ? 1.4 : 0.7) : 0;
   return (
     <>
       <RainOverlay frame={frame} intensity={rainI} speed={speedy ? 1.45 : calm ? 0.75 : 1} />
@@ -131,10 +131,10 @@ const Panel: React.FC<{ children: React.ReactNode; top: number; accent: string; 
   <div
     style={{
       position: "absolute",
-      left: 90,
-      right: 90,
+      left: 56,
+      width: 640,
       top,
-      padding: "22px 34px",
+      padding: "18px 28px",
       borderRadius: 20,
       background: "rgba(13,19,26,0.72)",
       border: `2px solid ${accent}55`,
@@ -158,7 +158,7 @@ const DistanceHud: React.FC<{ frame: number; mode: "edge" | "halt" }> = ({ frame
   const accent = stopped ? C.amber : C.crimson;
   const fill = halt ? interpolate(value, [0, 38], [0.995, 0.2], clamp) : interpolate(value, [0, 2], [1, 0.84], clamp);
   return (
-    <Panel top={170} accent={accent} opacity={enter}>
+    <Panel top={48} accent={accent} opacity={enter}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div style={{ fontFamily: mono, fontWeight: 700, fontSize: 30, letterSpacing: 4, color: C.mist }}>
           {stopped ? "TRAIN HALTED" : "DISTANCE TO EDGE"}
@@ -169,7 +169,7 @@ const DistanceHud: React.FC<{ frame: number; mode: "edge" | "halt" }> = ({ frame
         </div>
       </div>
       <div style={{ display: "flex", alignItems: "baseline", gap: 18, marginTop: 4 }}>
-        <div style={{ fontFamily: mono, fontWeight: 800, fontSize: 104, color: C.ice, lineHeight: 1.05, textShadow: `0 0 30px ${accent}66` }}>
+        <div style={{ fontFamily: mono, fontWeight: 800, fontSize: 84, color: C.ice, lineHeight: 1.05, textShadow: `0 0 30px ${accent}66` }}>
           {value.toFixed(2)}
           <span style={{ fontSize: 54, color: accent }}> m</span>
         </div>
@@ -192,16 +192,16 @@ const RewindBadge: React.FC<{ frame: number }> = ({ frame }) => {
   const counter = Math.max(0, Math.round(interpolate(local, [0, 14], [0, 240], clamp)));
   const mm = String(Math.floor(counter / 60)).padStart(2, "0");
   const ss = String(counter % 60).padStart(2, "0");
-  const scale = interpolate(dock, [0, 1], [1, 0.48]) * pop;
+  const scale = interpolate(dock, [0, 1], [1, 0.6]) * pop;
   return (
     <div
       style={{
         position: "absolute",
-        left: interpolate(dock, [0, 1], [WIDTH / 2, 60]),
-        top: interpolate(dock, [0, 1], [250, 70]),
-        translate: `${interpolate(dock, [0, 1], [-50, 0])}% 0`,
+        left: interpolate(dock, [0, 1], [WIDTH / 2, WIDTH - 56]),
+        top: interpolate(dock, [0, 1], [70, 48]),
+        translate: `${interpolate(dock, [0, 1], [-50, -100])}% 0`,
         scale: String(scale),
-        transformOrigin: "left top",
+        transformOrigin: "right top",
         display: "flex",
         alignItems: "center",
         gap: 22,
@@ -242,7 +242,7 @@ const Gauge: React.FC<{ label: string; unit: string; value: number; max: number;
   };
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-      <svg width={240} height={210} viewBox="0 0 240 210">
+      <svg width={190} height={166} viewBox="0 0 240 210">
         <path d={arc(a0, a0 + sweep)} stroke="#2b3a4c" strokeWidth={14} fill="none" strokeLinecap="round" />
         <path d={arc(a0 + (redFrom / max) * sweep, a0 + sweep)} stroke={C.crimson} strokeWidth={14} fill="none" strokeLinecap="round" />
         {new Array(10).fill(0).map((_, i) => {
@@ -281,7 +281,7 @@ const GaugeCluster: React.FC<{ frame: number; mode: "throttle" | "brake" }> = ({
   const lamp = Math.floor(frame / 6) % 2 === 0;
   const warn = mode === "brake" ? "REVERSE THRUST · AIR DUMP" : "STORM WARNING IGNORED";
   return (
-    <Panel top={mode === "throttle" ? 150 : 130} accent={mode === "brake" ? C.crimson : C.amber} opacity={enter}>
+    <Panel top={48} accent={mode === "brake" ? C.crimson : C.amber} opacity={enter}>
       <div style={{ display: "flex", justifyContent: "space-around" }}>
         <Gauge label="SPEED" unit="KM/H" value={speed} max={160} redFrom={110} accent={C.amber} />
         <Gauge label="BRAKE" unit="PSI" value={psi} max={110} redFrom={95} accent={mode === "brake" ? C.crimson : C.mist} />
@@ -298,7 +298,7 @@ const GaugeCluster: React.FC<{ frame: number; mode: "throttle" | "brake" }> = ({
 const RedAlert: React.FC<{ frame: number }> = ({ frame }) => {
   const on = Math.floor(frame / 6) % 2 === 0;
   return (
-    <div style={{ position: "absolute", left: 0, right: 0, top: 210, display: "flex", justifyContent: "center" }}>
+    <div style={{ position: "absolute", left: 0, right: 0, top: 56, display: "flex", justifyContent: "center" }}>
       <div
         style={{
           display: "flex",
@@ -321,7 +321,7 @@ const RedAlert: React.FC<{ frame: number }> = ({ frame }) => {
 const WarningLabel: React.FC<{ frame: number }> = ({ frame }) => {
   const on = Math.floor(frame / 10) % 2 === 0;
   return (
-    <div style={{ position: "absolute", left: 0, right: 0, top: 230, display: "flex", justifyContent: "center", opacity: interpolate(frame, [474, 478], [0, 1], clamp) }}>
+    <div style={{ position: "absolute", left: 0, right: 0, top: 56, display: "flex", justifyContent: "center", opacity: interpolate(frame, [474, 478], [0, 1], clamp) }}>
       <div style={{ display: "flex", alignItems: "center", gap: 22, padding: "14px 36px", borderRadius: 16, background: "rgba(13,19,26,0.85)", border: `3px solid ${on ? C.crimson : C.amber}` }}>
         <div style={{ fontFamily: mono, fontWeight: 800, fontSize: 48, color: on ? C.crimson : C.amber, letterSpacing: 3 }}>⚠ STORM ALERT</div>
         <div dir="rtl" style={{ fontFamily: cairo, fontWeight: 800, fontSize: 46, color: C.ice }}>تحذير العاصفة</div>
@@ -398,10 +398,10 @@ export const FilmFinish: React.FC = () => {
           src={staticFile("grain.png")}
           style={{
             position: "absolute",
-            width: 1280,
-            height: 2160,
-            left: -Math.floor(random(`gx${frame}`) * 190),
-            top: -Math.floor(random(`gy${frame}`) * 230),
+            width: WIDTH + 240,
+            height: HEIGHT + 200,
+            left: -Math.floor(random(`gx${frame}`) * 230),
+            top: -Math.floor(random(`gy${frame}`) * 190),
           }}
         />
       </AbsoluteFill>

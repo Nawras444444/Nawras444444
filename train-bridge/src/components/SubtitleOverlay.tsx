@@ -34,21 +34,21 @@ const Page: React.FC<{ page: CaptionPage; frame: number }> = ({ page, frame }) =
         lang="ar"
         style={{
           position: "absolute",
-          left: 90,
-          right: 90,
-          bottom: 340,
+          left: 160,
+          right: 160,
+          bottom: 56,
           display: "flex",
           flexWrap: "wrap",
           justifyContent: "center",
           alignItems: "baseline",
-          columnGap: 22,
+          columnGap: 28,
           rowGap: 0,
           direction: "rtl",
           textAlign: "center",
           fontFamily: cairo,
           fontWeight: 800,
-          fontSize: 76,
-          lineHeight: 1.45,
+          fontSize: 100,
+          lineHeight: 1.35,
           opacity: exit,
         }}
       >

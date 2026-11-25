@@ -1,8 +1,8 @@
 import { panelSizes } from "./panelSizes";
 
 export const FPS = 30;
-export const WIDTH = 1080;
-export const HEIGHT = 1920;
+export const WIDTH = 1920;
+export const HEIGHT = 1080;
 /** Frame at which the picture hard-cuts to black (after the last spoken word). */
 export const CUT_TO_BLACK = 1704;
 export const TOTAL_FRAMES = 1710;
@@ -114,7 +114,7 @@ type PanelInput = Omit<
   exterior?: boolean;
 };
 
-const DEFAULT_WINDOW = 900;
+const DEFAULT_WINDOW = 1080; // full-frame picture in 16:9
 const EXTERIOR_SCENES = [1, 2, 4, 5, 7];
 
 const make = (id: string, p: PanelInput): Panel => {
@@ -145,9 +145,6 @@ export const storyData: Panel[] = [
     transitionIn: { type: "cut" },
     hudOverlay: "none",
     sfxList: [
-      { file: "wheel_screech.wav", at: 4, volume: 0.35 },
-      { file: "rail_clack.wav", at: 0, volume: 0.5 },
-      { file: "sub_rumble.wav", at: 0, volume: 0.45 },
     ],
     arabicSubtitleSegment: "متران فقط تفصل مقدمة القطار",
   }),
@@ -160,9 +157,6 @@ export const storyData: Panel[] = [
     transitionIn: { type: "whip", frames: 6, direction: "left" },
     hudOverlay: "distance-edge",
     sfxList: [
-      { file: "whoosh.wav", at: -6, volume: 0.35 },
-      { file: "steel_friction.wav", at: 4, volume: 0.32 },
-      { file: "storm_wind.wav", at: 0, volume: 0.4 },
     ],
     arabicSubtitleSegment: "عن السقوط في وادٍ سحيق",
   }),
@@ -174,7 +168,7 @@ export const storyData: Panel[] = [
     shakeIntensity: 1,
     transitionIn: { type: "dissolve", frames: 8 },
     hudOverlay: "distance-edge",
-    sfxList: [{ file: "canyon_wind.wav", at: -4, volume: 0.6 }],
+    sfxList: [],
     arabicSubtitleSegment: "عن السقوط في وادٍ سحيق",
   }),
   make("01_4", {
@@ -187,8 +181,6 @@ export const storyData: Panel[] = [
     transitionIn: { type: "cut" },
     hudOverlay: "distance-edge",
     sfxList: [
-      { file: "rain_drip.wav", at: 0, volume: 0.6 },
-      { file: "sub_rumble.wav", at: 0, volume: 0.6 },
     ],
     arabicSubtitleSegment: "والعجلات تتحرك ببطء نحو الهاوية",
   }),
@@ -204,8 +196,6 @@ export const storyData: Panel[] = [
     transitionIn: { type: "zoom-reveal", frames: 10 },
     hudOverlay: "none",
     sfxList: [
-      { file: "distant_thunder.wav", at: 0, volume: 0.7 },
-      { file: "whoosh.wav", at: -10, volume: 0.3 },
     ],
     arabicSubtitleSegment: "جسر منهار بالكامل",
   }),
@@ -213,19 +203,17 @@ export const storyData: Panel[] = [
     startFrame: 264,
     durationInFrames: 51,
     focalPoint: "center",
-    windowHeight: 720,
     cameraMotion: { label: "pan-left-to-right", scale: [1.04, 1.06], x: [0.95, -0.95], easing: "inOut" },
     shakeIntensity: 0.6,
     transitionIn: { type: "whip", frames: 6, direction: "left" },
     hudOverlay: "none",
-    sfxList: [{ file: "storm_wind.wav", at: -6, volume: 0.6 }],
+    sfxList: [],
     arabicSubtitleSegment: "وسط عاصفة لا ترحم",
   }),
   make("02_3", {
     startFrame: 315,
     durationInFrames: 51,
     focalPoint: "top",
-    windowHeight: 820,
     cameraMotion: { label: "tilt-up", scale: [1.14, 1.16], y: [40, -40], easing: "inOut" },
     shakeIntensity: 0.8,
     transitionIn: { type: "dissolve", frames: 8 },
@@ -238,12 +226,11 @@ export const storyData: Panel[] = [
     startFrame: 366,
     durationInFrames: 54,
     focalPoint: "bottom",
-    windowHeight: 820,
     cameraMotion: { label: "drift-zoom", scale: [1.06, 1.16], x: [0.25, -0.15], easing: "linear" },
     shakeIntensity: 0.3,
     transitionIn: { type: "dissolve", frames: 8 },
     hudOverlay: "none",
-    sfxList: [{ file: "bridge_creak.wav", at: 6, volume: 0.6 }],
+    sfxList: [],
     arabicSubtitleSegment: "ولا طريق للعودة",
   }),
 
@@ -257,7 +244,6 @@ export const storyData: Panel[] = [
     shakeIntensity: 0.6,
     transitionIn: { type: "rewind-flash", frames: 12 },
     hudOverlay: "rewind-badge",
-    fx: ["amber-pulse"],
     sfxList: [
       { file: "rewind.wav", at: -14, volume: 0.6 },
       { file: "engine_hum.wav", at: 2, volume: 0.35, frames: 210 },
@@ -295,8 +281,7 @@ export const storyData: Panel[] = [
     shakeIntensity: 1,
     transitionIn: { type: "dissolve", frames: 8 },
     hudOverlay: "gauges-throttle",
-    fx: ["wiper"],
-    sfxList: [{ file: "wiper.wav", at: 6, volume: 0.5 }],
+    sfxList: [],
     arabicSubtitleSegment: "ليلحق الركاب برحلتهم",
   }),
 
@@ -310,10 +295,8 @@ export const storyData: Panel[] = [
     shakeIntensity: 4,
     transitionIn: { type: "cut" },
     hudOverlay: "none",
-    fx: ["speed-lines"],
     sfxList: [
       { file: "train_pass.wav", at: 0, volume: 0.6 },
-      { file: "rail_fast.wav", at: 0, volume: 0.5, frames: 210 },
     ],
     arabicSubtitleSegment: "",
   }),
@@ -325,8 +308,7 @@ export const storyData: Panel[] = [
     shakeIntensity: 4,
     transitionIn: { type: "whip", frames: 6, direction: "right" },
     hudOverlay: "none",
-    fx: ["splash"],
-    sfxList: [{ file: "splash.wav", at: 0, volume: 0.7 }],
+    sfxList: [],
     arabicSubtitleSegment: "",
   }),
   make("04_3", {
@@ -338,8 +320,7 @@ export const storyData: Panel[] = [
     shakeIntensity: 3,
     transitionIn: { type: "cut" },
     hudOverlay: "none",
-    fx: ["headlight-flare"],
-    sfxList: [{ file: "reverse_roar.wav", at: 0, volume: 0.35 }],
+    sfxList: [],
     arabicSubtitleSegment: "حتى انكشف الجسر المنهار فجأة",
   }),
   make("04_4", {
@@ -351,8 +332,7 @@ export const storyData: Panel[] = [
     shakeIntensity: 6,
     transitionIn: { type: "whip", frames: 6, direction: "left" },
     hudOverlay: "none",
-    fx: ["speed-lines"],
-    sfxList: [{ file: "tension_whine.wav", at: 0, volume: 0.3 }],
+    sfxList: [],
     arabicSubtitleSegment: "وسط الضباب الكثيف",
   }),
 
@@ -369,8 +349,6 @@ export const storyData: Panel[] = [
     fx: ["red-vignette"],
     sfxList: [
       { file: "impact.wav", at: 0, volume: 0.6 },
-      { file: "headlight_buzz.wav", at: 4, volume: 0.25 },
-      { file: "storm_wind.wav", at: 0, volume: 0.35 },
     ],
     arabicSubtitleSegment: "لا وقت للتوقف العادي",
   }),
@@ -384,7 +362,6 @@ export const storyData: Panel[] = [
     hudOverlay: "red-alert",
     fx: ["red-vignette"],
     sfxList: [
-      { file: "gasp.wav", at: 0, volume: 0.6 },
       { file: "alarm_chime.wav", at: 2, volume: 0.4 },
       { file: "impact.wav", at: 0, volume: 0.5 },
     ],
@@ -407,13 +384,12 @@ export const storyData: Panel[] = [
     startFrame: 996,
     durationInFrames: 54,
     focalPoint: "center",
-    windowHeight: 760,
     cameraMotion: { label: "rapid-scale-up", scale: [1.0, 1.32], easing: "in" },
     shakeIntensity: 3.5,
     transitionIn: { type: "cut" },
     hudOverlay: "red-alert",
     fx: ["red-vignette"],
-    sfxList: [{ file: "tension_whine.wav", at: 0, volume: 0.45 }],
+    sfxList: [],
     arabicSubtitleSegment: "القرار الخطأ يعني الانزلاق للأسفل",
   }),
 
@@ -450,8 +426,7 @@ export const storyData: Panel[] = [
     shakeIntensity: 6,
     transitionIn: { type: "cut" },
     hudOverlay: "gauges-brake",
-    fx: ["amber-red-pulse"],
-    sfxList: [{ file: "reverse_roar.wav", at: 0, volume: 0.6 }],
+    sfxList: [],
     arabicSubtitleSegment: "في ثوانٍ حاسمة",
   }),
   make("06_4", {
@@ -462,7 +437,7 @@ export const storyData: Panel[] = [
     shakeIntensity: 12,
     transitionIn: { type: "cut" },
     hudOverlay: "gauges-brake",
-    fx: ["sparks", "amber-red-pulse"],
+    fx: ["sparks"],
     sfxList: [{ file: "brake_screech.wav", at: 0, volume: 0.6 }],
     arabicSubtitleSegment: "",
   }),
@@ -477,7 +452,6 @@ export const storyData: Panel[] = [
     shakeIntensity: 5,
     transitionIn: { type: "cut" },
     hudOverlay: "distance-halt",
-    fx: ["sparks"],
     sfxList: [{ file: "grind_stop.wav", at: 0, volume: 0.7 }],
     arabicSubtitleSegment: "يصرخ المعدن",
   }),
@@ -490,7 +464,7 @@ export const storyData: Panel[] = [
     shakeIntensity: 0,
     transitionIn: { type: "cut" },
     hudOverlay: "distance-halt",
-    sfxList: [{ file: "suspension_creak.wav", at: 0, volume: 0.6 }],
+    sfxList: [],
     arabicSubtitleSegment: "ويتوقف القطار قبل الحافة بشعرة",
   }),
   make("07_3", {
@@ -503,19 +477,18 @@ export const storyData: Panel[] = [
     transitionIn: { type: "dissolve", frames: 8 },
     hudOverlay: "distance-halt",
     fx: ["steam"],
-    sfxList: [{ file: "sizzle.wav", at: 0, volume: 0.55 }],
+    sfxList: [],
     arabicSubtitleSegment: "ويتوقف القطار قبل الحافة بشعرة",
   }),
   make("07_4", {
     startFrame: 1416,
     durationInFrames: 54,
     focalPoint: "center",
-    windowHeight: 700,
     cameraMotion: { label: "ultra-slow-pullback", scale: [1.05, 1.0], easing: "out" },
     shakeIntensity: 0,
     transitionIn: { type: "dissolve", frames: 10 },
     hudOverlay: "none",
-    sfxList: [{ file: "rain_drip.wav", at: 0, volume: 0.6 }],
+    sfxList: [],
     arabicSubtitleSegment: "يتنفس الجميع الصعداء",
   }),
 
@@ -528,7 +501,6 @@ export const storyData: Panel[] = [
     shakeIntensity: 0,
     transitionIn: { type: "fade-black", frames: 15 },
     hudOverlay: "none",
-    fx: ["light-spill"],
     sfxList: [
       { file: "exhale.wav", at: -8, volume: 0.55 },
       { file: "door_slide.wav", at: 10, volume: 0.6 },
@@ -557,7 +529,7 @@ export const storyData: Panel[] = [
     shakeIntensity: 0.4,
     transitionIn: { type: "cut" },
     hudOverlay: "none",
-    sfxList: [{ file: "chair_swivel.wav", at: 0, volume: 0.6 }],
+    sfxList: [],
     arabicSubtitleSegment: "نجوت من السقوط",
   }),
   make("08_4", {
@@ -569,7 +541,7 @@ export const storyData: Panel[] = [
     shakeIntensity: 0,
     transitionIn: { type: "cut" },
     hudOverlay: "none",
-    sfxList: [{ file: "ominous_wind.wav", at: 4, volume: 0.7, frames: 64 }],
+    sfxList: [],
     arabicSubtitleSegment: "لكن انظر إلى ما ينتظرك في الأسفل",
   }),
 ];
@@ -585,11 +557,11 @@ export const lightningFlashes: Array<[number, number]> = [
 
 /** Scene-wide background ambience levels (rain loop) per frame range. */
 export const ambienceRanges: Array<{ from: number; to: number; rain: number }> = [
-  { from: 0, to: 420, rain: 0.16 },
-  { from: 420, to: 630, rain: 0.07 }, // muffled inside the cab
-  { from: 630, to: 1050, rain: 0.18 },
-  { from: 1050, to: 1260, rain: 0.08 },
-  { from: 1260, to: 1416, rain: 0.15 },
-  { from: 1416, to: 1470, rain: 0.06 }, // eerie silence
-  { from: 1470, to: 1704, rain: 0.05 },
+  { from: 0, to: 420, rain: 0.048 },
+  { from: 420, to: 630, rain: 0.021 }, // muffled inside the cab
+  { from: 630, to: 1050, rain: 0.054 },
+  { from: 1050, to: 1260, rain: 0.024 },
+  { from: 1260, to: 1416, rain: 0.045 },
+  { from: 1416, to: 1470, rain: 0.018 }, // eerie silence
+  { from: 1470, to: 1704, rain: 0.015 },
 ];

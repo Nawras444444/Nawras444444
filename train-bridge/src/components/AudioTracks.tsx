@@ -8,8 +8,8 @@ import { clamp } from "../lib/motion";
 /** Mix levels (linear gain). */
 export const MIX = {
   voiceover: 1.0, // 0 dB
-  music: 0.5, // music bed – raised so it is clearly audible
-  musicUnderVoice: 0.34, // gentle duck while the narrator speaks
+  music: 0.9, // music bed – loud and clear
+  musicUnderVoice: 0.65, // only a light duck while the narrator speaks
   sfx: 0.6, // SFX bus (-4.4 dB) on top of per-cue volumes, keeps the mix out of clipping
 };
 

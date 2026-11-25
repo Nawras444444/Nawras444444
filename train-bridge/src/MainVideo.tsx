@@ -7,7 +7,7 @@ import { BlackOverlays, FilmFinish, Hud, LightningFlash, RewindFlash, Weather } 
 import { AudioTracks } from "./components/AudioTracks";
 
 /**
- * THE TRAIN ON THE BROKEN BRIDGE — 1080x1920 @ 30fps.
+ * THE TRAIN ON THE BROKEN BRIDGE — 1920x1080 (16:9) @ 30fps.
  * Layer order (bottom → top):
  *  1. 32 sequential panels (one-by-one, with transition lead-ins)
  *  2. weather (rain / fog), lightning
@@ -39,7 +39,7 @@ export const MainVideo: React.FC = () => {
       {/* darken the lower band so captions always read */}
       <AbsoluteFill
         style={{
-          background: "linear-gradient(to bottom, transparent 62%, rgba(13,19,26,0.55) 74%, rgba(13,19,26,0.8) 100%)",
+          background: "linear-gradient(to bottom, transparent 58%, rgba(13,19,26,0.5) 75%, rgba(13,19,26,0.85) 100%)",
         }}
       />
       <Hud />

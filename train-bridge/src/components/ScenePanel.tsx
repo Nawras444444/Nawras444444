@@ -1,11 +1,11 @@
 import React from "react";
 import { AbsoluteFill, Easing, Img, interpolate, staticFile, useCurrentFrame } from "remotion";
-import { WIDTH, type Panel } from "../data/storyData";
+import { HEIGHT, WIDTH, type Panel } from "../data/storyData";
 import { clamp, easingFn, focalBias, shakeAt } from "../lib/motion";
 import { PanelFx } from "./PanelFx";
 
 /** Vertical centre of the foreground picture window. */
-export const WINDOW_CENTER_Y = 860;
+export const WINDOW_CENTER_Y = HEIGHT / 2;
 
 /** How many frames a panel's Sequence starts before its nominal startFrame. */
 export const transitionLead = (p: Panel): number => {
@@ -43,7 +43,7 @@ export const ScenePanel: React.FC<{ panel: Panel }> = ({ panel }) => {
   const p = ease(interpolate(frame, [0, moveFrames], [0, 1], clamp));
 
   // ── camera keyframes
-  let scale = interpolate(p, [0, 1], m.scale);
+  let scale = interpolate(p, [0, 1], m.scale) * 1.04;
   const rot = m.rotate ? interpolate(p, [0, 1], m.rotate) : 0;
   const fb = focalBias(panel.focalPoint);
   const xUnit = m.x ? interpolate(p, [0, 1], m.x) : Math.max(-1, Math.min(1, fb.x + (panel.focalBiasX ?? 0)));
@@ -85,7 +85,7 @@ export const ScenePanel: React.FC<{ panel: Panel }> = ({ panel }) => {
   const overflowX = Math.max(0, (imgW * scale - WIDTH) / 2);
   const overflowY = Math.max(0, (wh * scale - wh) / 2);
   const panX = xUnit * overflowX;
-  const panY = fb.y * overflowY * 0.9 + yPx;
+  const panY = Math.max(-overflowY, Math.min(overflowY, fb.y * overflowY * 0.9 + yPx));
   const windowTop = WINDOW_CENTER_Y - wh / 2;
 
   // chromatic aberration during the rewind flash
@@ -121,7 +121,7 @@ export const ScenePanel: React.FC<{ panel: Panel }> = ({ panel }) => {
           position: "absolute",
           inset: -60,
           width: WIDTH + 120,
-          height: 1920 + 120,
+          height: HEIGHT + 120,
           objectFit: "cover",
           scale: String(1.05 + p * 0.04),
         }}
@@ -135,8 +135,12 @@ export const ScenePanel: React.FC<{ panel: Panel }> = ({ panel }) => {
           width: WIDTH,
           height: wh,
           overflow: "hidden",
-          maskImage: "linear-gradient(to bottom, transparent 0%, black 9%, black 91%, transparent 100%)",
-          WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, black 9%, black 91%, transparent 100%)",
+          ...(wh < HEIGHT
+            ? {
+                maskImage: "linear-gradient(to bottom, transparent 0%, black 9%, black 91%, transparent 100%)",
+                WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, black 9%, black 91%, transparent 100%)",
+              }
+            : {}),
         }}
       >
         {caAmount > 0.5 ? (
