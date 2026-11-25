@@ -43,7 +43,8 @@ def main():
         if os.path.exists(clip):
             have.append(clip)
             subprocess.run(FF + ["-i", clip, "-ss", f"{t:.4f}", "-t", f"{p['dur']:.4f}", "-i", narr,
-                                 "-filter_complex", mix, "-map", "0:v", "-map", "[a]",
+                                 "-filter_complex", mix.replace("[a]", "[m]") + ";[m]loudnorm=I=-14:TP=-1.5:LRA=11[a]",
+                                 "-map", "0:v", "-map", "[a]", "-ar", "44100",
                                  "-c:v", "copy", "-c:a", "aac", "-b:a", "192k", f"videos_vo/{p['id']}.mp4"], check=True)
             print("mixed", p["id"], f"{t:.2f}-{t + p['dur']:.2f}s")
         t += p["dur"]
