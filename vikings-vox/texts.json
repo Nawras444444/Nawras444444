@@ -1,17 +1,182 @@
 {
-  "defaults": {"stamp": ["HISTORY", "EXPLAINED"], "dir": "ltr"},
-  "groups": {
-    "vk": {"mood": "wind"}
-  },
-  "panels": {
-    "vk_1": {"kicker": "VIKING AGE · 793–1066", "title": "Born into a rank", "badge": ["793", "–1066"], "caption": "Family, land, weapons", "mood": "fire", "dur": 6.633333},
-    "vk_2": {"kicker": "THE SOURCE", "title": "Three households", "badge": ["3", "classes"], "caption": "Written down centuries later", "mood": "wind", "dur": 7.8},
-    "vk_3": {"kicker": "TOP RANK", "title": "The jarls", "badge": ["#1", "rank"], "caption": "Land, ships and followers", "mood": "travel", "dur": 5.8},
-    "vk_4": {"kicker": "THE MAJORITY", "title": "The karls", "badge": ["#2", "rank"], "caption": "Free farmers with a vote", "mood": "sun", "dur": 6.4},
-    "vk_5": {"kicker": "THE LAW", "title": "A price on every life", "badge": ["LAW", "code"], "caption": "Compensation rose with rank", "mood": "pluck", "dur": 6.233333},
-    "vk_6": {"kicker": "THE BOTTOM RANK", "title": "The thralls", "badge": ["#3", "rank"], "caption": "Captives and their children", "mood": "machine", "dur": 6.433333},
-    "vk_7": {"kicker": "THE EXCEPTION", "title": "The ladder moved", "badge": ["UP", "mobility"], "caption": "Freedom could be earned", "mood": "wind", "dur": 5.3},
-    "vk_8": {"kicker": "THE HOUSEHOLD", "title": "The keys", "badge": ["KEYS", "authority"], "caption": "A mark of authority", "mood": "pluck", "dur": 5.766667},
-    "vk_9": {"kicker": "THE CONCLUSION", "title": "Rigid, not still", "badge": ["1", "society"], "caption": "Every class needed the others", "mood": "finale", "dur": 9.633333}
+ "defaults": {
+  "stamp": [
+   "HISTORY",
+   "EXPLAINED"
+  ],
+  "dir": "ltr"
+ },
+ "groups": {
+  "vk": {
+   "mood": "wind"
   }
+ },
+ "panels": {
+  "vk_1": {
+   "kicker": "VIKING AGE · 793–1066",
+   "title": "Born into a rank",
+   "badge": [
+    "793",
+    "–1066"
+   ],
+   "caption": "Family, land, weapons",
+   "mood": "fire",
+   "dur": 6.633333,
+   "bg": "04_sunburst",
+   "acc": [
+    "05_bell",
+    "06_megaphone"
+   ],
+   "accRot": [
+    0,
+    0
+   ]
+  },
+  "vk_2": {
+   "kicker": "THE SOURCE",
+   "title": "Three households",
+   "badge": [
+    "3",
+    "classes"
+   ],
+   "caption": "Written down centuries later",
+   "mood": "wind",
+   "dur": 7.8,
+   "bg": "03_halftone_vortex",
+   "acc": [
+    "09_scroll"
+   ],
+   "accRot": [
+    0
+   ]
+  },
+  "vk_3": {
+   "kicker": "TOP RANK",
+   "title": "The jarls",
+   "badge": [
+    "#1",
+    "rank"
+   ],
+   "caption": "Land, ships and followers",
+   "mood": "travel",
+   "dur": 5.8,
+   "bg": "02_hud_ring",
+   "acc": [
+    "10_crossed_swords"
+   ],
+   "accRot": [
+    0
+   ]
+  },
+  "vk_4": {
+   "kicker": "THE MAJORITY",
+   "title": "The karls",
+   "badge": [
+    "#2",
+    "rank"
+   ],
+   "caption": "Free farmers with a vote",
+   "mood": "sun",
+   "dur": 6.4,
+   "bg": "13_speed_chevrons",
+   "acc": [
+    "12_check"
+   ],
+   "accRot": [
+    0
+   ]
+  },
+  "vk_5": {
+   "kicker": "THE LAW",
+   "title": "A price on every life",
+   "badge": [
+    "LAW",
+    "code"
+   ],
+   "caption": "Compensation rose with rank",
+   "mood": "pluck",
+   "dur": 6.233333,
+   "bg": "18_brush_circle",
+   "acc": [
+    "07_warning",
+    "15_diamond"
+   ],
+   "accRot": [
+    0,
+    0
+   ]
+  },
+  "vk_6": {
+   "kicker": "THE BOTTOM RANK",
+   "title": "The thralls",
+   "badge": [
+    "#3",
+    "rank"
+   ],
+   "caption": "Captives and their children",
+   "mood": "machine",
+   "dur": 6.433333,
+   "bg": "20_brush_slash",
+   "acc": [
+    "17_pixel_dissolve"
+   ],
+   "accRot": [
+    0
+   ]
+  },
+  "vk_7": {
+   "kicker": "THE EXCEPTION",
+   "title": "The ladder moved",
+   "badge": [
+    "UP",
+    "mobility"
+   ],
+   "caption": "Freedom could be earned",
+   "mood": "wind",
+   "dur": 5.3,
+   "bg": "16_swirl",
+   "acc": [
+    "14_big_chevrons"
+   ],
+   "accRot": [
+    -90
+   ]
+  },
+  "vk_8": {
+   "kicker": "THE HOUSEHOLD",
+   "title": "The keys",
+   "badge": [
+    "KEYS",
+    "authority"
+   ],
+   "caption": "A mark of authority",
+   "mood": "pluck",
+   "dur": 5.766667,
+   "bg": "04_sunburst",
+   "acc": [
+    "11_key"
+   ],
+   "accRot": [
+    0
+   ]
+  },
+  "vk_9": {
+   "kicker": "THE CONCLUSION",
+   "title": "Rigid, not still",
+   "badge": [
+    "1",
+    "society"
+   ],
+   "caption": "Every class needed the others",
+   "mood": "finale",
+   "dur": 9.633333,
+   "bg": "18_brush_circle",
+   "acc": [
+    "08_burst"
+   ],
+   "accRot": [
+    0
+   ]
+  }
+ }
 }

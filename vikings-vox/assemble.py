@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Mix the narration into the rendered clips, and join all clips into one video.
 
-Usage: python3 assemble.py [--lead 0.3] [--sfx 0.4]
+Usage: python3 assemble.py [--lead 0.3] [--sfx 0.6] [--music 0.55]
 
 The narration is one continuous file. Clip boundaries in data.js were placed at the
 start of each spoken line, so delaying the whole narration by --lead seconds makes
@@ -27,7 +27,8 @@ def panels():
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--lead", type=float, default=0.3)
-    ap.add_argument("--sfx", type=float, default=0.4, help="sound-effects level under the voice")
+    ap.add_argument("--sfx", type=float, default=0.6, help="sound-effects level under the voice")
+    ap.add_argument("--music", type=float, default=0.55, help="music level before it ducks under the voice")
     a = ap.parse_args()
     P = panels()
     total = sum(p["dur"] for p in P)
@@ -35,6 +36,14 @@ def main():
     subprocess.run(FF + ["-i", "audio/narration.mp3", "-af",
                          f"adelay={int(a.lead * 1000)}:all=1,apad,atrim=0:{total:.4f}",
                          "-ac", "2", "-ar", "44100", narr], check=True)
+    # bed = music that ducks whenever the narration speaks, plus the narration itself
+    bed = "audio/bed.wav"
+    subprocess.run(FF + ["-i", "audio/music.mp3", "-i", narr, "-filter_complex",
+                         f"[0:a]aresample=44100,atrim=0:{total:.4f},volume={a.music},afade=t=in:d=0.6,afade=t=out:st={total - 2.5:.3f}:d=2.5[m];"
+                         "[1:a]asplit[n1][n2];[m][n1]sidechaincompress=threshold=0.02:ratio=5:attack=15:release=350[md];"
+                         "[md][n2]amix=inputs=2:normalize=0:duration=longest[b]",
+                         "-map", "[b]", "-ac", "2", "-ar", "44100", bed], check=True)
+    narr = bed
     mix = f"[0:a]volume={a.sfx}[s];[1:a]volume=1.0[n];[s][n]amix=inputs=2:normalize=0:duration=first,alimiter=limit=0.95[a]"
     os.makedirs("videos_vo", exist_ok=True)
     t, have = 0.0, []

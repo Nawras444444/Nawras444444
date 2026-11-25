@@ -6,3 +6,4 @@ audio/narration_delayed.wav
 # raw renders without narration; assemble.py turns them into videos_vo/ and final.mp4
 videos/
 joined_sfx.mp4
+audio/bed.wav

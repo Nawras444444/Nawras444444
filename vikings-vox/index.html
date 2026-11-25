@@ -1,126 +1,129 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Vox Collage Clip</title>
+<title>Vikings Collage Clip</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@500;700;900&family=Playfair+Display:wght@700;900&family=Archivo:wght@700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Pirata+One&family=Tajawal:wght@700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="data.js"></script>
 <style>
-/* ===== palette ===== */
-:root{--studio:#0e0e0e;--paper:#f5f1e8;--ink:#1a1a1a;--red:#d62828;--gold:#f4a261;--brown:#3a2013}
+/* ===== palette: yellow + black (yellow sampled from the torn-paper shape) ===== */
+:root{--bg:#0c0c0c;--yel:#fcc709;--ink:#111;--paper:#fbf8f1;--dim:rgba(255,255,255,.42);--ar:#ffe27a}
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;background:var(--studio);overflow:hidden;font-family:'Tajawal',sans-serif;color:#ddd}
+html,body{height:100%;background:#000;overflow:hidden;font-family:'Cinzel',serif;color:#ddd}
 body{display:flex;flex-direction:column}
 #wrap{flex:1;min-height:0;position:relative}
 /* fixed 1920x1080 design canvas, scaled to fit */
-#stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;transform-origin:50% 50%;overflow:hidden;background:var(--paper);direction:rtl}
+#stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;transform-origin:50% 50%;overflow:hidden;background:var(--bg)}
 body.record #controls{display:none}
 .abs{position:absolute}
-#grid{inset:0;background-image:linear-gradient(rgba(26,26,26,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(26,26,26,.08) 1px,transparent 1px),
-  linear-gradient(rgba(26,26,26,.06) 2px,transparent 2px),linear-gradient(90deg,rgba(26,26,26,.06) 2px,transparent 2px);
+#grid{inset:0;background-image:linear-gradient(rgba(252,199,9,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(252,199,9,.06) 1px,transparent 1px),
+  linear-gradient(rgba(252,199,9,.05) 2px,transparent 2px),linear-gradient(90deg,rgba(252,199,9,.05) 2px,transparent 2px);
   background-size:40px 40px,40px 40px,200px 200px,200px 200px}
-.dots{background-image:radial-gradient(circle,var(--c,#d62828) 32%,transparent 36%);background-size:var(--s,26px) var(--s,26px)}
-#htR{left:-60px;top:560px;width:640px;height:640px;border-radius:50%;
-  -webkit-mask-image:radial-gradient(circle at 35% 55%,#000 30%,transparent 70%);mask-image:radial-gradient(circle at 35% 55%,#000 30%,transparent 70%)}
-#htK{--c:#1a1a1a;--s:22px;right:-60px;top:330px;width:520px;height:420px;
-  -webkit-mask-image:radial-gradient(ellipse at 80% 20%,#000 25%,transparent 72%);mask-image:radial-gradient(ellipse at 80% 20%,#000 25%,transparent 72%)}
-#block{background:var(--ink)}
-#block::after{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.07) 1px,transparent 1px);background-size:36px 36px}
+.dots{background-image:radial-gradient(circle,var(--c,#fcc709) 32%,transparent 36%);background-size:var(--s,26px) var(--s,26px)}
+#htR{left:-90px;top:60px;width:560px;height:560px;border-radius:50%;opacity:.55;
+  -webkit-mask-image:radial-gradient(circle at 35% 45%,#000 30%,transparent 70%);mask-image:radial-gradient(circle at 35% 45%,#000 30%,transparent 70%)}
+#htK{--s:22px;right:-60px;top:520px;width:520px;height:420px;opacity:.35;
+  -webkit-mask-image:radial-gradient(ellipse at 80% 40%,#000 25%,transparent 72%);mask-image:radial-gradient(ellipse at 80% 40%,#000 25%,transparent 72%)}
+#bgShape{opacity:0;transform-origin:50% 50%;pointer-events:none}
+#bgShape img{width:100%;height:100%;object-fit:contain}
+#block{background:var(--yel)}
+#block::after{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(0,0,0,.09) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,.09) 1px,transparent 1px);background-size:36px 36px}
 
 /* card = the panel, built from two planes: background plate + cut-out subject */
 #card{transform-origin:50% 50%}
-#plateW{inset:0;overflow:hidden;background:#fff;border:12px solid #fbf8f1;box-shadow:0 18px 40px rgba(0,0,0,.35)}
+#plateW{inset:0;overflow:hidden;background:#fff;border:12px solid var(--paper);box-shadow:0 22px 50px rgba(0,0,0,.7)}
 #plate{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform-origin:50% 50%}
 #arrow{overflow:visible}
+#arrow polygon{fill:var(--yel);stroke:var(--ink);stroke-width:5;stroke-linejoin:round}
 #cutW{inset:12px}
-#cut{position:absolute;inset:0;width:100%;height:100%;filter:drop-shadow(0 14px 18px rgba(0,0,0,.45));transform-origin:50% 70%}
+#cut{position:absolute;inset:0;width:100%;height:100%;filter:drop-shadow(0 14px 18px rgba(0,0,0,.55));transform-origin:50% 70%}
 
-/* overlays */
-#paths{left:0;top:0;width:1920px;height:1080px;overflow:visible;pointer-events:none}
-#head{right:70px;top:34px;text-align:right}
-#kicker{font:900 30px 'Tajawal';color:var(--red);letter-spacing:.02em;overflow:hidden}
-#kicker span,#title span{display:block}
-#title{font:700 84px/1.15 'Amiri',serif;color:var(--ink);overflow:hidden;white-space:nowrap;padding-bottom:6px}
-#ul{display:flex;gap:14px;justify-content:flex-start;margin-top:6px}
-#ul b{display:block;width:150px;height:14px;background:var(--red);transform-origin:100% 50%}
-#ul u{display:block;width:340px;height:5px;background:var(--ink);align-self:flex-end;transform-origin:100% 50%}
+/* shapes from the yellow sheet, one or two per panel */
+.acc{transform-origin:50% 50%}
+.acc img{display:block;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 8px 14px rgba(0,0,0,.6))}
+
+/* header: kicker tag (black on yellow) + title (yellow) */
+#head{left:320px;top:10px;white-space:nowrap}
+#tag{display:inline-block;background:var(--yel);color:var(--ink);font:400 34px/1 'Pirata One',cursive;letter-spacing:.06em;padding:6px 18px 4px;overflow:hidden}
+#tag span,#title span{display:inline-block}
+#title{font:900 70px/1.1 'Cinzel',serif;color:var(--yel);overflow:hidden;padding-top:2px;text-shadow:0 4px 0 #000}
 .badge{border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  font-family:'Tajawal';font-weight:900;color:#fff;line-height:1;box-shadow:0 10px 24px rgba(0,0,0,.4);transform:translate(-50%,-50%)}
-#badge{width:190px;height:190px;background:var(--red);border:13px solid var(--gold)}
-#badge b{font-size:52px}#badge i{font-style:normal;font-size:28px;margin-top:8px;font-weight:700}
-#badge svg{width:90px;height:90px}
-#idx{width:124px;height:124px;background:var(--ink);border:9px solid var(--gold)}
-#idx b{font-size:40px}#idx i{font-style:normal;font-size:20px;margin-top:4px;font-weight:700;color:var(--gold)}
-#capW{left:80px;bottom:46px;filter:drop-shadow(0 10px 16px rgba(0,0,0,.35))}
-#cap{background:#efe6d2;padding:34px 46px 26px;min-width:460px;text-align:right}
-#cap .t{font:700 62px/1.15 'Amiri',serif;color:var(--ink);overflow:hidden;white-space:nowrap}
-#cap .t span{display:block}
-#cap .l{height:9px;background:var(--ink);margin-top:14px;transform-origin:100% 50%}
-#stampW{right:110px;bottom:70px;filter:drop-shadow(8px 12px 12px rgba(0,0,0,.45))}
-#stamp{background:var(--red);color:#f6ecd8;text-align:center;padding:26px 44px 22px;position:relative;line-height:1;
+  font-family:'Cinzel',serif;font-weight:900;line-height:1;box-shadow:0 10px 24px rgba(0,0,0,.6);transform:translate(-50%,-50%)}
+#badge{width:210px;height:210px;background:var(--yel);color:var(--ink);border:10px solid var(--ink);outline:4px solid var(--yel)}
+#badge b{font-size:50px}#badge i{font-style:normal;font-size:24px;margin-top:8px;font-weight:700}
+#idx{width:136px;height:136px;background:var(--ink);color:var(--yel);border:8px solid var(--yel)}
+#idx b{font-size:46px}#idx i{font-style:normal;font-size:20px;margin-top:4px;font-weight:700}
+#stampW{right:42px;top:22px;filter:drop-shadow(6px 8px 10px rgba(0,0,0,.6))}
+#stamp{background:var(--yel);color:var(--ink);text-align:center;padding:14px 26px 12px;position:relative;line-height:1;
   clip-path:polygon(7% 0,93% 0,100% 14%,100% 86%,93% 100%,7% 100%,0 86%,0 14%)}
-#stamp::before{content:"";position:absolute;inset:11px;border:4px solid #f6ecd8;border-radius:8px}
-#stamp b{display:block;font:900 64px 'Amiri',serif;letter-spacing:.04em}
-#stamp i{display:block;font:900 40px 'Tajawal';font-style:normal;margin-top:4px}
-#grain{inset:0;width:100%;height:100%;pointer-events:none;mix-blend-mode:multiply;opacity:.5;z-index:50}
-/* English (LTR): Latin display fonts, left-aligned caption that grows from the left */
-html[dir=ltr] #stage{direction:ltr}
-html[dir=ltr] #kicker{font:900 30px 'Archivo',sans-serif;letter-spacing:.06em}
-html[dir=ltr] #title{font:900 78px/1.15 'Playfair Display',serif}
-html[dir=ltr] #cap{text-align:left}
-html[dir=ltr] #cap .t{font:700 54px/1.15 'Playfair Display',serif}
-html[dir=ltr] #cap .l{transform-origin:0 50%}
-html[dir=ltr] .badge{font-family:'Archivo',sans-serif}
-html[dir=ltr] #stamp b{font:900 54px 'Archivo',sans-serif}
-html[dir=ltr] #stamp i{font:900 32px 'Archivo',sans-serif;letter-spacing:.08em}
+#stamp::before{content:"";position:absolute;inset:7px;border:3px solid var(--ink);border-radius:6px}
+#stamp b{display:block;font:900 34px 'Cinzel',serif;letter-spacing:.04em}
+#stamp i{display:block;font:400 26px 'Pirata One',cursive;font-style:normal;margin-top:2px;letter-spacing:.08em}
 
-/* controls */
-#controls{flex:none;display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;padding:10px 12px 14px;background:#151515;border-top:1px solid #262626;direction:ltr}
-#controls button,#controls select{background:#222;border:1px solid #3a3a3a;color:#eee;padding:8px 12px;border-radius:8px;font:700 13px 'Tajawal';cursor:pointer}
-#controls button.on{background:var(--red);border-color:var(--red)}
-#scrub{flex:1 1 200px;max-width:440px;accent-color:var(--red)}
+/* synced subtitles: English (words light up as spoken) + Arabic translation */
+#subs{left:90px;right:90px;top:858px;height:215px}
+#wave{left:0;top:40px;width:120px;height:120px;transform-origin:50% 50%}
+#wave img{width:100%;height:100%;object-fit:contain}
+.chunk{position:absolute;left:140px;right:0;top:0;text-align:center;opacity:0}
+.chunk .en{font:700 56px/1.15 'Cinzel',serif;color:var(--dim);text-shadow:0 3px 0 #000}
+.chunk .en span{display:inline-block;margin:0 .14em}
+.chunk .ar{font:800 48px/1.4 'Tajawal',sans-serif;color:var(--ar);direction:rtl;margin-top:6px;text-shadow:0 3px 0 #000}
+
+/* torn-paper transition: solid yellow plus the torn edge cut from the sheet */
+.torn{left:0;width:1920px;height:820px;z-index:60}
+.torn .solid{position:absolute;left:0;width:100%;height:600px;background:var(--yel)}
+.torn img{position:absolute;left:0;width:100%;height:220px}
+#tornT{top:0}#tornT .solid{top:0}#tornT img{top:600px}
+#tornB{top:260px}#tornB img{top:0}#tornB .solid{top:220px}
+#grain{inset:0;width:100%;height:100%;pointer-events:none;mix-blend-mode:screen;opacity:.18;z-index:50}
+
+/* controls (hidden while recording) */
+#controls{flex:none;display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;padding:10px 12px 14px;background:#151515;border-top:1px solid #262626}
+#controls button,#controls select{background:#222;border:1px solid #3a3a3a;color:#eee;padding:8px 12px;border-radius:8px;font:700 13px system-ui,sans-serif;cursor:pointer}
+#controls button.on{background:var(--yel);border-color:var(--yel);color:#000}
+#scrub{flex:1 1 200px;max-width:440px;accent-color:var(--yel)}
 #tl{font:12px ui-monospace,monospace;color:#999;min-width:70px;text-align:center}
 </style>
 </head>
 <body>
 <div id="wrap">
  <div id="stage">
-  <!-- L1 background -->
   <div id="grid" class="abs"></div>
+  <div id="bgShape" class="abs"><img alt=""></div>
   <div id="htR" class="abs dots"></div>
   <div id="htK" class="abs dots"></div>
   <div id="block" class="abs"></div>
-  <!-- L2/L3 the panel: plate → red arrow → cut-out subject -->
   <div id="card" class="abs">
     <div id="plateW" class="abs"><img id="plate" alt=""></div>
-    <svg id="arrow" class="abs"><polygon fill="#d62828"/></svg>
+    <svg id="arrow" class="abs"><polygon/></svg>
     <div id="cutW" class="abs"><img id="cut" alt=""></div>
   </div>
-  <!-- L4 foreground graphics -->
-  <svg id="paths" class="abs" viewBox="0 0 1920 1080"></svg>
-  <div id="head" class="abs"><div id="kicker"><span></span></div><div id="title"><span></span></div><div id="ul"><b></b><u></u></div></div>
+  <div id="accs"></div>
+  <div id="head" class="abs"><div id="tag"><span></span></div><div id="title"><span></span></div></div>
   <div class="abs wig" id="badgeW"><div id="badge" class="badge"></div></div>
   <div class="abs wig" id="idxW"><div id="idx" class="badge"></div></div>
-  <div class="abs wig" id="capW"><div id="cap"><div class="t"><span></span></div><div class="l"></div></div></div>
   <div class="abs wig" id="stampW"><div id="stamp"><b></b><i></i></div></div>
+  <div id="subs" class="abs"><div id="wave" class="abs"><img src="shapes/19_sound_wave.png" alt=""></div></div>
   <svg id="grain" class="abs"><filter id="gf" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" seed="4"/>
-    <feColorMatrix values="0 0 0 0 .5  0 0 0 0 .4  0 0 0 0 .3  0 0 0 .35 -.05"/></filter><rect width="100%" height="100%" filter="url(#gf)"/></svg>
+    <feColorMatrix values="0 0 0 0 .5  0 0 0 0 .45  0 0 0 0 .3  0 0 0 .35 -.05"/></filter><rect width="100%" height="100%" filter="url(#gf)"/></svg>
+  <div id="tornT" class="abs torn"><div class="solid"></div><img src="shapes/01c_torn_edge_top.png" alt=""></div>
+  <div id="tornB" class="abs torn"><img src="shapes/01d_torn_edge_bottom.png" alt=""><div class="solid"></div></div>
  </div>
 </div>
 <div id="controls">
-  <button id="prev">◀ السابق</button>
+  <button id="prev">◀ Prev</button>
   <select id="pick"></select>
-  <button id="next">التالي ▶</button>
-  <button id="play">❚❚ إيقاف</button>
-  <button id="replay">↻ إعادة</button>
+  <button id="next">Next ▶</button>
+  <button id="play">❚❚ Pause</button>
+  <button id="replay">↻ Replay</button>
   <input id="scrub" type="range" min="0" max="1000" value="0"><span id="tl"></span>
-  <button id="all">⏭ تشغيل الكل</button>
+  <button id="all">⏭ Play all</button>
   <button id="mute">🔊</button>
-  <button id="rec">🎬 وضع التصوير</button>
+  <button id="rec">🎬 Record mode</button>
 </div>
 <script>
 /* ================= which panel ================= */
@@ -131,7 +134,6 @@ const D = P.dur || 6.5;                       // clip length (s)
 const $ = s => document.querySelector(s);
 let seed = 7 + idx*31; const rnd = () => (seed = seed*16807 % 2147483647)/2147483647;
 
-/* ================= fit stage ================= */
 function fit(){ const w=$("#wrap"); const s=Math.min(w.clientWidth/1920, w.clientHeight/1080);
   $("#stage").style.transform=`translate(-50%,-50%) scale(${s})`; }
 addEventListener("resize",fit); fit();
@@ -144,69 +146,50 @@ function torn(sides="all",j=1.2,st=3.5){ const r=()=> (rnd()-.5)*2*j, pts=[];
   for(let x=100;x>=0;x-=st) pts.push([x,B?98.6+r():100]);
   for(let y=100;y>=0;y-=st*1.5) pts.push([L?1.4+r():0,y]);
   return "polygon("+pts.map(p=>p[0].toFixed(1)+"% "+Math.max(0,Math.min(100,p[1])).toFixed(1)+"%").join(",")+")"; }
-$("#cap").style.clipPath = torn("all",1.6,4);
-$("#block").style.clipPath = torn("tl",2,3);
+$("#block").style.clipPath = torn("all",2,3);
+$("#tag").style.clipPath = torn("all",3,6);
 
 /* ================= fill content ================= */
-const cup = `<svg viewBox="0 0 64 64"><path fill="#fff" d="M10 24h36v14a14 14 0 0 1-14 14H24a14 14 0 0 1-14-14zM46 28h4a7 7 0 0 1 0 14h-5v-4h5a3 3 0 0 0 0-6h-4z"/><path fill="none" stroke="#f4a261" stroke-width="3" stroke-linecap="round" d="M20 8c-3 4 3 6 0 11M30 8c-3 4 3 6 0 11M40 8c-3 4 3 6 0 11"/></svg>`;
-$("#kicker span").textContent = P.kicker || '';
-const ST = P.stamp || ['VOX','تحليل']; $("#stamp b").textContent = ST[0]; $("#stamp i").textContent = ST[1];
-const LTR = P.dir==='ltr';
-if(LTR){ document.documentElement.dir='ltr'; document.documentElement.lang='en'; }
+$("#tag span").textContent = P.kicker || '';
 $("#title span").textContent = P.title;
-$("#badge").innerHTML = P.badge[1] ? `<b>${P.badge[0]}</b><i>${P.badge[1]}</i>` : cup;
-$("#idx").innerHTML = `<b>${P.of.split('/')[0]}</b><i>${LTR?'of':'من'} ${P.of.split('/')[1]}</i>`;
-$("#cap .t span").textContent = P.caption;
+const ST = P.stamp || ['HISTORY','explained']; $("#stamp b").textContent = ST[0]; $("#stamp i").textContent = ST[1];
+$("#badge").innerHTML = `<b>${P.badge[0]}</b><i>${P.badge[1]||''}</i>`;
+$("#idx").innerHTML = `<b>${P.of.split('/')[0]}</b><i>of ${P.of.split('/')[1]}</i>`;
 $("#plate").src = `assets/${P.id}_bg.jpg`;
 if(P.cut) $("#cut").src = `assets/${P.id}_cut.png`; else $("#cutW").style.display="none";
+if(P.bg) $("#bgShape img").src = `shapes/${P.bg}.png`; else $("#bgShape").style.display="none";
 
 /* ================= layout (px on the 1920x1080 canvas) ================= */
-const ar = P.w/P.h, maxW=1560, maxH=690, CX=960, CY=548;
+const ar = P.w/P.h, maxW=1440, maxH=720, CX=960, CY=488;
 const cw = Math.min(maxW, maxH*ar), ch = cw/ar, cl = CX-cw/2, ct = CY-ch/2;
 Object.assign($("#card").style,{left:cl+"px",top:ct+"px",width:cw+"px",height:ch+"px"});
-Object.assign($("#block").style,{left:(cl+cw*.55)+"px",top:(ct+ch*.42)+"px",width:(cw*.5+80)+"px",height:(ch*.62+60)+"px"});
-/* arrow behind the subject's upper third, pointing left (RTL "forward") */
+Object.assign($("#block").style,{left:(cl+cw*.45)+"px",top:(ct+70)+"px",width:(cw*.6+60)+"px",height:(ch*.46)+"px"});
+Object.assign($("#bgShape").style,{left:(CX-900)+"px",top:(CY-560)+"px",width:"1800px",height:"1120px"});
+/* arrow behind the subject's upper third, pointing right (forward in English) */
 const bb = P.bbox;
-/* with a cut-out: arrow passes behind the subject's upper third; without: it rides along the card's top edge */
 const ay = P.cut ? Math.min(.68, Math.max(.16, bb[1] + (bb[3]-bb[1])*.32)) : 0;
 const ah = P.cut ? Math.max(70, Math.min(130, ch*.17)) : 90, ax0 = P.cut ? -cw*.05 : -cw*.06, aw = P.cut ? cw*1.0 : cw*.7;
-/* LTR mirrors the arrow so it points right (forward in English) */
-const axL = LTR ? cw-ax0-aw : ax0;
+const axL = cw-ax0-aw;
 Object.assign($("#arrow").style,{left:axL+"px",top:(ch*ay-ah/2)+"px",width:aw+"px",height:ah+"px"});
-{ const hl=ah*1.25, sh=ah*.22, A=$("#arrow"); A.setAttribute("viewBox",`0 0 ${aw} ${ah}`);
-  const pts=[[aw,sh],[hl,sh],[hl,0],[0,ah/2],[hl,ah],[hl,ah-sh],[aw,ah-sh]].map(([x,y])=>[LTR?aw-x:x,y]);
+{ const hl=ah*1.25, sh=ah*.22, A=$("#arrow"); A.setAttribute("viewBox",`-4 -4 ${aw+8} ${ah+8}`);
+  const pts=[[aw,sh],[hl,sh],[hl,0],[0,ah/2],[hl,ah],[hl,ah-sh],[aw,ah-sh]].map(([x,y])=>[aw-x,y]);
   A.querySelector("polygon").setAttribute("points",pts.map(p=>p.join(",")).join(" ")); }
-/* badges */
-const badgeX=cl+40, badgeY=ct+20;
-Object.assign($("#badgeW").style,{left:badgeX+"px",top:badgeY+"px"});
-/* LTR stamp words are wider, so the "n of N" badge moves left to stay clear of it */
-const idxX=1920-(LTR?600:470), idxY=1080-120;
-Object.assign($("#idxW").style,{left:idxX+"px",top:idxY+"px"});
+/* badges in the left margin */
+Object.assign($("#badgeW").style,{left:"160px",top:"330px"});
+Object.assign($("#idxW").style,{left:"160px",top:"700px"});
+/* accent shapes in the right margin: one centred, or two stacked */
+const ACC = P.acc || [];
+const accPos = ACC.length > 1 ? [[1765,330,300],[1765,690,270]] : [[1765,500,330]];
+ACC.forEach((name,i)=>{ const [x,y,h]=accPos[i]; const d=document.createElement("div"); d.className="abs acc wig"; d.id="acc"+i;
+  Object.assign(d.style,{left:(x-150)+"px",top:(y-h/2)+"px",width:"300px",height:h+"px"});
+  d.innerHTML=`<img src="shapes/${name}.png" alt="">`; $("#accs").appendChild(d); });
 
-/* dashed connector paths, drawn through a mask */
-const NS="http://www.w3.org/2000/svg", svg=$("#paths");
-const capTop = 1080-46-150, capRight = 80+560;
-const titleLeft = 1920-70-Math.min(900, $("#title span").scrollWidth||600);
-const PATHS = [
-  {c:"#d62828", d:`M ${badgeX} ${badgeY+105} C ${badgeX-70} ${badgeY+320} ${badgeX-60} ${capTop-120} ${170} ${capTop-18}`},
-  {c:"#f4a261", d:`M ${capRight+40} ${1080-110} C ${capRight+180} ${1080-40} ${idxX-220} ${1080-40} ${idxX-72} ${idxY+8}`},
-  {c:"#f4a261", d:`M ${titleLeft-30} ${120} C ${titleLeft-200} ${110} ${titleLeft-260} ${ct-40} ${titleLeft-330} ${ct+30}`}
-];
-const defs=document.createElementNS(NS,"defs"); svg.appendChild(defs);
-PATHS.forEach((p,i)=>{
-  const m=document.createElementNS(NS,"mask"); m.id="m"+i; m.setAttribute("maskUnits","userSpaceOnUse");
-  m.setAttribute("x",-200); m.setAttribute("y",-200); m.setAttribute("width",2400); m.setAttribute("height",1500);
-  const mp=document.createElementNS(NS,"path"); mp.setAttribute("d",p.d); mp.setAttribute("fill","none"); mp.setAttribute("stroke","#fff");
-  mp.setAttribute("stroke-width",26); mp.setAttribute("pathLength",1); mp.setAttribute("stroke-dasharray",1); mp.setAttribute("stroke-dashoffset",1); mp.classList.add("mp");
-  m.appendChild(mp); defs.appendChild(m);
-  const g=document.createElementNS(NS,"g"); g.setAttribute("mask",`url(#m${i})`); g.classList.add("wig");
-  const base=document.createElementNS(NS,"path"); base.setAttribute("d",p.d); base.setAttribute("fill","none"); base.setAttribute("stroke","#f5f1e8"); base.setAttribute("stroke-width",12); base.setAttribute("stroke-linecap","round");
-  const v=document.createElementNS(NS,"path"); v.setAttribute("d",p.d); v.setAttribute("fill","none"); v.setAttribute("stroke",p.c); v.setAttribute("stroke-width",6); v.setAttribute("stroke-linecap","round"); v.setAttribute("stroke-dasharray","16 14");
-  g.appendChild(base); g.appendChild(v); svg.appendChild(g);
-  const L=v.getTotalLength(), e=v.getPointAtLength(L);
-  const dot=document.createElementNS(NS,"circle"); dot.setAttribute("cx",e.x); dot.setAttribute("cy",e.y); dot.setAttribute("r",11); dot.setAttribute("fill",p.c);
-  dot.setAttribute("stroke","#f5f1e8"); dot.setAttribute("stroke-width",4); dot.classList.add("pdot"); svg.appendChild(dot);
-});
+/* ================= subtitles ================= */
+/* each chunk: {t0,t1,ar,words:[{w,t}]} with times relative to this clip's start */
+const SUBS = P.subs || [];
+SUBS.forEach((c,i)=>{ const d=document.createElement("div"); d.className="chunk"; d.id="ch"+i;
+  d.innerHTML=`<div class="en">${c.words.map((w,k)=>`<span id="w${i}_${k}">${w.w}</span>`).join(" ")}</div><div class="ar">${c.ar}</div>`;
+  $("#subs").appendChild(d); });
 
 /* ================= audio (synthesised, same engine live + offline) ================= */
 const SR=44100;
@@ -225,6 +208,8 @@ const FX={
  whoosh(c,o,t,a={}){ const {dur=.6,f0=300,f1=3000,g=.2,q=1.1}=a; const n=noise(c,t,dur),f=c.createBiquadFilter(),G=c.createGain(); f.type="bandpass"; f.Q.value=q;
    f.frequency.setValueAtTime(f0,t); f.frequency.exponentialRampToValueAtTime(f1,t+dur); ar_(G,t,dur*.4,g,0,dur*.6); n.connect(f).connect(G); out(o,G,.2); },
  flip(c,o,t,a={}){ const g=a.g||.2; [0,.045].forEach((d,i)=>{ const n=noise(c,t+d,.08),f=c.createBiquadFilter(),G=c.createGain(); f.type="highpass"; f.frequency.value=2200+i*900; ar_(G,t+d,.004,g*(1-i*.3),0,.06); n.connect(f).connect(G); out(o,G,.08); }); },
+ rip(c,o,t,a={}){ const dur=a.dur||.35,n=noise(c,t,dur),f=c.createBiquadFilter(),G=c.createGain(); f.type="bandpass"; f.Q.value=2.5; f.frequency.setValueAtTime(1800,t); f.frequency.linearRampToValueAtTime(3800,t+dur);
+   G.gain.setValueAtTime(.0001,t); for(let k=0;k<dur*60;k++){ const tt=t+k/60; G.gain.setValueAtTime((a.g||.22)*(.35+Math.random()*.65),tt); } G.gain.setValueAtTime(.0001,t+dur); n.connect(f).connect(G); out(o,G,.1); },
  pop(c,o,t,a={}){ const g=a.g||.3,os=c.createOscillator(),G=c.createGain(); os.frequency.setValueAtTime(a.f||620,t); os.frequency.exponentialRampToValueAtTime((a.f||620)*.25,t+.14); ar_(G,t,.004,g,0,.16); os.connect(G); out(o,G,.1); os.start(t); os.stop(t+.25); },
  thump(c,o,t,a={}){ const g=a.g||.5,f=a.f||130,os=c.createOscillator(),G=c.createGain(); os.frequency.setValueAtTime(f,t); os.frequency.exponentialRampToValueAtTime(f*.35,t+.22); ar_(G,t,.005,g,0,.28); os.connect(G); out(o,G,.05); os.start(t); os.stop(t+.4); },
  slap(c,o,t,a={}){ const n=noise(c,t,.2),f=c.createBiquadFilter(),G=c.createGain(); f.type="lowpass"; f.frequency.value=1500; ar_(G,t,.003,.45,0,.15); n.connect(f).connect(G); out(o,G,.1); FX.thump(c,o,t,{g:.5,f:150}); },
@@ -238,20 +223,18 @@ const FX={
  grind(c,o,t,dur,a={}){ const p=a.period||.17,g=a.g||.2,n=noise(c,t,dur),f=c.createBiquadFilter(),G=c.createGain(),os=c.createOscillator(),og=c.createGain(); f.type="lowpass"; f.frequency.value=1100; os.type="sawtooth"; os.frequency.value=62; os.start(t); os.stop(t+dur+.1);
    G.gain.setValueAtTime(.0001,t); og.gain.setValueAtTime(.0001,t); for(let k=0;k*p<dur;k++){ const tt=t+k*p; G.gain.setValueAtTime(g,tt); G.gain.exponentialRampToValueAtTime(.02,tt+p*.75); og.gain.setValueAtTime(g*.55,tt); og.gain.exponentialRampToValueAtTime(.02,tt+p*.8); }
    G.gain.setValueAtTime(.0001,t+dur); og.gain.setValueAtTime(.0001,t+dur); n.connect(f).connect(G); os.connect(og); out(o,G,.08); out(o,og,.05); },
- pour(c,o,t,dur,a={}){ const g=a.g||.18,n=noise(c,t,dur),f=c.createBiquadFilter(),G=c.createGain(); f.type="bandpass"; f.Q.value=.8; f.frequency.setValueAtTime(1500,t); f.frequency.linearRampToValueAtTime(2300,t+dur); sustain(G,t,dur,g,.25); n.connect(f).connect(G); out(o,G,.25);
-   for(let k=0;k<dur*7;k++){ const tt=t+.3+Math.random()*(dur-.4),os=c.createOscillator(),bg=c.createGain(),f0=500+Math.random()*900; os.frequency.setValueAtTime(f0,tt); os.frequency.exponentialRampToValueAtTime(f0*1.8,tt+.06); ar_(bg,tt,.004,g*.35,0,.06); os.connect(bg); out(o,bg,.2); os.start(tt); os.stop(tt+.12); } },
- steam(c,o,t,dur,a={}){ const n=noise(c,t,dur),f=c.createBiquadFilter(),G=c.createGain(); f.type="highpass"; f.frequency.setValueAtTime(3500,t); f.frequency.linearRampToValueAtTime(7000,t+dur); G.gain.setValueAtTime(.0001,t); G.gain.exponentialRampToValueAtTime(a.g||.09,t+dur*.6); G.gain.exponentialRampToValueAtTime(.0001,t+dur); n.connect(f).connect(G); out(o,G,.3); },
  pad(c,o,t,a={}){ const d=a.d||3; (a.notes||["C5","E5","G5"]).forEach((nn,i)=>{ const os=c.createOscillator(),G=c.createGain(); os.frequency.value=hz(NT[nn]); ar_(G,t+i*.05,.5,a.g||.06,d*.4,d*.6); os.connect(G); out(o,G,.55); os.start(t); os.stop(t+d+1.2); }); }
 };
-/* score for this clip: common Vox hits + a bed that matches the scene */
+/* score: torn-paper transition hits, Vox pops, and a bed that matches the scene */
 function score(){
   const ev=[], E=(t,fn,args={},dur=0)=>ev.push({t,fn,args,dur});
-  E(.28,"whoosh",{dur:.6,f0:250,f1:2600,g:.14}); E(.85,"thump",{g:.32,f:110});
-  E(.82,"whoosh",{dur:.5,f0:600,f1:3600,g:.1});
+  E(0,"rip",{g:.24,dur:.4}); E(.05,"whoosh",{dur:.5,f0:400,f1:3000,g:.16});
+  E(.35,"thump",{g:.3,f:110}); E(.82,"whoosh",{dur:.5,f0:600,f1:3600,g:.1});
   if(P.cut){ E(1.05,"whoosh",{dur:.35,f0:900,f1:4000,g:.08}); E(1.2,"pop",{g:.3}); }
-  E(1.3,"flip",{g:.14}); E(2.1,"pop",{g:.26,f:700}); E(2.35,"pop",{g:.22,f:820}); E(2.7,"flip",{g:.18}); E(3.55,"slap");
+  E(1.3,"flip",{g:.14}); E(2.0,"pop",{g:.26,f:700}); E(2.3,"pop",{g:.22,f:820}); ACC.forEach((_,i)=>E(2.0+i*.4,"slap"));
+  E(D-.42,"whoosh",{dur:.4,f0:3000,f1:400,g:.14}); E(D-.3,"rip",{g:.2,dur:.28});
   const n=["C5","D5","E5","G5","A5"];
-  const MOOD={wind:1,pluck:2,sun:3,fire:4,machine:5,travel:6,pour:7,finale:8};
+  const MOOD={wind:1,pluck:2,sun:3,fire:4,machine:5,travel:6,finale:8};
   switch(MOOD[P.mood]||1){
    case 1: E(0,"wind",{g:.12},D); E(1.5,"chime",{n:"E5",g:.16}); E(3.9,"chime",{n:"G5",g:.14}); break;
    case 2: [1.6,1.95,2.3,4.0,4.35,4.7].forEach((t,k)=>E(t,"pluck",{n:n[(k+idx)%5],g:.16})); E(0,"drone",{f:131,g:.03,lp:260},D); break;
@@ -259,7 +242,6 @@ function score(){
    case 4: E(.6,"crackle",{rate:24,g:.15},D-.8); E(.3,"drone",{f:82,g:.09,lp:240},D-.3); E(1.0,"whoosh",{dur:2.4,f0:150,f1:700,g:.08,q:.5}); break;
    case 5: E(1.0,"grind",{g:.18},1.7); E(3.9,"grind",{g:.18},1.6); E(.4,"drone",{f:55,g:.08,lp:200},D-.4); break;
    case 6: E(.4,"whoosh",{dur:5,f0:200,f1:1300,g:.08,q:.4}); E(.6,"drone",{f:73,g:.06,lp:220},D-.6); E(4.6,"chime",{n:"G5",g:.18}); E(4.95,"chime",{n:"C6",g:.18,d:1.6}); break;
-   case 7: E(1.2,"pour",{g:.16},2.2); E(3.7,"steam",{g:.08},2.6); E(4.4,"chime",{n:"E5",g:.13}); break;
    case 8: E(1.1,"pad",{notes:["C5","E5","G5"],g:.05,d:4}); E(1.15,"chime",{n:"C5",g:.14}); E(1.35,"chime",{n:"E5",g:.12}); E(1.55,"chime",{n:"G5",g:.12}); break;
   }
   return ev;
@@ -272,7 +254,7 @@ function ac(){ if(!actx){ try{actx=new AudioContext()}catch(e){} } if(actx&&actx
 function kill(){ if(bus){ const b=bus; b.master.gain.setTargetAtTime(0,b.ctx.currentTime,.03); setTimeout(()=>{try{b.master.disconnect()}catch(e){}},300); bus=null; } }
 function startAudio(from){ kill(); if(muted) return; const c=ac(); if(!c) return; bus=makeBus(c,c.destination); schedule(bus,from,c.currentTime+.04); }
 async function renderWav(){ const len=Math.ceil(D*SR), oc=new OfflineAudioContext(2,len,SR), b=makeBus(oc,oc.destination);
-  b.master.gain.setValueAtTime(.9,D-.3); b.master.gain.linearRampToValueAtTime(0,D-.02); schedule(b,0,0);
+  schedule(b,0,0);
   const buf=await oc.startRendering(), L=buf.getChannelData(0), R=buf.getChannelData(1);
   let pk=0; for(let k=0;k<len;k++) pk=Math.max(pk,Math.abs(L[k]),Math.abs(R[k])); const g=pk>.9?.9/pk:1;
   const by=new Uint8Array(44+len*4), dv=new DataView(by.buffer), ws=(o,s)=>[...s].forEach((ch,k)=>dv.setUint8(o+k,ch.charCodeAt(0)));
@@ -281,67 +263,78 @@ async function renderWav(){ const len=Math.ceil(D*SR), oc=new OfflineAudioContex
   let s=""; for(let k=0;k<by.length;k+=0x8000) s+=String.fromCharCode.apply(null,by.subarray(k,k+0x8000)); return btoa(s); }
 
 /* ================= GSAP timeline ================= */
+/* every tween is a fromTo on one paused timeline, so tl.time(t) always gives the same frame */
 const tl = gsap.timeline({paused:true});
 const dir = idx%2 ? 1 : -1;     // alternate drift directions between clips
-tl.fromTo("#grid",{opacity:0},{opacity:1,duration:.4,ease:"none"},0)
-  .fromTo("#htR,#htK",{scale:0,opacity:0},{scale:1,opacity:1,duration:.6,ease:"back.out(1.6)",stagger:.15},.1)
+/* torn paper opens at the start and closes at the end, so the cut between clips is hidden */
+tl.fromTo("#tornT",{y:0},{y:-840,duration:.5,ease:"power3.in"},0)
+  .fromTo("#tornB",{y:0},{y:840,duration:.5,ease:"power3.in"},0)
+  .fromTo("#tornT",{y:-840},{y:0,duration:.38,ease:"power3.out",immediateRender:false},D-.4)
+  .fromTo("#tornB",{y:840},{y:0,duration:.38,ease:"power3.out",immediateRender:false},D-.4)
+  .fromTo("#grid",{opacity:0},{opacity:1,duration:.4,ease:"none"},0)
+  .fromTo("#bgShape",{opacity:0,scale:.85,rotation:-4*dir},{opacity:.22,scale:1,rotation:0,duration:.9,ease:"power2.out"},.15)
+  .fromTo("#bgShape",{scale:1,rotation:0},{scale:1.1,rotation:5*dir,duration:D-1.05,ease:"none",immediateRender:false},1.05)
+  .fromTo("#htR,#htK",{scale:0},{scale:1,duration:.6,ease:"back.out(1.6)",stagger:.15},.1)
   .fromTo("#block",{xPercent:40,opacity:0},{xPercent:0,opacity:1,duration:.6,ease:"power3.out"},.3)
-  /* the panel card lands */
-  .fromTo("#card",{x:260,y:40,rotation:6,opacity:0},{x:0,y:0,rotation:-1.2,opacity:1,duration:.8,ease:"back.out(1.2)"},.3)
-  /* Ken Burns on the background plate (whole clip) */
+  .fromTo("#card",{x:260,y:40,rotation:6,opacity:0},{x:0,y:0,rotation:-1,opacity:1,duration:.8,ease:"back.out(1.2)"},.3)
   .fromTo("#plate",{scale:1.0,xPercent:0},{scale:1.08,xPercent:dir*1.5,duration:D-.3,ease:"none"},.3)
-  /* red arrow behind the subject */
-  .fromTo("#arrow",LTR?{clipPath:"inset(-10% 100% -10% -10%)",x:-40}:{clipPath:"inset(-10% -10% -10% 100%)",x:40},
-                   {clipPath:LTR?"inset(-10% 0% -10% -10%)":"inset(-10% -10% -10% 0%)",x:0,duration:.7,ease:"back.out(1.3)"},.85);
+  .fromTo("#arrow",{clipPath:"inset(-10% 100% -10% -10%)",x:-40},{clipPath:"inset(-10% -10% -10% -10%)",x:0,duration:.7,ease:"back.out(1.3)"},.85);
 if(P.cut){
-  /* the cut-out subject pops off the paper, then drifts against the plate (parallax) */
   tl.fromTo("#cut",{y:50,scale:.9,rotation:-2.5,opacity:0},{y:0,scale:1,rotation:0,opacity:1,duration:.7,ease:"back.out(1.6)"},1.05)
-    .fromTo("#cut",{x:0,scale:1},{x:-dir*16,scale:1.04,duration:D-1.75,ease:"none"},1.75);
+    .fromTo("#cut",{x:0,scale:1},{x:-dir*16,scale:1.04,duration:D-1.75,ease:"none",immediateRender:false},1.75);
 }
-tl.fromTo("#kicker span",{yPercent:110},{yPercent:0,duration:.5,ease:"power4.out"},1.3)
-  .fromTo("#title span",{xPercent:-30,opacity:0},{xPercent:0,opacity:1,duration:.7,ease:"power3.out"},1.38)
-  .fromTo("#ul b",{scaleX:0},{scaleX:1,duration:.5,ease:"power2.out"},1.75)
-  .fromTo("#ul u",{scaleX:0},{scaleX:1,duration:.7,ease:"power2.out"},1.88)
-  .fromTo(".mp",{attr:{"stroke-dashoffset":1}},{attr:{"stroke-dashoffset":0},duration:.8,ease:"power1.inOut",stagger:.22},1.9)
-  .fromTo(".pdot",{scale:0,transformOrigin:"50% 50%",transformBox:"fill-box"},{scale:1,duration:.3,ease:"back.out(2.5)",stagger:.22},2.6)
-  .fromTo("#badge",{scale:0,rotation:-30},{scale:1,rotation:0,duration:.6,ease:"back.out(1.7)"},2.1)
-  .fromTo("#idx",{scale:0},{scale:1,duration:.55,ease:"back.out(1.7)"},2.35)
-  .fromTo("#capW",{clipPath:LTR?"inset(-20% 100% -20% -20%)":"inset(-20% -20% -20% 100%)"},{clipPath:"inset(-20% -20% -20% -20%)",duration:.6,ease:"power3.out"},2.7)
-  .fromTo("#cap .t span",{yPercent:110},{yPercent:0,duration:.55,ease:"power4.out"},2.9)
-  .fromTo("#cap .l",{scaleX:0},{scaleX:1,duration:.5,ease:"power2.out"},3.15)
-  .fromTo("#stamp",{scale:2.5,rotation:-18,opacity:0},{scale:1,rotation:-6,opacity:1,duration:.26,ease:"power4.in"},3.3)
-  .to("#stamp",{scale:1.06,duration:.08},3.56).to("#stamp",{scale:1,duration:.35,ease:"elastic.out(1.2,.4)"},3.64)
-  .to({}, {duration:.001}, D);
+tl.fromTo("#tag span",{yPercent:110},{yPercent:0,duration:.45,ease:"power4.out"},.55)
+  .fromTo("#tag",{clipPath:"inset(0 100% 0 0)"},{clipPath:"inset(0 0% 0 0)",duration:.4,ease:"power3.out"},.5)
+  .fromTo("#title span",{xPercent:-25,opacity:0},{xPercent:0,opacity:1,duration:.6,ease:"power3.out"},.7)
+  .fromTo("#badge",{scale:0,rotation:-30},{scale:1,rotation:0,duration:.6,ease:"back.out(1.7)"},1.5)
+  .fromTo("#idx",{scale:0},{scale:1,duration:.55,ease:"back.out(1.7)"},1.75)
+  .fromTo("#stamp",{scale:2.2,rotation:-16,opacity:0},{scale:1,rotation:-5,opacity:1,duration:.26,ease:"power4.in"},2.6)
+  .fromTo("#wave",{scale:0},{scale:1,duration:.4,ease:"back.out(2)"},.25);
+ACC.forEach((_,i)=>{ const r=(P.accRot||[])[i]||0;
+  tl.fromTo("#acc"+i,{scale:0,rotation:r-25,opacity:0},{scale:1,rotation:r,opacity:1,duration:.55,ease:"back.out(1.8)"},2.0+i*.4)
+    .fromTo("#acc"+i,{y:0},{y:-14,duration:D-2.6-i*.4,ease:"sine.inOut",immediateRender:false},2.55+i*.4); });
+/* subtitles: chunk slides in, its words turn yellow as spoken, then it hands over to the next chunk */
+const YEL = getComputedStyle(document.documentElement).getPropertyValue('--yel').trim();
+const DIM = getComputedStyle(document.documentElement).getPropertyValue('--dim').trim();
+SUBS.forEach((c,i)=>{
+  const tin=Math.max(.15,c.t0-.15), next=SUBS[i+1], tout=next ? Math.max(tin+.3,next.t0-.15-.18) : Math.min(D-.45, c.t1+1.2);
+  tl.fromTo("#ch"+i,{opacity:0,y:28},{opacity:1,y:0,duration:.22,ease:"power2.out"},tin)
+    .fromTo("#ch"+i,{opacity:1,y:0},{opacity:0,y:-18,duration:.18,ease:"power2.in",immediateRender:false},tout);
+  c.words.forEach((w,k)=>{ tl.fromTo(`#w${i}_${k}`,{color:DIM,scale:1},{color:YEL,scale:1.06,duration:.1,ease:"none"},Math.max(tin,w.t))
+    .fromTo(`#w${i}_${k}`,{scale:1.06},{scale:1,duration:.18,ease:"power1.out",immediateRender:false},Math.max(tin,w.t)+.1); });
+});
+tl.to({}, {duration:.001}, D);
 
-/* 8fps stop-motion paper wiggle */
+/* 8fps stop-motion paper wiggle, plus the sound-wave shape pulsing beside the subtitles */
 const wig = gsap.timeline({repeat:-1});
 for(let k=0;k<16;k++){ wig.set(".wig",{rotation:()=>(rnd()-.5)*1.4,x:()=>Math.round((rnd()-.5)*3),y:()=>Math.round((rnd()-.5)*3)},k*.125);
+  wig.set("#wave",{scaleY:.55+rnd()*.6},k*.125);
   if(P.cut) wig.set("#cutW",{rotation:(rnd()-.5)*1.2,x:Math.round((rnd()-.5)*4),y:Math.round((rnd()-.5)*3)},k*.125); }
 wig.set({}, {}, 2);
 
 /* ================= controls ================= */
-const sel=$("#pick"); PANELS.forEach((p,i)=>{ const o=document.createElement("option"); o.value=p.id; o.textContent=`${p.id} — ${p.caption}`; if(i===idx) o.selected=true; sel.appendChild(o); });
+const sel=$("#pick"); PANELS.forEach((p,i)=>{ const o=document.createElement("option"); o.value=p.id; o.textContent=`${p.id} — ${p.title}`; if(i===idx) o.selected=true; sel.appendChild(o); });
 const go = (i, extra="") => { location.search = `?p=${PANELS[(i+PANELS.length)%PANELS.length].id}${extra}`; };
 sel.onchange=()=>go(PANELS.findIndex(p=>p.id===sel.value));
 $("#prev").onclick=()=>go(idx-1); $("#next").onclick=()=>go(idx+1);
 let playing=true, autoAll = Q.get('all')==='1'; $("#all").classList.toggle("on",autoAll);
 $("#all").onclick=()=>{ autoAll=!autoAll; $("#all").classList.toggle("on",autoAll); };
-function setPlay(p){ playing=p; $("#play").textContent=p?"❚❚ إيقاف":"▶ تشغيل"; if(p){ if(tl.progress()>=1) tl.time(0); tl.play(); wig.play(); startAudio(tl.time()); } else { tl.pause(); wig.pause(); kill(); } }
+function setPlay(p){ playing=p; $("#play").textContent=p?"❚❚ Pause":"▶ Play"; if(p){ if(tl.progress()>=1) tl.time(0); tl.play(); wig.play(); startAudio(tl.time()); } else { tl.pause(); wig.pause(); kill(); } }
 $("#play").onclick=()=>setPlay(!playing);
 $("#replay").onclick=()=>{ tl.time(0); setPlay(true); };
 const scrub=$("#scrub"); let drag=false;
 tl.eventCallback("onUpdate",()=>{ if(!drag) scrub.value=tl.progress()*1000; $("#tl").textContent=tl.time().toFixed(1)+" / "+D+"s"; });
-tl.eventCallback("onComplete",()=>{ kill(); if(autoAll) go(idx+1,"&all=1"+(document.body.classList.contains("record")?"&rec=1":"")); else { playing=false; $("#play").textContent="▶ تشغيل"; } });
+tl.eventCallback("onComplete",()=>{ kill(); if(autoAll) go(idx+1,"&all=1"+(document.body.classList.contains("record")?"&rec=1":"")); else { playing=false; $("#play").textContent="▶ Play"; } });
 scrub.addEventListener("pointerdown",()=>drag=true); addEventListener("pointerup",()=>drag=false);
 scrub.addEventListener("input",()=>{ tl.progress(scrub.value/1000); wig.time(tl.time()); if(playing) startAudio(tl.time()); });
 $("#mute").onclick=e=>{ muted=!muted; e.currentTarget.textContent=muted?"🔇":"🔊"; if(muted) kill(); else if(playing) startAudio(tl.time()); };
 $("#rec").onclick=()=>{ document.body.classList.add("record"); fit(); };
 $("#stage").addEventListener("click",()=>{ if(document.body.classList.contains("record")) setPlay(!playing); });
-addEventListener("keydown",e=>{ if(e.key==="Escape"){ document.body.classList.remove("record"); fit(); } if(e.key==="ArrowLeft") go(idx+1); if(e.key==="ArrowRight") go(idx-1); });
+addEventListener("keydown",e=>{ if(e.key==="Escape"){ document.body.classList.remove("record"); fit(); } if(e.key==="ArrowRight") go(idx+1); if(e.key==="ArrowLeft") go(idx-1); });
 if(Q.get('rec')==='1') document.body.classList.add("record"); fit();
 
 /* boot when fonts + images are ready */
-const imgs=[$("#plate"),...(P.cut?[$("#cut")]:[])];
+const imgs=[...document.querySelectorAll("#stage img")].filter(im=>im.getAttribute("src"));
 window.__ready=Promise.all([document.fonts.ready,...imgs.map(im=>new Promise(r=>im.complete&&im.naturalWidth?r():(im.onload=im.onerror=r)))]);
 window.__ready.then(()=>{ if(Q.get('render')==='1') return; tl.play(); wig.play();
   addEventListener("pointerdown",()=>{ if(playing&&!bus) startAudio(tl.time()); },{once:true}); });
