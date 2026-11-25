@@ -3,6 +3,6 @@ assets_orig/
 preview/
 *.log
 audio/narration_delayed.wav
-videos/*.part.mp4
-videos/list.txt
+# raw renders without narration; assemble.py turns them into videos_vo/ and final.mp4
+videos/
 joined_sfx.mp4
