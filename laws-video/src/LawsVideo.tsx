@@ -902,14 +902,14 @@ export const LawsVideo: React.FC = () => {
         }}
       />
 
-      <Audio src={staticFile("vo.wav")} volume={1} />
+      <Audio src={staticFile("vo.wav")} volume={0.9} />
       <Audio
         src={staticFile("music.mp3")}
-        volume={(f) => interpolate(f, [0, 15, TOTAL_FRAMES - 45, TOTAL_FRAMES], [0, 0.13, 0.13, 0], clamp)}
+        volume={(f) => interpolate(f, [0, 15, TOTAL_FRAMES - 45, TOTAL_FRAMES], [0, 0.34, 0.34, 0], clamp)}
       />
       {SFX.map(([name, at, vol], i) => (
         <Sequence key={`sfx${i}`} from={s(at)} name={`sfx ${name}`} layout="none">
-          <Audio src={staticFile(`sfx/${name}.wav`)} volume={vol ?? 0.8} />
+          <Audio src={staticFile(`sfx/${name}.wav`)} volume={(vol ?? 0.8) * 0.8} />
         </Sequence>
       ))}
     </AbsoluteFill>
