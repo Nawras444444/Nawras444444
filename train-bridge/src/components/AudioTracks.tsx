@@ -10,7 +10,7 @@ export const MIX = {
   voiceover: 1.0, // 0 dB
   music: 0.5, // music bed – raised so it is clearly audible
   musicUnderVoice: 0.34, // gentle duck while the narrator speaks
-  sfx: 1.0, // per-cue volumes in storyData are already set around -6 dB
+  sfx: 0.6, // SFX bus (-4.4 dB) on top of per-cue volumes, keeps the mix out of clipping
 };
 
 /**
