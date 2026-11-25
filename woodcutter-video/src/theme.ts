@@ -36,7 +36,7 @@ export const LEAD = 0.35; // seconds of silence before each voice line
 export const TRANSITION = 12; // frames
 
 // Narration clip lengths in seconds (public/vo/voN.wav)
-export const VO = [6.79, 12.25, 6.69, 2.21, 6.76, 6.83, 12.5, 10.5];
+export const VO = [6.45, 11.4, 6.33, 2.62, 7.35, 7.25, 12.9, 9.83];
 const TAILS = [0.6, 0.6, 0.6, 1.1, 0.6, 0.6, 0.6, 2.4];
 const LEADS = [0.5, LEAD, LEAD, LEAD, LEAD, LEAD, LEAD, LEAD];
 

@@ -33,11 +33,11 @@ export const S4A: React.FC = () => {
     <AbsoluteFill>
       <FullImage src="img/s4a.png" from={1.0} to={1.08} origin="62% 78%" />
       <BottomShade />
-      <Sparkle at={sec(4.6, I)} />
-      <Sparkle at={sec(6.0, I)} />
-      <Icon name="bulb" x={84} y={10} w={190} at={sec(0.4, I)} pulse />
+      <Sparkle at={sec(5.5, I)} />
+      <Sparkle at={sec(6.7, I)} />
+      <Icon name="bulb" x={84} y={10} w={190} at={sec(0.6, I)} pulse />
       <Caption
-        at={sec(6.6, I)}
+        at={sec(7.2, I)}
         size={82}
         parts={[{ t: "شحذ الفأس =" }, { t: "تطوير الأدوات", color: C.emerald, br: true }]}
       />

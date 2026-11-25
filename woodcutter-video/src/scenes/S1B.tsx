@@ -9,7 +9,7 @@ const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
 const panels = [
   { top: 0, bottom: 66.6, at: -1 },
   { top: 33.4, bottom: 33.3, at: 3.1 },
-  { top: 66.7, bottom: 0, at: 8.0 },
+  { top: 66.7, bottom: 0, at: 7.2 },
 ];
 
 export const S1B: React.FC = () => {

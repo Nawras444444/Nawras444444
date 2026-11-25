@@ -11,8 +11,8 @@ const TOP = 110;
 // Opening: the four character panels of the woodcutter board pop in one by one.
 const quads = [
   { clip: "inset(0% 50% 50% 0%)", origin: "25% 25%", at: 0.0 }, // woodcutter
-  { clip: "inset(0% 0% 50% 50%)", origin: "75% 25%", at: 1.0 }, // axe
-  { clip: "inset(50% 50% 0% 0%)", origin: "25% 75%", at: 2.8 }, // tree
+  { clip: "inset(0% 0% 50% 50%)", origin: "75% 25%", at: 0.9 }, // axe
+  { clip: "inset(50% 50% 0% 0%)", origin: "25% 75%", at: 2.7 }, // tree
   { clip: "inset(50% 0% 0% 50%)", origin: "75% 75%", at: 3.5 }, // "10"
 ];
 
