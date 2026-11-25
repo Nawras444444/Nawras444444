@@ -1,0 +1,8 @@
+# regenerated or scratch output
+assets_orig/
+preview/
+*.log
+audio/narration_delayed.wav
+videos/*.part.mp4
+videos/list.txt
+joined_sfx.mp4
