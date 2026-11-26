@@ -43,21 +43,27 @@ for(let li=0;li<3;li++){const n=L[li];const spec=NORO.pick('text',li===2?{techs:
    const sx=isDot?{cls:'reveal',tech:'pop',dir:'S',ease:'back'}:spec;
    add(sp,'text',t,isDot?.45:.75,{spec:sx,gain:isDot?.6:1});t+=isDot?.0:.5}
  t+=.45}
-const tEnd=t;
-NORO.T={end:tEnd,bulb:tBulb};
+// ---------- pacing: fit the whole montage into TARGET seconds (entrances + HOLD)
+const TARGET=10, HOLD=2.0;
+const KT=(TARGET-HOLD)/t;            // start-time scale (spacing between elements)
+const KD=Math.min(1,Math.sqrt(KT));  // motion durations shrink less, so moves stay smooth
+for(const it of items){it.t0*=KT;it.dur*=KD}
+for(const e of NORO.schedule){e.t*=KT;e.dur*=KD}
+const tEnd=t*KT, tBulbS=tBulb*KT;
+NORO.T={end:tEnd,bulb:tBulbS};
 // ---------- render
 function render(T){
  for(const it of items){const p=(T-it.t0)/it.dur;NORO.apply(it.sp,it.spec,p,T,stage)}
  // idle life after entrances
  const idle=Math.min(1,Math.max(0,(T-tEnd+.3)/1.2));
- const bp=Math.max(0,Math.min(1,(T-tBulb-.6)/.6));
+ const bp=Math.max(0,Math.min(1,(T-tBulbS-.4)/.5));
  bulbGlow.style.opacity=bp*(.55+.25*Math.sin(T*3.1))+0;
- if(T>tBulb+1){bulb.el.style.filter=`brightness(${1+.08*Math.sin(T*3.1)})`}
+ if(T>tBulbS+.7){bulb.el.style.filter=`brightness(${1+.08*Math.sin(T*3.1)})`}
  rays.forEach((r,i)=>{if(T>tEnd-1.5){const k=1+.06*Math.sin(T*4+i)*idle;r.el.style.transform+=` scale(${k})`}});
- const cam=1+.04*Math.min(1,Math.max(0,(T-3)/(tEnd+3-3)));
+ const cam=1+.04*Math.min(1,Math.max(0,(T-tEnd*.25)/(TARGET-tEnd*.25)));
  wEl.style.transformOrigin='540px 420px';wEl.style.transform=`scale(${cam})`;
  if(T>tEnd-1){man.el.style.transform+=` translateY(${Math.sin(T*1.6)*2.5*idle}px)`}
 }
 window.ready=false;const chk=()=>{window.ready=imgs.every(i=>i.complete&&i.naturalWidth>0)};setInterval(chk,100);chk();
-window.render=render;window.DUR=tEnd+3.2;
+window.render=render;window.DUR=TARGET;
 </script></body></html>

@@ -11,7 +11,8 @@ description: Nawras "norostyle" motion-graphics montage. Animate a flat poster/i
 4. **Order:** background first → main + secondary characters second → shapes & symbols third → **text last**.
 5. **Text forms differently every line** (typewriter, mosaic, blur-rise, stamp, slices, marker, flip, drop-bounce, spin, glitch). Words reveal in Arabic reading order (right → left).
 6. **Variety library:** `scripts/noro.js` holds 38 techniques × 8 directions × 4 easings = **1216 entrance variants** (more than the 500 the user asked for). A seeded picker never repeats a technique within the last 4 elements, nor a direction within the last 2.
-7. **Sound only where needed**, one sound per element (not per word, no music wall): technique→sound map in `noro.js` (`SOUND`), synthesized in `scripts/audio.py` from the exported `schedule.json`. Keep a very low pad bed. Never exaggerate.
+7. **Duration: 10 seconds total** (slightly faster pace): all entrances fit in the first 8 s, then a 2 s hold with idle life. Set by `TARGET=10, HOLD=2.0` in `scripts/anim_t.html` — element start times are scaled by `KT=(TARGET-HOLD)/naturalEnd`, motion durations by `sqrt(KT)` so moves stay smooth (not rushed). Sound cues are scaled with them. Change `TARGET` only if the user asks for another length.
+8. **Sound only where needed**, one sound per element (not per word, no music wall): technique→sound map in `noro.js` (`SOUND`), synthesized in `scripts/audio.py` from the exported `schedule.json`. Keep a very low pad bed. Never exaggerate.
 
 ## Technique classes (noro.js `TECH`)
 - **outside** (backgrounds, characters): slide, spin, arc, slam, stop-motion, flip, zoom, stretch, tumble, pendulum
@@ -22,6 +23,6 @@ description: Nawras "norostyle" motion-graphics montage. Animate a flat poster/i
 ## Pipeline (same tooling as image-to-motion-graphics)
 1. Inspect the image; crop regions to find every element.
 2. `scripts/prep.py` (adapt per image): characters via `rembg` (isnet-general-use) + colour-key fixes; background pieces by colour classes → connected components → each piece cut out; hidden areas behind characters filled with a tiled texture of the same piece; text matted per word (manual split x if Arabic gaps are ambiguous); paper/notes with text inpainted out; strokes/arrows/rays by colour key. Verify rest composite vs original (diff < ~4) and look at it.
-3. `scripts/anim_t.html`: register sprites in the rule order with `add(sprite, class, t0, dur, opts)`; `NORO.pick` chooses tech/dir/ease. Idle life after the last entrance (glows, breathing, slow camera push), hold ~3s.
+3. `scripts/anim_t.html`: register sprites in the rule order with `add(sprite, class, t0, dur, opts)`; `NORO.pick` chooses tech/dir/ease. Idle life after the last entrance (glows, breathing, slow camera push); total length is 10 s (see rule 7).
 4. `node scripts/render.js t1,t2,...` for preview frames → contact sheet; then full render (writes `schedule.json` + `video_silent.mp4`), `python3 scripts/audio.py`, mux with ffmpeg (aac 160k).
 5. Deliver MP4 in `motion/`, send with SendUserFile, commit & push. Reply in Arabic with a table: element → technique → direction → sound.
