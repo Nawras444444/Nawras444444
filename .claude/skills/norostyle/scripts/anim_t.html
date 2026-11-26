@@ -1,0 +1,63 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+html,body{margin:0;background:#111}
+#s{position:relative;width:1086px;height:1448px;overflow:hidden;background:#1b1b1b}
+#w{position:absolute;left:0;top:0;width:1086px;height:1448px}
+#w img,#w canvas,#w .d{position:absolute;display:block}
+.sh{filter:drop-shadow(4px 7px 6px rgba(0,0,0,.35))}
+</style></head><body><div id="s"><div id="w"></div></div>
+<script src="noro.js"></script>
+<script>
+const D=__DATA__,M=D.meta,W=1086,H=1448,stage={W,H};
+const wEl=document.getElementById('w');const imgs=[];
+NORO.setSeed(__SEED__);
+function sprite(name,useCanvas){const m=M[name];const i=new Image();i.src='L/'+name+'.png';imgs.push(i);
+ i.style.cssText=`left:${m[0]}px;top:${m[1]}px;width:${m[2]}px;height:${m[3]}px;opacity:0`;wEl.appendChild(i);
+ const sp={name,el:i,img:i,x:m[0],y:m[1],w:m[2],h:m[3],pad:340};
+ if(useCanvas){const c=document.createElement('canvas');c.width=m[2]+680;c.height=m[3]+680;c.style.cssText=`left:${m[0]-340}px;top:${m[1]-340}px;display:none`;wEl.appendChild(c);sp.canvas=c}
+ return sp}
+const items=[];// {sp,spec,t0,dur,group}
+function add(sp,cls,t0,dur,opts={}){const spec=opts.spec||NORO.pick(cls,opts);items.push({sp,spec,t0,dur});
+ if(!opts.silent)NORO.schedule.push({t:t0,dur,sound:NORO.SOUND[spec.tech],size:Math.sqrt(sp.w*sp.h),gain:opts.gain||1,name:sp.name,tech:spec.tech,dir:spec.dir,ease:spec.ease});return spec}
+// ---------- 1) background pieces: from outside, every piece from a different side
+const bgOrder=D.bg.slice().sort((a,b)=>M[b][2]*M[b][3]-M[a][2]*M[a][3]);
+let t=0.25;
+for(const n of bgOrder){add(sprite(n),'outside',t,1.05,{gain:.7});t+=0.42}
+// ---------- 2) main character: from outside
+t+=0.55;const man=sprite('man');add(man,'outside',t,1.5,{techs:['slide','arc','slam','flip','zoom','stretch'],gain:1});man.el.classList.add('sh');t+=1.55;
+// ---------- 3) shapes & symbols: mix of outside / reveal / form
+const note=sprite('note',true);note.el.classList.add('sh');add(note,'form',t,1.1,{techs:['unfold','rubber','slices']});t+=1.0;
+const ul=sprite('underline');add(ul,'reveal',t,.8,{techs:['draw'],dir:'E'});t+=.75;
+const arrow=sprite('arrow',true);add(arrow,'reveal',t,.9,{techs:['draw','mosaic','torn'],dir:'W'});t+=.8;
+const bulbGlow=document.createElement('div');bulbGlow.className='d';bulbGlow.style.cssText=`left:${M.bulb[0]-120}px;top:${M.bulb[1]-110}px;width:${M.bulb[2]+240}px;height:${M.bulb[3]+200}px;border-radius:50%;background:radial-gradient(circle at 50% 42%,rgba(255,230,120,.75),rgba(255,200,40,0) 60%);mix-blend-mode:screen;opacity:0`;wEl.appendChild(bulbGlow);
+const bulb=sprite('bulb',true);add(bulb,'reveal',t,1.0,{techs:['flicker']});const tBulb=t;t+=0.95;
+const rays=[];const bc=[M.bulb[0]+M.bulb[2]/2,M.bulb[1]+M.bulb[3]*.42];
+D.rays.forEach((c,i)=>{const sp=sprite('ray'+i);const dx=c[0]-bc[0],dy=c[1]-bc[1];
+ // direction: stretch outward from the bulb -> pick nearest of 8 dirs pointing TO bulb (origin side)
+ const ang=Math.atan2(dy,dx);const names=['E','SE','S','SW','W','NW','N','NE'];const k=((Math.round(ang/(Math.PI/4))%8)+8)%8;
+ const dir=names[k];rays.push(sp);items.push({sp,spec:{cls:'form',tech:'stretchF',dir,ease:'back'},t0:t+i*.07,dur:.55})});
+NORO.schedule.push({t:t,dur:.9,sound:'shimmer',size:200,gain:.8,name:'rays',tech:'stretchF'});t+=.9;
+// ---------- 4) text last: each line a different text technique
+const L=D.words;const lineSpecs=[];
+for(let li=0;li<3;li++){const n=L[li];const spec=NORO.pick('text',li===2?{techs:['stampT','drop','spinT']}:{});lineSpecs.push(spec);
+ for(let k=n-1;k>=0;k--){const sp=sprite(`t${li}_${k}`,true);const isDot=(li===2&&k===0);
+   const sx=isDot?{cls:'reveal',tech:'pop',dir:'S',ease:'back'}:spec;
+   add(sp,'text',t,isDot?.45:.75,{spec:sx,gain:isDot?.6:1});t+=isDot?.0:.5}
+ t+=.45}
+const tEnd=t;
+NORO.T={end:tEnd,bulb:tBulb};
+// ---------- render
+function render(T){
+ for(const it of items){const p=(T-it.t0)/it.dur;NORO.apply(it.sp,it.spec,p,T,stage)}
+ // idle life after entrances
+ const idle=Math.min(1,Math.max(0,(T-tEnd+.3)/1.2));
+ const bp=Math.max(0,Math.min(1,(T-tBulb-.6)/.6));
+ bulbGlow.style.opacity=bp*(.55+.25*Math.sin(T*3.1))+0;
+ if(T>tBulb+1){bulb.el.style.filter=`brightness(${1+.08*Math.sin(T*3.1)})`}
+ rays.forEach((r,i)=>{if(T>tEnd-1.5){const k=1+.06*Math.sin(T*4+i)*idle;r.el.style.transform+=` scale(${k})`}});
+ const cam=1+.04*Math.min(1,Math.max(0,(T-3)/(tEnd+3-3)));
+ wEl.style.transformOrigin='540px 420px';wEl.style.transform=`scale(${cam})`;
+ if(T>tEnd-1){man.el.style.transform+=` translateY(${Math.sin(T*1.6)*2.5*idle}px)`}
+}
+window.ready=false;const chk=()=>{window.ready=imgs.every(i=>i.complete&&i.naturalWidth>0)};setInterval(chk,100);chk();
+window.render=render;window.DUR=tEnd+3.2;
+</script></body></html>
