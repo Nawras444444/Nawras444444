@@ -33,7 +33,7 @@
     .shot.photo { background: #fff; }
     .shot.photo img { width: 100%; height: 100%; object-fit: cover; left: 0; top: 0; }
     /* cinematic panels: 1400x1920 crop, slightly wider than the screen for a slow pan */
-    .shot.panel img { width: 1400px; height: 1920px; left: -160px; top: 0; }
+    .shot.panel img { height: 1920px; width: auto; left: 0; top: 0; }
     .shot.collage img { width: 100%; height: 100%; object-fit: cover; left: 0; top: 0; }
 
     /* readability scrim for captions */
@@ -75,19 +75,15 @@
     .icon img { width: 100%; height: 100%; }
 
     /* ---------- Scene badge (glowing icon + label) ---------- */
-    .badge {
-      position: absolute; left: 0; right: 0; top: 120px;
-      display: flex; flex-direction: column; align-items: center; gap: 22px;
-      opacity: 0;
+    .badge { position: absolute; top: 70px; width: 210px; height: 210px; opacity: 0; }
+    .badge.left { left: 46px; } .badge.right { right: 46px; }
+    .badge .icon { width: 210px; height: 210px; }
+    .chapter {
+      position: absolute; left: 0; right: 0; top: 1330px; text-align: center; opacity: 0;
+      font-weight: 900; font-size: 40px; letter-spacing: 0.18em; text-transform: uppercase; color: #fff;
+      -webkit-text-stroke: 9px rgba(0,0,0,0.85); paint-order: stroke fill;
     }
-    .badge .icon { width: 260px; height: 260px; }
-    .badge .label {
-      font-weight: 900; font-size: 46px; letter-spacing: 0.16em; text-transform: uppercase;
-      color: #fff; padding: 12px 30px; border-radius: 999px;
-      background: rgba(10,6,2,0.72); border: 3px solid var(--gold);
-      box-shadow: 0 0 30px var(--glow);
-    }
-    .badge .label b { color: var(--gold); }
+    .chapter b { color: var(--gold); }
 
     /* ---------- Captions (karaoke, no box) ---------- */
     .caption {
@@ -147,9 +143,12 @@
     <div id="scrim"></div>
     <div id="dustLayer"></div>
 
-    <div class="badge" id="b1"><div class="icon"><img src="assets/v2/icon-cheetah.png"></div><div class="label"><b>01</b> · The Hunter</div></div>
-    <div class="badge" id="b2"><div class="icon"><img src="assets/v2/icon-gazelle.png"></div><div class="label"><b>02</b> · The Survivor</div></div>
-    <div class="badge" id="b3"><div class="icon"><img src="assets/v2/icon-cat.png"></div><div class="label"><b>03</b> · The Twist</div></div>
+    <div class="badge right" id="b1"><div class="icon"><img src="assets/v2/icon-cheetah.png"></div></div>
+    <div class="badge right" id="b2"><div class="icon"><img src="assets/v2/icon-gazelle.png"></div></div>
+    <div class="badge left"  id="b3"><div class="icon"><img src="assets/v2/icon-cat.png"></div></div>
+    <div class="chapter" id="ch1"><b>01</b> · The Hunter</div>
+    <div class="chapter" id="ch2"><b>02</b> · The Survivor</div>
+    <div class="chapter" id="ch3"><b>03</b> · The Twist</div>
 
     <div class="caption" id="cap1"></div>
     <div class="caption" id="cap2"></div>
@@ -202,9 +201,12 @@
       tl.fromTo(`${sel} img`, from, { ...to, duration: dur, ease: SMOOTH, immediateRender: false }, t);
     }
     function badge(sel, tIn, tOut) {
-      tl.fromTo(sel, { opacity: 0, y: -30, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: "power3.out", immediateRender: false }, tIn);
-      tl.to(`${sel} .icon`, { scale: 1.05, duration: 0.9, ease: SMOOTH, yoyo: true, repeat: Math.max(1, Math.floor((tOut - tIn - 1.6) / 0.9)) }, tIn + 0.7);
-      tl.to(sel, { opacity: 0, y: -20, duration: 0.6, ease: "power2.in" }, tOut - 0.6);
+      const ch = sel.replace("#b", "#ch");
+      tl.fromTo(sel, { opacity: 0, scale: 0.75 }, { opacity: 1, scale: 1, duration: 0.7, ease: "power3.out", immediateRender: false }, tIn);
+      tl.to(`${sel} .icon`, { scale: 1.06, duration: 0.9, ease: SMOOTH, yoyo: true, repeat: Math.max(1, Math.floor((tOut - tIn - 1.6) / 0.9)) }, tIn + 0.7);
+      tl.to(sel, { opacity: 0, scale: 0.9, duration: 0.6, ease: "power2.in" }, tOut - 0.6);
+      tl.fromTo(ch, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out", immediateRender: false }, tIn + 0.1);
+      tl.to(ch, { opacity: 0, duration: 0.5, ease: "power2.in" }, tOut - 0.5);
     }
     function leak(t) { // warm light flare riding each crossfade
       tl.fromTo("#leak", { opacity: 0, x: -120 }, { opacity: 0.55, x: 0, duration: XF / 2, ease: "sine.out", immediateRender: false }, t)
@@ -249,7 +251,7 @@
     fadeIn("#c1", 1.75); leak(1.75);
     camera("#c1", 1.75, 2.0, { scale: 1.0, yPercent: 0 }, { scale: 1.12, yPercent: -2 });   // he stalks toward us
     fadeIn("#p1", 2.75); leak(2.75);
-    camera("#p1", 2.75, 2.3, { scale: 1.1, x: 60 }, { scale: 1.0, x: -40 });                 // settle onto the meal
+    camera("#p1", 2.75, 2.3, { scale: 1.1, x: -60 }, { scale: 1.0, x: -260 });                 // settle onto the meal
     badge("#b1", 2.1, 4.5);
     karaoke("cap1", 2.15, 4.3);
 
@@ -257,7 +259,7 @@
     fadeIn("#c2", 4.15); leak(4.15);
     camera("#c2", 4.15, 2.3, { scale: 1.0 }, { scale: 1.1 });
     fadeIn("#p2", 5.55); leak(5.55);
-    camera("#p2", 5.55, 2.5, { scale: 1.08, x: 120 }, { scale: 1.0, x: -110 });              // pan with the leap
+    camera("#p2", 5.55, 2.5, { scale: 1.08, x: -40 }, { scale: 1.0, x: -319 });              // pan with the leap
     badge("#b2", 4.55, 7.45);
     karaoke("cap2", 4.5, 7.3);
 
@@ -266,7 +268,7 @@
     camera("#c3", 7.15, 2.9, { scale: 1.0, transformOrigin: "50% 32%" }, { scale: 1.22, transformOrigin: "50% 32%" }); // slow suspicious push-in
     tl.to("#c3 img", { rotation: 1.6, duration: 0.11, ease: SMOOTH, yoyo: true, repeat: 5 }, 9.34);                   // "chaos" tremor
     fadeIn("#p3", 9.95); leak(9.95);
-    camera("#p3", 9.95, 2.6, { scale: 1.1, x: 140 }, { scale: 1.0, x: -100 });               // from the evidence to the smug face
+    camera("#p3", 9.95, 2.7, { x: -40 }, { x: -982 });               // from the evidence to the smug face
     badge("#b3", 7.6, 12.0);
     karaoke("cap3a", 7.55, 10.25);
     karaoke("cap3b", 10.35, 12.15);
