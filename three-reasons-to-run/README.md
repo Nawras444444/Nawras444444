@@ -1,6 +1,16 @@
 # Three Reasons to Run (9:16 TikTok motion graphic)
 
-Rendered video: `three-reasons-to-run.mp4` (1080x1920, 30 fps, H.264 + AAC, 15.0 s, with voiceover).
+## v2 (current): `three-reasons-to-run-v2.mp4`
+- Every image is full-screen, with no frames. Each scene goes from the studio photo to its cinematic panel (cheetah eating, gazelle leaping, cat pooping).
+- Slow 0.85 s crossfades with a warm light flare, and slow camera push-ins and pans on every shot.
+- Glowing icon badges cut from the panel image. The full 3-panel image is the outro.
+- The panel image and the cat photo were upscaled 4x with Real-ESRGAN so they stay sharp at 1080x1920.
+- Re-render: `node render.js 30 three-reasons-to-run-v2.mp4`
+
+v1 (framed, neo-brutalist): `three-reasons-to-run-v1.mp4` / `index-v1.html`
+
+
+Rendered video (v1): `three-reasons-to-run-v1.mp4` (1080x1920, 30 fps, H.264 + AAC, 15.0 s, with voiceover).
 
 ## Timeline (synced to the voiceover's word timestamps)
 | Time | Scene | VO |
