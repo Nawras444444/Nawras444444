@@ -1,13 +1,13 @@
 <!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;background:#000}canvas{display:block}</style></head><body>
 <canvas id="c" width="1080" height="1920"></canvas>
-<script>
+<script type="module">
+import * as THREE from './three.module.js';
 const W=1080,H=1920,cv=document.getElementById('c'),ctx=cv.getContext('2d');
 const FONT='Georgia, "Times New Roman", serif';
 const RED='#e10600', BLACK='#0a0a0a', WHITE='#ffffff', MUTED='#8a8a8a';
 const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x));
 const easeOut=x=>1-Math.pow(1-clamp(x),3);
 const easeOutBack=x=>{const c1=1.4,c3=c1+1;x=clamp(x);return 1+c3*Math.pow(x-1,3)+c1*Math.pow(x-1,2)};
-// [start,end,lines,accent,label]
 const SEG=[
  [0,3.2,['EMINEM'],RED,'WHO IS HE?'],
  [3.2,7,['BORN 1972','MISSOURI','RAISED IN DETROIT'],WHITE,'EARLY LIFE'],
@@ -16,7 +16,78 @@ const SEG=[
  [15,18,['220M+','RECORDS SOLD','(ESTIMATED)'],RED,'IMPACT'],
  [18,20,['2022','ROCK & ROLL','HALL OF FAME'],WHITE,'LEGACY']
 ];
-const SLIDE=0.4; // seconds for slide transition
+const SLIDE=0.4;
+
+/* ---------- 3D layer (Three.js, composited under the text) ---------- */
+const renderer=new THREE.WebGLRenderer({alpha:true,antialias:true,preserveDrawingBuffer:true});
+renderer.setPixelRatio(1);renderer.setSize(W,H,false);renderer.setClearColor(0x000000,0);
+const scene3=new THREE.Scene();
+const cam=new THREE.PerspectiveCamera(35,W/H,0.1,100);cam.position.set(0,0,9);
+scene3.add(new THREE.AmbientLight(0xffffff,0.55));
+const key=new THREE.DirectionalLight(0xffffff,1.3);key.position.set(3,4,6);scene3.add(key);
+const redLight=new THREE.PointLight(0xe10600,2.2,20);redLight.position.set(-4,-2,4);scene3.add(redLight);
+// anchor sits in the upper third of the frame (world y=1.3 ≈ screen y 520px)
+const anchor=new THREE.Group();anchor.position.set(0,1.45,0);anchor.scale.setScalar(0.7);scene3.add(anchor);
+
+function labelTex(text,bg,fg){
+  const w=1024,h=512,c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d');
+  g.fillStyle=bg;g.fillRect(0,0,w,h);
+  g.strokeStyle=fg;g.lineWidth=18;g.strokeRect(24,24,w-48,h-48);
+  let fs=200;g.font=`bold ${fs}px ${FONT}`;
+  while(g.measureText(text).width>w*0.8&&fs>40){fs-=6;g.font=`bold ${fs}px ${FONT}`}
+  g.fillStyle=fg;g.textAlign='center';g.textBaseline='middle';g.fillText(text,w/2,h/2);
+  const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;return t;
+}
+// 1) 3D title block (EMINEM) — used in intro and legacy
+const titleMat=new THREE.MeshStandardMaterial({map:labelTex('EMINEM',BLACK,RED),roughness:0.4,metalness:0.1});
+const titleSide=new THREE.MeshStandardMaterial({color:0x7a0300,roughness:0.5});
+const title=new THREE.Mesh(new THREE.BoxGeometry(2.6,1.3,0.45),[titleSide,titleSide,titleSide,titleSide,titleMat,titleMat]);
+anchor.add(title);
+// 2) 3D microphone — intro
+const mic=new THREE.Group();
+const bodyMat=new THREE.MeshStandardMaterial({color:0x151515,roughness:0.35,metalness:0.6});
+const grillMat=new THREE.MeshStandardMaterial({color:0x2a2a2a,roughness:0.6,metalness:0.8});
+const handle=new THREE.Mesh(new THREE.CylinderGeometry(0.14,0.18,1.9,32),bodyMat);handle.position.y=-0.6;mic.add(handle);
+const head=new THREE.Mesh(new THREE.SphereGeometry(0.55,40,30),grillMat);head.position.y=0.75;mic.add(head);
+const ring=new THREE.Mesh(new THREE.TorusGeometry(0.4,0.04,16,64),new THREE.MeshStandardMaterial({color:RED,emissive:RED,emissiveIntensity:0.6}));ring.position.y=0.75;ring.rotation.x=Math.PI/2;mic.add(ring);
+mic.scale.setScalar(0.65);
+anchor.add(mic);
+// 3) 3D album cubes — breakthrough
+const albumA=new THREE.Mesh(new THREE.BoxGeometry(1.3,1.3,0.12),[titleSide,titleSide,titleSide,titleSide,new THREE.MeshStandardMaterial({map:labelTex('SLIM SHADY',RED,WHITE)}),new THREE.MeshStandardMaterial({map:labelTex('SLIM SHADY',RED,WHITE)})]);
+const albumB=new THREE.Mesh(new THREE.BoxGeometry(1.3,1.3,0.12),[titleSide,titleSide,titleSide,titleSide,new THREE.MeshStandardMaterial({map:labelTex('MATHERS',WHITE,BLACK)}),new THREE.MeshStandardMaterial({map:labelTex('MATHERS',WHITE,BLACK)})]);
+albumA.position.set(-0.85,0,0);albumB.position.set(0.85,0,0);
+anchor.add(albumA,albumB);
+// 4) 3D background — two slow red rings behind everything
+const bgGroup=new THREE.Group();bgGroup.position.set(0,0,-1.5);scene3.add(bgGroup);
+const ringMat=new THREE.MeshBasicMaterial({color:RED,transparent:true,opacity:0.22});
+const ringA=new THREE.Mesh(new THREE.TorusGeometry(3.4,0.03,12,160),ringMat);
+const ringB=new THREE.Mesh(new THREE.TorusGeometry(2.6,0.02,12,160),ringMat);
+bgGroup.add(ringA,ringB);
+// scene index → which 3D object is visible
+const VIS=[
+ {title:false,mic:true,albums:false,rings:true},
+ {title:false,mic:false,albums:false,rings:true},
+ {title:false,mic:false,albums:true,rings:true},
+ {title:false,mic:false,albums:false,rings:true},
+ {title:false,mic:false,albums:false,rings:true},
+ {title:true,mic:false,albums:false,rings:true},
+];
+function draw3d(t,idx){
+  const v=VIS[idx];
+  title.visible=v.title;mic.visible=v.mic;albumA.visible=albumB.visible=v.albums;
+  bgGroup.visible=v.rings;
+  // gentle motion
+  title.rotation.y=Math.sin(t*1.2)*0.5;title.rotation.x=Math.sin(t*0.8)*0.12;
+  mic.rotation.y=t*1.1;mic.rotation.z=Math.sin(t*1.5)*0.1;
+  albumA.rotation.y=-0.45+Math.sin(t*1.4)*0.25;albumB.rotation.y=0.45-Math.sin(t*1.4)*0.25;
+  albumA.position.y=0.25+Math.sin(t*2)*0.08;albumB.position.y=0.25-Math.sin(t*2)*0.08;
+  ringA.rotation.x=t*0.35;ringA.rotation.y=t*0.5;
+  ringB.rotation.x=-t*0.4;ringB.rotation.z=t*0.3;
+  renderer.render(scene3,cam);
+  ctx.drawImage(renderer.domElement,0,0,W,H);
+}
+
+/* ---------- 2D text + transitions ---------- */
 function txt(s,x,y,size,color,alpha=1,scale=1,weight='bold'){
   if(!s.length)return;
   ctx.save();ctx.globalAlpha=clamp(alpha);ctx.translate(x,y);ctx.scale(scale,scale);
@@ -25,30 +96,25 @@ function txt(s,x,y,size,color,alpha=1,scale=1,weight='bold'){
 }
 function bg(t){
   ctx.fillStyle=BLACK;ctx.fillRect(0,0,W,H);
-  // faint red diagonal rules
   ctx.save();ctx.globalAlpha=0.07;ctx.fillStyle=RED;
   for(let i=-10;i<20;i++){const x=i*180+((t*60)%180);ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x+40,0);ctx.lineTo(x+740,H);ctx.lineTo(x+700,H);ctx.fill();}
   ctx.restore();
 }
 function draw(t){
   bg(t);
-  // find current segment; blend previous into next during slide
   let idx=SEG.findIndex(s=>t>=s[0]&&t<s[1]); if(idx<0) idx=SEG.length-1;
+  draw3d(t,idx);
   const seg=SEG[idx];
-  // slide: content enters from right at start of segment, exits left at end
   const k=t-seg[0], rem=seg[1]-t;
-  const inP=easeOut(k/SLIDE), outP=easeOut((SLIDE-rem)/SLIDE);
-  const offIn=(1-inP)*W, offOut=rem<SLIDE? -outP*W*0 : 0; // exit handled by next slide-in
+  const inP=easeOut(k/SLIDE);
+  const dx=(1-inP)*W;
   const [t0,t1,lines,accent,label]=seg;
-  const dx=offIn;
-  // label
-  txt(label,W/2+dx,260,44,MUTED,inP,1,'normal');
-  // progress bar
+  txt(label,W/2+dx,190,44,MUTED,inP,1,'normal');
   ctx.fillStyle='#222';ctx.fillRect(80,H-160,W-160,12);
   ctx.fillStyle=RED;ctx.fillRect(80,H-160,(W-160)*clamp(t/20),12);
-  const n=lines.length, top=H/2-(n-1)*110;
+  const n=lines.length, top=H/2+60-(n-1)*110;
   lines.forEach((ln,i)=>{
-    const d=clamp((k-0.06*i-0.2)/0.6); // stagger 60ms, typewriter over 0.6s
+    const d=clamp((k-0.06*i-0.2)/0.6);
     const shown=ln.slice(0,Math.floor(d*ln.length));
     const base=ln.length<=8?300:(ln.length<=14?150:110);
     ctx.font=`bold ${base}px ${FONT}`;
@@ -58,10 +124,6 @@ function draw(t){
     const bounce=easeOutBack(clamp((k-0.06*i-0.2)/0.35));
     txt(shown,W/2+dx,top+i*220,size,col,inP,bounce);
   });
-  // slide-out: draw fading text sliding left during last SLIDE seconds handled by next segment
-  if(rem<SLIDE){ // partial overlay shift left for exit
-    ctx.save();ctx.globalAlpha=clamp(rem/SLIDE);ctx.restore();
-  }
   txt('@explainer',W/2,H-100,40,MUTED,0.9,1,'normal');
 }
 window.draw=draw;window.ready=true;draw(0);
