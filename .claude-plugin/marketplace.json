@@ -1,0 +1,11 @@
+{
+  "name": "nawras-plugins",
+  "owner": { "name": "Nawras" },
+  "plugins": [
+    {
+      "name": "norostyle",
+      "source": "./norostyle-plugin",
+      "description": "norostyle motion-graphics montage skill"
+    }
+  ]
+}
