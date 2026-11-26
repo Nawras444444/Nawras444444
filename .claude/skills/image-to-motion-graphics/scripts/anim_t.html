@@ -1,0 +1,70 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+html,body{margin:0;background:#fff}
+#s{position:relative;width:940px;height:1672px;overflow:hidden;background:#fff}
+#s img{position:absolute;will-change:transform,opacity;opacity:0}
+.bg{position:absolute;border-radius:50%;filter:blur(40px);opacity:0}
+</style></head><body><div id="s"></div>
+<script>
+const META=__META__;
+const S=document.getElementById('s');
+const bgs=[[-80,300,420,'#f5d77a',.22],[560,1000,520,'#c26a7a',.12],[40,1250,460,'#f3e9d6',.55],[620,60,380,'#f3e9d6',.5]];
+const bgEls=bgs.map(b=>{const d=document.createElement('div');d.className='bg';d.style.cssText=`left:${b[0]}px;top:${b[1]}px;width:${b[2]}px;height:${b[2]}px;background:${b[3]}`;S.appendChild(d);return d});
+const E={};
+for(const n in META){const i=document.createElement('img');i.src='L/'+n+'.png';const m=META[n];i.style.left=m[0]+'px';i.style.top=m[1]+'px';i.style.width=m[2]+'px';i.style.height=m[3]+'px';S.appendChild(i);E[n]=i}
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const P=(t,s,d)=>clamp((t-s)/d);
+const oc=x=>1-Math.pow(1-x,3), oq=x=>1-Math.pow(1-x,4), io=x=>-(Math.cos(Math.PI*x)-1)/2;
+const ob=(x,k=1.3)=>{const c=k+1;return 1+c*Math.pow(x-1,3)+k*Math.pow(x-1,2)};
+const smooth=x=>x*x*(3-2*x);
+const sin=(t,f,ph=0)=>Math.sin(2*Math.PI*f*t+ph);
+const T={ringL:.3,icL:1.2,ringR:.8,icR:1.7,panL:2.4,panR:2.8,dumbbell:3.0,laptop:3.4,target:3.8,book:3.4,bulb:3.8,calendar:4.2,
+ bar1:4.8,bar2:5.2,bar3:5.6,bar4:6.0,arrow:6.6,badge:7.8,man:8.4,woman:9.0,connL:10.2,connR:10.5,burstL:10.9,burstR:11.2};
+const idleK=t=>smooth(P(t,11.4,1.6));
+function set(n,o){const e=E[n];e.style.opacity=o.op;e.style.transform=o.tf||'';e.style.clipPath=o.cp===undefined?'none':o.cp;
+ const m=o.mask===undefined?'none':o.mask;e.style.webkitMaskImage=m;e.style.maskImage=m;if(o.origin)e.style.transformOrigin=o.origin}
+function ring(n,cx,cy,t,dir){
+ const p=P(t,T[n],1.7),a=io(p)*372,f=12;
+ const m=dir>0?`conic-gradient(from 0deg at ${cx}px ${cy}px, #000 ${Math.max(0,a-f)}deg, transparent ${a}deg)`
+  :`conic-gradient(from 0deg at ${cx}px ${cy}px, transparent ${360-a}deg, #000 ${Math.min(360,360-a+f)}deg)`;
+ const sc=.86+.14*oc(p);
+ set(n,{op:p>0?1:0,tf:`scale(${sc})`,origin:`${cx}px ${cy}px`,mask:p>=1?'none':m});
+}
+function render(t){
+ bgEls.forEach((d,i)=>{d.style.opacity=smooth(P(t,0,2.5))*bgs[i][4];d.style.transform=`translate(${sin(t,.035,i*1.7)*26}px,${sin(t,.045,i*2.3)*30}px) scale(${1+.05*sin(t,.05,i)})`});
+ const I=idleK(t);
+ ring('ringL',152-META.ringL[0],235-META.ringL[1],t,1);
+ ring('ringR',793-META.ringR[0],235-META.ringR[1],t,-1);
+ {let p=P(t,T.icL,1.1);
+  set('icL',{op:oc(P(t,T.icL,.7)),tf:`translateY(${(1-oq(p))*16}px) scale(${.7+.3*oq(p)})`,origin:'50% 55%',cp:`inset(0 ${(1-io(p))*100}% 0 0)`});
+  p=P(t,T.icR,1.2);
+  set('icR',{op:oc(P(t,T.icR,.7)),tf:`translateY(${(1-oq(p))*-34}px) scale(${.8+.2*ob(p,.9)})`,origin:'50% 50%'})}
+ for(const [n,side] of [['panL',-1],['panR',1]]){
+  const p=P(t,T[n],1.3),e=oq(p),fl=I*sin(t,.2,side)*3,q=io(clamp(p*1.15));
+  set(n,{op:oc(P(t,T[n],.8)),tf:`translate(${(1-e)*40*side}px,${fl}px) scale(${.94+.06*e})`,origin:side<0?'0 50%':'100% 50%',cp:`inset(${(1-q)*50}% 0 ${(1-q)*50}% 0)`});
+ }
+ for(const [n,side] of [['dumbbell',-1],['laptop',-1],['target',-1],['book',1],['bulb',1],['calendar',1]]){
+  const p=P(t,T[n],.9),e=oq(p),k={bulb:.5,laptop:1.2,book:2,dumbbell:0,target:2.5,calendar:3}[n];
+  const fl=I*sin(t,.2,side)*3+I*sin(t,.33,k)*1.5,ex=n=='target'?ob(p,1.1):e;
+  set(n,{op:oc(P(t,T[n],.6)),tf:`translate(0,${(1-e)*18+fl}px) scale(${.8+.2*ex})`,origin:'50% 50%'});
+ }
+ for(const n of['bar1','bar2','bar3','bar4']){
+  const p=P(t,T[n],1.1),e=oq(p);
+  set(n,{op:oc(P(t,T[n],.5)),tf:`translateY(${(1-e)*36}px) scaleY(${.78+.22*e})`,origin:'50% 100%',cp:`inset(${(1-io(clamp(p*1.1)))*100}% 0 0 0)`});
+ }
+ {const p=P(t,T.arrow,1.5);
+  set('arrow',{op:p>0?1:0,tf:`translate(${(1-oc(p))*-24}px,${(1-oc(p))*18+I*sin(t,.25,1)*3}px)`,cp:`inset(-20px ${(1-io(p))*100}% -20px 0)`})}
+ {const p=P(t,T.badge,.9),e=ob(p,1.2);
+  set('badge',{op:oc(P(t,T.badge,.4)),tf:`translateY(${I*sin(t,.25,2)*2}px) scale(${.25+.75*e})`,origin:'50% 50%'})}
+ for(const [n,side] of [['man',-1],['woman',1]]){
+  const p=P(t,T[n],1.8),e=oq(p),br=1+I*.004*sin(t,.22,side);
+  set(n,{op:oc(P(t,T[n],1.0)),tf:`translate(${(1-e)*70*side}px,${(1-e)*26}px) scale(${br})`,origin:'50% 100%'});
+ }
+ {let p=P(t,T.connL,1.0);set('connL',{op:p>0?1:0,cp:`inset(0 ${(1-io(p))*100}% 0 0)`});
+  p=P(t,T.connR,1.0);set('connR',{op:p>0?1:0,cp:`inset(0 0 0 ${(1-io(p))*100}%)`})}
+ for(const [n,o] of [['burstL','0% 100%'],['burstR','100% 100%']]){
+  const p=P(t,T[n],.9),pulse=1+I*.03*sin(t,.5,n=='burstL'?0:1.5);
+  set(n,{op:oc(P(t,T[n],.4)),tf:`scale(${(.35+.65*ob(p,1.4))*pulse})`,origin:o});
+ }
+}
+window.render=render;
+</script></body></html>
