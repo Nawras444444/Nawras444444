@@ -6,12 +6,13 @@ const path = require("path");
 
 const FPS = Number(process.argv[2] || 30);
 const OUT = path.resolve(__dirname, process.argv[3] || "three-reasons-to-run.mp4");
+const HTML = process.argv[4] || "index.html";
 const AUDIO = path.resolve(__dirname, "assets/voiceover.wav");
 
 (async () => {
   const browser = await chromium.launch();
   const page = await browser.newPage({ viewport: { width: 1080, height: 1920 }, deviceScaleFactor: 1 });
-  await page.goto("file://" + path.resolve(__dirname, "index.html") + "?render");
+  await page.goto("file://" + path.resolve(__dirname, HTML) + "?render");
   await page.evaluate(() => window.__ready);
   const duration = await page.evaluate(() => window.__duration);
   const frames = Math.round(duration * FPS);

@@ -7,209 +7,157 @@
   <script src="assets/gsap.min.js"></script>
   <style>
     :root {
-      --bg: #F4F1EA;
-      --ink: #141414;
-      --gold: #F2B705;
-      --red: #E63946;
-      --blue: #2B5B84;
+      --gold: #FFC21A;
+      --glow: rgba(255, 176, 0, 0.75);
       --font: "Inter Display", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { background: #0d0d0d; overflow: hidden; }
+    html, body { background: #000; overflow: hidden; }
     body { font-family: var(--font); }
 
-    /* Fixed 1080x1920 stage; scaled to fit the window for preview */
     #stage {
       position: absolute; left: 50%; top: 50%;
       width: 1080px; height: 1920px;
       transform-origin: 50% 50%;
       overflow: hidden;
-      background: var(--bg);
-      color: var(--ink);
+      background: radial-gradient(120% 80% at 50% 45%, #3a2408 0%, #120b04 55%, #050302 100%);
     }
     body.render #stage { left: 0; top: 0; transform: none !important; }
 
-    /* ---------- Ambient layer ---------- */
-    #ambient {
-      position: absolute; inset: -200px;
-      background: repeating-linear-gradient(-35deg,
-        rgba(20,20,20,0.045) 0 26px, transparent 26px 78px);
-    }
-    #tint { position: absolute; inset: 0; background: var(--gold); opacity: 0; mix-blend-mode: multiply; }
-
-    .scene { position: absolute; inset: 0; opacity: 0; visibility: hidden; }
-
-    /* ---------- Shared pieces ---------- */
-    .badge {
-      position: absolute; left: 70px; top: 120px;
-      font-weight: 900; font-size: 40px; letter-spacing: 0.06em;
-      text-transform: uppercase;
-      padding: 14px 26px; border-radius: 12px;
-      border: 5px solid var(--ink);
-      box-shadow: 8px 8px 0 var(--ink);
-    }
-    .visual-box {
-      position: absolute; left: 70px; top: 250px;
-      width: 940px; height: 1040px;
-      border: 7px solid var(--ink); border-radius: 44px;
-      background: #fff; overflow: hidden;
-      box-shadow: 18px 18px 0 var(--ink);
-    }
-    .visual-box img {
-      position: absolute; left: 50%; top: 0; height: 100%; width: auto;
-      mix-blend-mode: multiply;
-      /* feather the photo edges so its off-white backdrop melts into the card */
-      -webkit-mask-image: radial-gradient(ellipse 62% 58% at 50% 50%, #000 72%, transparent 100%);
-              mask-image: radial-gradient(ellipse 62% 58% at 50% 50%, #000 72%, transparent 100%);
+    /* ---------- Full-screen shots (no frames) ---------- */
+    .shot { position: absolute; inset: 0; opacity: 0; overflow: hidden; }
+    .shot img {
+      position: absolute; left: 50%; top: 50%;
       will-change: transform;
     }
-    .caption-box {
-      position: absolute; left: 70px; right: 70px; top: 1370px;
-      min-height: 250px;
-      background: var(--ink); color: #fff;
-      border-radius: 36px; padding: 40px 44px;
-      display: flex; align-items: center; justify-content: center;
-      text-align: center;
-      box-shadow: 14px 14px 0 var(--gold);
+    .shot.photo { background: #fff; }
+    .shot.photo img { width: 100%; height: 100%; object-fit: cover; left: 0; top: 0; }
+    /* cinematic panels: 1400x1920 crop, slightly wider than the screen for a slow pan */
+    .shot.panel img { width: 1400px; height: 1920px; left: -160px; top: 0; }
+    .shot.collage img { width: 100%; height: 100%; object-fit: cover; left: 0; top: 0; }
+
+    /* readability scrim for captions */
+    #scrim {
+      position: absolute; left: 0; right: 0; bottom: 0; height: 52%;
+      background: linear-gradient(to top, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.45) 45%, transparent 100%);
+      opacity: 0; pointer-events: none;
     }
-    .caption {
-      font-weight: 900; font-size: 74px; line-height: 1.08; letter-spacing: -0.02em;
-    }
-    .caption .w { display: inline-block; color: #5d5b57; transform-origin: 50% 70%; }
-    .caption .w.on { color: #fff; }
-    .caption .w.hot { color: var(--gold); }
-    .stamp {
-      position: absolute; right: 40px; bottom: 50px;
-      font-weight: 900; font-size: 78px; letter-spacing: 0.02em; text-transform: uppercase;
-      padding: 14px 34px; border-radius: 999px;
-      border: 7px solid var(--ink);
-      box-shadow: 10px 10px 0 var(--ink);
-      transform: rotate(-8deg);
+    #topscrim {
+      position: absolute; left: 0; right: 0; top: 0; height: 30%;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.45), transparent);
       opacity: 0;
     }
-    .streak { position: absolute; height: 16px; border-radius: 99px; background: var(--gold); }
+    #vignette {
+      position: absolute; inset: 0; pointer-events: none;
+      background: radial-gradient(130% 90% at 50% 50%, transparent 55%, rgba(0,0,0,0.55) 100%);
+    }
+    #leak {
+      position: absolute; inset: -20%; pointer-events: none; opacity: 0; mix-blend-mode: screen;
+      background: radial-gradient(40% 35% at 70% 30%, rgba(255,170,30,0.85), transparent 70%);
+    }
+
+    /* ---------- Ambient gold dust ---------- */
+    .dust { position: absolute; border-radius: 50%; background: #FFD25E;
+      box-shadow: 0 0 12px 4px rgba(255,180,40,0.7); pointer-events: none; }
 
     /* ---------- Intro ---------- */
-    .hero-type {
-      position: absolute; left: 70px; top: 300px;
-      font-weight: 900; font-size: 200px; line-height: 0.92; letter-spacing: -0.045em;
-      text-transform: uppercase;
+    #intro { position: absolute; inset: 0; }
+    .title {
+      position: absolute; left: 0; right: 0; top: 330px; text-align: center;
+      font-weight: 900; font-size: 168px; line-height: 0.95; letter-spacing: -0.04em;
+      text-transform: uppercase; color: #fff;
+      text-shadow: 0 8px 40px rgba(0,0,0,0.6);
     }
-    .hero-type .w { display: inline-block; }
-    .hero-type .hl { color: var(--red); }
-    .chips { position: absolute; left: 70px; top: 1330px; display: flex; gap: 34px; }
-    .chip {
-      width: 290px; height: 290px; border-radius: 50%;
-      border: 7px solid var(--ink); background: #fff; overflow: hidden;
-      box-shadow: 10px 10px 0 var(--ink);
-    }
-    .chip img { width: 100%; height: 100%; object-fit: cover; mix-blend-mode: multiply; }
+    .title .w { display: inline-block; }
+    .title .gold { color: var(--gold); text-shadow: 0 0 40px var(--glow), 0 0 90px rgba(255,140,0,0.45); }
+    .icons { position: absolute; left: 0; right: 0; top: 1130px; display: flex; justify-content: center; gap: 30px; }
+    .icon { width: 310px; height: 310px; filter: drop-shadow(0 0 26px var(--glow)) drop-shadow(0 0 60px rgba(255,140,0,0.35)); }
+    .icon img { width: 100%; height: 100%; }
 
-    /* ---------- Outro ---------- */
-    .grid-stack { position: absolute; left: 70px; right: 70px; top: 270px; display: grid; gap: 34px; }
-    .row {
-      display: flex; align-items: center; gap: 30px;
-      background: #fff; border: 6px solid var(--ink); border-radius: 32px;
-      padding: 22px 30px; box-shadow: 12px 12px 0 var(--ink);
-      font-weight: 900; font-size: 64px; letter-spacing: -0.02em;
+    /* ---------- Scene badge (glowing icon + label) ---------- */
+    .badge {
+      position: absolute; left: 0; right: 0; top: 120px;
+      display: flex; flex-direction: column; align-items: center; gap: 22px;
+      opacity: 0;
     }
-    .row .thumb { width: 170px; height: 170px; border-radius: 24px; overflow: hidden; border: 5px solid var(--ink); flex: none; }
-    .row .thumb img { width: 100%; height: 100%; object-fit: cover; mix-blend-mode: multiply; }
-    .row .name { flex: 1; }
-    .pill { padding: 10px 26px; border-radius: 999px; font-size: 40px; text-transform: uppercase; letter-spacing: 0.03em; }
-    .gold { background: var(--gold); color: var(--ink); }
-    .blue { background: var(--blue); color: #fff; }
-    .red  { background: var(--red);  color: #fff; }
+    .badge .icon { width: 260px; height: 260px; }
+    .badge .label {
+      font-weight: 900; font-size: 46px; letter-spacing: 0.16em; text-transform: uppercase;
+      color: #fff; padding: 12px 30px; border-radius: 999px;
+      background: rgba(10,6,2,0.72); border: 3px solid var(--gold);
+      box-shadow: 0 0 30px var(--glow);
+    }
+    .badge .label b { color: var(--gold); }
 
+    /* ---------- Captions (karaoke, no box) ---------- */
+    .caption {
+      position: absolute; left: 60px; right: 60px; top: 1420px;
+      text-align: center; opacity: 0;
+      font-weight: 900; font-size: 88px; line-height: 1.08; letter-spacing: -0.02em;
+      -webkit-text-stroke: 14px rgba(0,0,0,0.9); paint-order: stroke fill;
+      text-shadow: 0 10px 30px rgba(0,0,0,0.55);
+    }
+    .caption .w { display: inline-block; color: rgba(255,255,255,0.5); transform-origin: 50% 70%; }
+    .caption .w.on { color: #fff; }
+    .caption .w.hot { color: var(--gold); }
     .cta {
-      position: absolute; left: 70px; right: 70px; top: 1500px; text-align: center;
-      font-weight: 900; font-size: 54px; letter-spacing: -0.01em;
-      background: var(--gold); border: 6px solid var(--ink); border-radius: 28px;
-      padding: 26px 30px; box-shadow: 10px 10px 0 var(--ink);
+      position: absolute; left: 0; right: 0; top: 1700px; text-align: center; opacity: 0;
+      font-weight: 800; font-size: 50px; color: #fff;
+      -webkit-text-stroke: 10px rgba(0,0,0,0.85); paint-order: stroke fill;
     }
-    .cta .arrow { display: inline-block; }
-    /* ---------- Transition wipe + progress ---------- */
-    .wipe { position: absolute; left: -10%; width: 120%; height: 130%; top: 100%; z-index: 30; }
-    .progress { position: absolute; left: 0; bottom: 0; width: 100%; height: 14px; background: rgba(20,20,20,0.12); z-index: 40; }
-    .progress > div { height: 100%; width: 100%; background: var(--red); transform-origin: 0 50%; transform: scaleX(0); }
+    .cta span { display: inline-block; color: var(--gold); }
+
+    .progress { position: absolute; left: 0; bottom: 0; width: 100%; height: 10px; background: rgba(255,255,255,0.15); z-index: 40; }
+    .progress > div { height: 100%; width: 100%; background: var(--gold); box-shadow: 0 0 14px var(--glow); transform-origin: 0 50%; transform: scaleX(0); }
 
     #play {
       position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%);
       z-index: 99; font: 900 28px var(--font); padding: 18px 34px;
-      border: 4px solid #fff; border-radius: 14px; background: var(--red); color: #fff; cursor: pointer;
+      border: 3px solid var(--gold); border-radius: 14px; background: #111; color: var(--gold); cursor: pointer;
     }
     body.render #play { display: none; }
   </style>
 </head>
 <body>
   <div id="stage">
-    <div id="ambient"></div>
-    <div id="tint"></div>
-
-    <!-- INTRO 0.00–2.05 : "Every runner has a reason." -->
-    <section class="scene" id="s0">
-      <div class="badge" style="background:var(--ink);color:var(--bg);">3 runners · 3 reasons</div>
-      <div class="hero-type" id="hero"></div>
-      <div class="chips">
-        <div class="chip"><img src="assets/cheetah.jpg" style="object-position:50% 22%"></div>
-        <div class="chip"><img src="assets/gazelle.jpg" style="object-position:50% 18%"></div>
-        <div class="chip"><img src="assets/cat.jpg" style="object-position:50% 20%"></div>
+    <!-- INTRO -->
+    <div id="intro">
+      <div class="title" id="title">
+        <span class="w">Every</span><br><span class="w">runner</span><br><span class="w">has a</span><br><span class="w gold">reason.</span>
       </div>
-    </section>
-
-    <!-- CHEETAH 2.05–4.40 -->
-    <section class="scene" id="s1">
-      <div class="badge" style="background:var(--gold);">01 / The Hunter</div>
-      <div class="visual-box" id="box1">
-        <div class="streak" style="left:-200px;top:330px;width:220px"></div>
-        <div class="streak" style="left:-200px;top:520px;width:160px;background:var(--ink)"></div>
-        <div class="streak" style="left:-200px;top:720px;width:260px"></div>
-        <img id="img1" src="assets/cheetah.jpg" alt="Cheetah">
-        <div class="stamp gold" id="stamp1">Hungry</div>
+      <div class="icons">
+        <div class="icon"><img src="assets/v2/icon-cheetah.png"></div>
+        <div class="icon"><img src="assets/v2/icon-gazelle.png"></div>
+        <div class="icon"><img src="assets/v2/icon-cat.png"></div>
       </div>
-      <div class="caption-box"><div class="caption" id="cap1"></div></div>
-    </section>
+    </div>
 
-    <!-- GAZELLE 4.40–7.45 -->
-    <section class="scene" id="s2">
-      <div class="badge" style="background:var(--blue);color:#fff;">02 / The Survivor</div>
-      <div class="visual-box" id="box2" style="box-shadow:18px 18px 0 var(--blue)">
-        <img id="img2" src="assets/gazelle.jpg" alt="Gazelle">
-        <div class="stamp blue" id="stamp2">Survival</div>
-      </div>
-      <div class="caption-box" style="box-shadow:14px 14px 0 var(--blue)"><div class="caption" id="cap2"></div></div>
-    </section>
+    <!-- Full-screen shots, stacked in play order: each fades in over the previous -->
+    <div class="shot photo"   id="c1"><img src="assets/cheetah.jpg"></div>
+    <div class="shot panel"   id="p1"><img src="assets/v2/panel-cheetah.jpg"></div>
+    <div class="shot photo"   id="c2"><img src="assets/gazelle.jpg"></div>
+    <div class="shot panel"   id="p2"><img src="assets/v2/panel-gazelle.jpg"></div>
+    <div class="shot photo"   id="c3"><img src="assets/v2/cat-hd.jpg" style="object-position:50% 30%"></div>
+    <div class="shot panel"   id="p3"><img src="assets/v2/panel-cat.jpg"></div>
+    <div class="shot collage" id="outro"><img src="assets/v2/collage.jpg"></div>
 
-    <!-- CAT 7.45–12.25 -->
-    <section class="scene" id="s3">
-      <div class="badge" style="background:var(--red);color:#fff;">03 / The Twist</div>
-      <div class="visual-box" id="box3" style="box-shadow:18px 18px 0 var(--red)">
-        <img id="img3" src="assets/cat.jpg" alt="Cat">
-        <div class="stamp red" id="stamp3a" style="right:auto;left:40px;top:50px;bottom:auto;transform:rotate(6deg)">Pure chaos</div>
-        <div class="stamp red" id="stamp3">Just pooped</div>
-      </div>
-      <div class="caption-box" style="box-shadow:14px 14px 0 var(--red)">
-        <div class="caption" id="cap3a"></div>
-        <div class="caption" id="cap3b" style="position:absolute;inset:40px 44px;display:flex;flex-wrap:wrap;align-content:center;justify-content:center;gap:0 0.25em;opacity:0"></div>
-      </div>
-    </section>
+    <div id="leak"></div>
+    <div id="vignette"></div>
+    <div id="topscrim"></div>
+    <div id="scrim"></div>
+    <div id="dustLayer"></div>
 
-    <!-- OUTRO 12.25–15.00 -->
-    <section class="scene" id="s4">
-      <div class="badge" style="background:var(--ink);color:var(--bg);top:110px">Which runner are you?</div>
-      <div class="grid-stack" style="top:250px">
-        <div class="row"><div class="thumb"><img src="assets/cheetah.jpg" style="object-position:50% 22%"></div><span class="name">Cheetah</span><span class="pill gold">Hungry</span></div>
-        <div class="row"><div class="thumb"><img src="assets/gazelle.jpg" style="object-position:50% 16%"></div><span class="name">Gazelle</span><span class="pill blue">Survival</span></div>
-        <div class="row"><div class="thumb"><img src="assets/cat.jpg" style="object-position:50% 18%"></div><span class="name">Cat</span><span class="pill red">Just pooped</span></div>
-      </div>
-      <div class="caption-box" style="top:1150px"><div class="caption" id="cap4"></div></div>
-      <div class="cta" id="cta">Drop your reason in the comments <span class="arrow">↓</span></div>
-    </section>
+    <div class="badge" id="b1"><div class="icon"><img src="assets/v2/icon-cheetah.png"></div><div class="label"><b>01</b> · The Hunter</div></div>
+    <div class="badge" id="b2"><div class="icon"><img src="assets/v2/icon-gazelle.png"></div><div class="label"><b>02</b> · The Survivor</div></div>
+    <div class="badge" id="b3"><div class="icon"><img src="assets/v2/icon-cat.png"></div><div class="label"><b>03</b> · The Twist</div></div>
 
-    <div class="wipe" id="wipe1" style="background:var(--gold)"></div>
-    <div class="wipe" id="wipe2" style="background:var(--blue)"></div>
-    <div class="wipe" id="wipe3" style="background:var(--red)"></div>
-    <div class="wipe" id="wipe4" style="background:var(--ink)"></div>
+    <div class="caption" id="cap1"></div>
+    <div class="caption" id="cap2"></div>
+    <div class="caption" id="cap3a"></div>
+    <div class="caption" id="cap3b"></div>
+    <div class="caption" id="cap4"></div>
+    <div class="cta" id="cta">Drop your reason in the comments <span>↓</span></div>
+
     <div class="progress"><div id="bar"></div></div>
   </div>
 
@@ -221,9 +169,8 @@
     const isRender = new URLSearchParams(location.search).has("render");
     if (isRender) document.body.classList.add("render");
 
-    // Word timings from the voiceover (whisper word timestamps, seconds)
+    // Voiceover word timestamps (seconds); true = key word (gold)
     const WORDS = {
-      hero: [["Every",0.00],["runner",0.32],["has",0.68],["a",1.02],["reason.",1.18]],
       cap1: [["The",2.22],["cheetah",2.30],["runs",2.60],["because",2.82],["he's",3.22],["hungry.",3.46,true]],
       cap2: [["The",4.54],["gazelle",4.68],["runs",5.02],["because",5.26],["he",5.62],["does",5.84],["not",5.96],["want",6.14],["to",6.36],["die.",6.46,true]],
       cap3a:[["And",7.64],["the",7.88],["cat?",8.00,true],["Pure",8.92],["chaos.",9.34,true]],
@@ -231,164 +178,136 @@
       cap4: [["Tell",12.40],["me",12.84],["you've",12.98],["seen",13.12],["that",13.30],["3AM",13.46,true],["zoomie.",14.00,true]],
     };
 
-    function build(id, words, sep = " ") {
-      const el = document.getElementById(id);
-      el.innerHTML = words.map(([w], i) => `<span class="w" data-i="${i}">${w}</span>`).join(sep);
-      return [...el.querySelectorAll(".w")];
-    }
-
-    gsap.set(".visual-box img", { xPercent: -50 });
     const tl = gsap.timeline({ paused: true });
-    const E_IN = "back.out(1.6)", E_OUT = "power2.in";
+    const XF = 0.85;              // slow crossfade length
+    const SMOOTH = "sine.inOut";  // signature ease for camera moves and fades
 
-    // Karaoke: word lights up on its timestamp with a quick pop; key words go gold
-    function karaoke(id) {
-      const spans = build(id, WORDS[id]);
+    // ---------- helpers ----------
+    function karaoke(id, tIn, tOut) {
+      const el = document.getElementById(id);
+      el.innerHTML = WORDS[id].map(([w]) => `<span class="w">${w}</span>`).join(" ");
+      const spans = [...el.querySelectorAll(".w")];
+      tl.fromTo(el, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.45, ease: "power2.out", immediateRender: false }, tIn);
+      tl.to(el, { opacity: 0, y: -20, duration: 0.4, ease: "power2.in" }, tOut - 0.4);
       WORDS[id].forEach(([, t, hot], i) => {
         const s = spans[i];
-        tl.call(() => s.classList.add("on"), null, t)
-          .fromTo(s, { scale: 1 }, { scale: hot ? 1.1 : 1.06, duration: 0.09, ease: "power2.out", yoyo: true, repeat: 1, immediateRender: false }, t);
-        if (hot) tl.call(() => s.classList.add("hot"), null, t);
+        tl.call(() => { s.classList.add("on"); if (hot) s.classList.add("hot"); }, null, t)
+          .fromTo(s, { scale: 1 }, { scale: hot ? 1.1 : 1.04, duration: 0.14, ease: "power2.out", yoyo: true, repeat: 1, immediateRender: false }, t);
       });
-      // make classes reversible when seeking backwards (render seeks forward only, preview restarts from 0)
+    }
+    function fadeIn(sel, t, dur = XF) {
+      tl.fromTo(sel, { opacity: 0 }, { opacity: 1, duration: dur, ease: SMOOTH, immediateRender: false }, t);
+    }
+    function camera(sel, t, dur, from, to) { // slow Ken Burns on the shot's image
+      tl.fromTo(`${sel} img`, from, { ...to, duration: dur, ease: SMOOTH, immediateRender: false }, t);
+    }
+    function badge(sel, tIn, tOut) {
+      tl.fromTo(sel, { opacity: 0, y: -30, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: "power3.out", immediateRender: false }, tIn);
+      tl.to(`${sel} .icon`, { scale: 1.05, duration: 0.9, ease: SMOOTH, yoyo: true, repeat: Math.max(1, Math.floor((tOut - tIn - 1.6) / 0.9)) }, tIn + 0.7);
+      tl.to(sel, { opacity: 0, y: -20, duration: 0.6, ease: "power2.in" }, tOut - 0.6);
+    }
+    function leak(t) { // warm light flare riding each crossfade
+      tl.fromTo("#leak", { opacity: 0, x: -120 }, { opacity: 0.55, x: 0, duration: XF / 2, ease: "sine.out", immediateRender: false }, t)
+        .to("#leak", { opacity: 0, x: 120, duration: XF, ease: "sine.in" }, t + XF / 2);
     }
 
-    function showScene(sel, t) { tl.set(sel, { opacity: 1, visibility: "visible", y: 0 }, t); }
-    function hideScene(sel, t) {
-      tl.to(sel, { y: -70, opacity: 0, duration: 0.28, ease: E_OUT }, t - 0.28)
-        .set(sel, { visibility: "hidden" }, t);
-    }
-    function wipe(sel, t) { // colored panel sweeps up across the cut, centred on t
-      tl.fromTo(sel, { yPercent: 0 }, { yPercent: -175, duration: 0.62, ease: "power3.inOut", immediateRender: false }, t - 0.31);
-    }
-
-    // ---- Ambient: constant drift + per-scene tint ----
-    tl.to("#ambient", { x: 220, y: -160, duration: DURATION, ease: "none" }, 0);
+    // ---------- ambient: progress, gold dust, top scrim ----------
     tl.to("#bar", { scaleX: 1, duration: DURATION, ease: "none" }, 0);
-    tl.to("#tint", { backgroundColor: "#F2B705", opacity: 0.10, duration: 0.3 }, 2.05)
-      .to("#tint", { backgroundColor: "#2B5B84", opacity: 0.08, duration: 0.3 }, 4.40)
-      .to("#tint", { backgroundColor: "#E63946", opacity: 0.08, duration: 0.3 }, 7.45)
-      .to("#tint", { opacity: 0, duration: 0.3 }, 12.25);
+    const dustLayer = document.getElementById("dustLayer");
+    let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    const dust = [];
+    for (let i = 0; i < 26; i++) {
+      const d = document.createElement("div"); d.className = "dust";
+      const size = 4 + rnd() * 7; d.style.width = d.style.height = size + "px";
+      d.style.left = (rnd() * 1080) + "px"; d.style.top = "0px";
+      dustLayer.appendChild(d);
+      dust.push({ d, period: 7 + rnd() * 6, phase: rnd(), sway: 30 + rnd() * 60, swayT: 2.5 + rnd() * 2, op: 0.25 + rnd() * 0.6 });
+    }
+    // ambient layer: a pure function of time, so every rendered frame is deterministic
+    function updateDust(t) {
+      for (const p of dust) {
+        const k = ((t / p.period) + p.phase) % 1;
+        const y = 1960 - k * 2020;
+        const x = Math.sin((t / p.swayT + p.phase) * Math.PI * 2) * p.sway;
+        const o = p.op * (0.6 + 0.4 * Math.sin((t * 1.3 + p.phase * 6.28))) * Math.min(1, k * 8, (1 - k) * 8);
+        p.d.style.transform = `translate(${x}px, ${y}px)`; p.d.style.opacity = o;
+      }
+    }
+    tl.eventCallback("onUpdate", () => updateDust(tl.time()));
+    tl.to("#scrim", { opacity: 1, duration: 0.8, ease: SMOOTH }, 2.0);
+    tl.to("#topscrim", { opacity: 1, duration: 0.8, ease: SMOOTH }, 2.0);
 
-    // ===== INTRO 0 – 2.05 =====
-    document.getElementById("hero").innerHTML =
-      '<span class="w">Every</span><br><span class="w">runner</span><br><span class="w">has a</span><br><span class="w hl">reason.</span>';
-    const hw = [...document.querySelectorAll("#hero .w")];
-    showScene("#s0", 0);
-    tl.from("#s0 .badge", { x: -80, opacity: 0, duration: 0.3, ease: E_IN }, 0.0);
+    // ===== INTRO 0 – 2.4 =====
+    const tw = [...document.querySelectorAll("#title .w")];
     [0.0, 0.32, 0.68, 1.18].forEach((t, i) =>
-      tl.from(hw[i], { yPercent: 70, opacity: 0, rotation: i % 2 ? 3 : -3, duration: 0.32, ease: E_IN }, t));
-    tl.from(".chip", { scale: 0, rotation: -20, duration: 0.38, stagger: 0.09, ease: "back.out(2.2)" }, 1.25);
-    tl.to("#hero .hl", { scale: 1.06, duration: 0.14, yoyo: true, repeat: 1, ease: "power1.inOut", transformOrigin: "0% 50%" }, 1.55);
-    hideScene("#s0", 2.05);
-    wipe("#wipe1", 2.05);
+      tl.from(tw[i], { y: 80, opacity: 0, duration: 0.55, ease: "power3.out" }, t));
+    tl.from(".icons .icon", { y: 60, scale: 0.7, opacity: 0, duration: 0.7, stagger: 0.14, ease: "power3.out" }, 0.55);
+    tl.to("#title .gold", { scale: 1.05, duration: 0.5, ease: SMOOTH, yoyo: true, repeat: 1 }, 1.3);
+    tl.to("#intro", { scale: 1.08, opacity: 0, duration: XF, ease: SMOOTH }, 1.75);
 
-    // ===== CHEETAH 2.05 – 4.40 =====
-    karaoke("cap1");
-    showScene("#s1", 2.05);
-    tl.from("#s1 .badge", { x: -90, opacity: 0, duration: 0.28, ease: E_IN }, 2.15)
-      .from("#box1", { scale: 0.82, y: 60, duration: 0.42, ease: E_IN }, 2.10)
-      .from("#s1 .caption-box", { y: 80, opacity: 0, duration: 0.32, ease: "power3.out" }, 2.18)
-      // primary: the cheetah stalks toward camera (slow push-in)
-      .fromTo("#img1", { scale: 1.0, y: 20 }, { scale: 1.16, y: -10, duration: 2.35, ease: "sine.inOut" }, 2.05)
-      // secondary: speed streaks rip across
-      .fromTo("#box1 .streak", { x: 0 }, { x: 1250, duration: 0.55, stagger: 0.12, ease: "power2.in", repeat: 2, repeatDelay: 0.15 }, 2.45)
-      // payoff on "hungry"
-      .fromTo("#stamp1", { scale: 2.2, opacity: 0, rotation: -18 }, { scale: 1, opacity: 1, rotation: -8, duration: 0.32, ease: "back.out(2.4)" }, 3.46)
-      .to("#box1", { x: 10, duration: 0.05, yoyo: true, repeat: 3, ease: "power1.inOut" }, 3.58);
-    hideScene("#s1", 4.40);
-    wipe("#wipe2", 4.40);
+    // ===== CHEETAH 1.75 – 4.6 =====
+    fadeIn("#c1", 1.75); leak(1.75);
+    camera("#c1", 1.75, 2.0, { scale: 1.0, yPercent: 0 }, { scale: 1.12, yPercent: -2 });   // he stalks toward us
+    fadeIn("#p1", 2.75); leak(2.75);
+    camera("#p1", 2.75, 2.3, { scale: 1.1, x: 60 }, { scale: 1.0, x: -40 });                 // settle onto the meal
+    badge("#b1", 2.1, 4.5);
+    karaoke("cap1", 2.15, 4.3);
 
-    // ===== GAZELLE 4.40 – 7.45 =====
-    karaoke("cap2");
-    showScene("#s2", 4.40);
-    tl.from("#s2 .badge", { x: -90, opacity: 0, duration: 0.28, ease: E_IN }, 4.50)
-      .from("#box2", { x: 260, rotation: 4, opacity: 0, duration: 0.42, ease: "power3.out" }, 4.42)
-      .from("#s2 .caption-box", { y: 80, opacity: 0, duration: 0.32, ease: "power3.out" }, 4.52)
-      // primary: alert, skittish hops
-      .fromTo("#img2", { y: 0 }, { y: -26, duration: 0.2, ease: "sine.out", yoyo: true, repeat: 7, repeatDelay: 0.08 }, 4.9)
-      .fromTo("#img2", { scale: 1.02 }, { scale: 1.1, duration: 3.0, ease: "sine.inOut" }, 4.4)
-      // payoff on "die": red alarm pulse + shake
-      .to("#box2", { borderColor: "#E63946", duration: 0.08, yoyo: true, repeat: 3 }, 6.46)
-      .to("#box2", { x: -14, duration: 0.05, yoyo: true, repeat: 5, ease: "power1.inOut" }, 6.46)
-      .fromTo("#stamp2", { scale: 2.2, opacity: 0, rotation: -18 }, { scale: 1, opacity: 1, rotation: -8, duration: 0.32, ease: "back.out(2.4)" }, 6.50);
-    hideScene("#s2", 7.45);
-    wipe("#wipe3", 7.45);
+    // ===== GAZELLE 4.15 – 7.5 =====
+    fadeIn("#c2", 4.15); leak(4.15);
+    camera("#c2", 4.15, 2.3, { scale: 1.0 }, { scale: 1.1 });
+    fadeIn("#p2", 5.55); leak(5.55);
+    camera("#p2", 5.55, 2.5, { scale: 1.08, x: 120 }, { scale: 1.0, x: -110 });              // pan with the leap
+    badge("#b2", 4.55, 7.45);
+    karaoke("cap2", 4.5, 7.3);
 
-    // ===== CAT 7.45 – 12.25 =====
-    karaoke("cap3a");
-    karaoke("cap3b");
-    showScene("#s3", 7.45);
-    tl.from("#s3 .badge", { x: -90, opacity: 0, duration: 0.28, ease: E_IN }, 7.55)
-      .from("#box3", { scale: 0.5, rotation: -8, opacity: 0, duration: 0.45, ease: "back.out(2)" }, 7.47)
-      .from("#s3 .caption-box", { scale: 0.9, opacity: 0, duration: 0.3, ease: E_IN }, 7.55)
-      // "And the cat?" — suspicious slow push
-      .fromTo("#img3", { scale: 1.0 }, { scale: 1.12, duration: 1.3, ease: "sine.inOut" }, 7.6)
-      // "Pure chaos." — the frame loses it
-      .fromTo("#stamp3a", { scale: 2.4, opacity: 0, rotation: 20 }, { scale: 1, opacity: 1, rotation: 6, duration: 0.3, ease: "back.out(2.4)" }, 9.0)
-      .to("#box3", { rotation: 3, duration: 0.07, yoyo: true, repeat: 7, ease: "power1.inOut" }, 8.92)
-      .to("#box3", { rotation: 0, duration: 0.15, ease: "power2.out" }, 9.5)
-      .to("#img3", { scale: 1.0, duration: 0.3, ease: "power2.out" }, 9.6)
-      // caption swap
-      .to("#cap3a", { y: -40, opacity: 0, duration: 0.2, ease: E_OUT }, 10.22)
-      .fromTo("#cap3b", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.24, ease: "power3.out", immediateRender: false }, 10.36)
-      .to("#stamp3a", { opacity: 0, scale: 0.6, duration: 0.2, ease: E_OUT }, 10.3)
-      // "just pooped" — 3AM zoomies: cat zips side to side with motion blur
-      .to("#img3", { x: 260, filter: "blur(6px)", duration: 0.13, ease: "power2.in" }, 11.5)
-      .to("#img3", { x: -260, duration: 0.18, ease: "power1.inOut" }, 11.63)
-      .to("#img3", { x: 160, duration: 0.15, ease: "power1.inOut" }, 11.81)
-      .to("#img3", { x: 0, filter: "blur(0px)", duration: 0.22, ease: "back.out(2)" }, 11.96)
-      .fromTo("#stamp3", { scale: 2.2, opacity: 0, rotation: -18 }, { scale: 1, opacity: 1, rotation: -8, duration: 0.32, ease: "back.out(2.4)" }, 11.62);
-    hideScene("#s3", 12.25);
-    wipe("#wipe4", 12.25);
+    // ===== CAT 7.15 – 12.3 =====
+    fadeIn("#c3", 7.15); leak(7.15);
+    camera("#c3", 7.15, 2.9, { scale: 1.0, transformOrigin: "50% 32%" }, { scale: 1.22, transformOrigin: "50% 32%" }); // slow suspicious push-in
+    tl.to("#c3 img", { rotation: 1.6, duration: 0.11, ease: SMOOTH, yoyo: true, repeat: 5 }, 9.34);                   // "chaos" tremor
+    fadeIn("#p3", 9.95); leak(9.95);
+    camera("#p3", 9.95, 2.6, { scale: 1.1, x: 140 }, { scale: 1.0, x: -100 });               // from the evidence to the smug face
+    badge("#b3", 7.6, 12.0);
+    karaoke("cap3a", 7.55, 10.25);
+    karaoke("cap3b", 10.35, 12.15);
 
-    // ===== OUTRO 12.25 – 15.00 =====
-    karaoke("cap4");
-    showScene("#s4", 12.25);
-    tl.from("#s4 .badge", { x: -90, opacity: 0, duration: 0.28, ease: E_IN }, 12.35)
-      .from("#s4 .row", { x: -140, opacity: 0, duration: 0.36, stagger: 0.1, ease: E_IN }, 12.3)
-      .from("#s4 .caption-box", { y: 80, opacity: 0, duration: 0.32, ease: "power3.out" }, 12.42)
-      .to("#s4 .row:nth-child(3)", { scale: 1.05, duration: 0.18, yoyo: true, repeat: 1, ease: "power1.inOut" }, 13.46)
-      .to("#s4 .row:nth-child(3) .pill", { rotation: -6, duration: 0.08, yoyo: true, repeat: 5, ease: "power1.inOut" }, 14.0)
-      .from("#cta", { y: 90, scale: 0.8, opacity: 0, duration: 0.38, ease: E_IN }, 13.0)
-      .to("#cta .arrow", { y: 12, duration: 0.25, yoyo: true, repeat: 5, ease: "sine.inOut" }, 13.4);
+    // ===== OUTRO 11.95 – 15 =====
+    fadeIn("#outro", 11.95, 1.0); leak(11.95);
+    camera("#outro", 11.95, 3.05, { scale: 1.18 }, { scale: 1.0 });                          // slow pull-back reveal
+    karaoke("cap4", 12.3, 15.6);
+    tl.fromTo("#cta", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out", immediateRender: false }, 13.4);
+    tl.to("#cta span", { y: 10, duration: 0.35, ease: SMOOTH, yoyo: true, repeat: 3 }, 14.0);
 
-    tl.set({}, {}, DURATION); // pin total length
+    tl.set({}, {}, DURATION);
+    tl.seek(0);
 
-    // ---- Deterministic seek API for the renderer ----
+    // ---------- deterministic seek API for render.js ----------
     window.__duration = DURATION;
     window.__seek = (t) => { tl.seek(t, false); };
     window.__ready = Promise.all([...document.images].map(i => i.decode().catch(() => {})))
       .then(() => document.fonts.ready);
 
-    // ---- Preview mode ----
+    // ---------- preview ----------
     function fit() {
       if (isRender) return;
       const s = Math.min(innerWidth / 1080, innerHeight / 1920);
       document.getElementById("stage").style.transform = `translate(-50%,-50%) scale(${s})`;
     }
     addEventListener("resize", fit); fit();
-
     if (!isRender) {
       const vo = document.getElementById("vo");
-      tl.seek(0.001);
       document.getElementById("play").onclick = (e) => {
+        if (tl.time() > 1) { location.reload(); return; } // karaoke classes are forward-only
         e.target.style.display = "none";
-        location.hash = "";
-        const start = () => {
-          vo.currentTime = 0; vo.play().catch(() => {});
-          const t0 = performance.now();
-          const tick = () => {
-            const t = vo.paused || vo.ended ? (performance.now() - t0) / 1000 : vo.currentTime;
-            tl.seek(Math.min(t, DURATION), false);
-            if (t < DURATION) requestAnimationFrame(tick);
-            else { e.target.textContent = "↻ Replay"; e.target.style.display = "block"; }
-          };
-          tick();
+        vo.currentTime = 0; vo.play().catch(() => {});
+        const t0 = performance.now();
+        const tick = () => {
+          const t = vo.paused || vo.ended ? (performance.now() - t0) / 1000 : vo.currentTime;
+          tl.seek(Math.min(t, DURATION), false);
+          if (t < DURATION) requestAnimationFrame(tick);
+          else { e.target.textContent = "↻ Replay"; e.target.style.display = "block"; }
         };
-        // classes added by tl.call are not reversible; reload for a clean replay
-        if (tl.time() > 1) { location.reload(); return; }
-        start();
+        tick();
       };
     }
   </script>
