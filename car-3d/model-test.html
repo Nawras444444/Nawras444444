@@ -1,0 +1,24 @@
+<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;background:#0d1a2e;width:1080px;height:1920px;overflow:hidden}canvas{display:block}</style></head>
+<body><script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import {GLTFLoader} from './vendor/GLTFLoader.js';
+import {RoomEnvironment} from './vendor/RoomEnvironment.js';
+const r=new THREE.WebGLRenderer({antialias:true});r.setSize(1080,1920);document.body.appendChild(r.domElement);
+r.toneMapping=THREE.ACESFilmicToneMapping;r.outputColorSpace=THREE.SRGBColorSpace;
+const s=new THREE.Scene();s.environment=new THREE.PMREMGenerator(r).fromScene(new RoomEnvironment(),.04).texture;
+const c=new THREE.PerspectiveCamera(30,1080/1920,.1,200);
+const k=new THREE.DirectionalLight(0xffffff,2);k.position.set(5,8,6);s.add(k);
+const g=new THREE.Mesh(new THREE.CircleGeometry(20,48),new THREE.MeshStandardMaterial({color:0x14213a}));g.rotation.x=-Math.PI/2;s.add(g);
+let car=null;
+function onLoad(gltf){
+ car=gltf.scene;
+ const b=new THREE.Box3().setFromObject(car);const size=b.getSize(new THREE.Vector3());const ctr=b.getCenter(new THREE.Vector3());
+ const sc=4/Math.max(size.x,size.y,size.z);
+ car.scale.setScalar(sc);car.position.set(-ctr.x*sc,-b.min.y*sc,-ctr.z*sc);
+ s.add(car);window.dims=[size.x,size.y,size.z];window.ready=true;
+}
+function onErr(e){console.error('GLTF '+(e&&e.message||e));window.ready=true;}
+new GLTFLoader().load('./models/ToyCar.glb',onLoad,undefined,onErr);
+window.render=t=>{if(car)car.rotation.y=t*.8;c.position.set(0,2.2,10);c.lookAt(0,1,0);r.render(s,c)};
+</script></body></html>
