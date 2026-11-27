@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8">
+<title>Car Evolution 30s</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--amber:#ffb627;--cyan:#3fd0e0;--ink:#eaf2ff;--mut:#8aa0c2}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#060b15}
+#stage{position:relative;width:1080px;height:1920px;overflow:hidden;font-family:Cairo,sans-serif;color:var(--ink);background:#0d1a2e}
+#bgimg{position:absolute;inset:-120px;background:url(grid.png) center/cover;filter:blur(44px) brightness(.3) saturate(1.1)}
+#bgtint{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 40%,rgba(29,58,98,.5),rgba(6,11,21,.92) 75%)}
+#grid{position:absolute;left:-200px;top:-200px;width:1480px;height:2320px;opacity:.22;
+ background-image:linear-gradient(rgba(120,170,255,.45) 2px,transparent 2px),linear-gradient(90deg,rgba(120,170,255,.45) 2px,transparent 2px);
+ background-size:80px 80px}
+.ov{position:absolute;left:0;right:0;text-align:center;pointer-events:none}
+.kick{font-size:40px;font-weight:800;color:var(--cyan);letter-spacing:2px}
+.h{font-weight:900;color:#fff;text-shadow:0 8px 40px rgba(63,208,224,.35)}
+#rail{position:absolute;left:0;top:0;width:1080px;height:1920px;perspective:1800px}
+#track{position:absolute;left:0;top:0;width:1080px;height:1920px;transform-style:preserve-3d}
+.tile{position:absolute;left:60px;top:500px;width:960px;height:820px;border-radius:26px;overflow:hidden;
+ border:6px solid var(--amber);box-shadow:0 0 0 3px #5a3b10,0 0 40px rgba(255,182,39,.25),0 40px 90px rgba(0,0,0,.7);background:#2a2d33}
+.tile img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+.tile .sheen{position:absolute;inset:0;background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.12) 50%,transparent 65%);pointer-events:none}
+#pad{position:absolute;left:50%;top:1290px;width:900px;height:70px;margin-left:-450px;border-radius:50%;
+ background:radial-gradient(ellipse,rgba(63,208,224,.45),transparent 70%);filter:blur(4px)}
+#year{position:absolute;left:0;right:0;top:330px;text-align:center;font-size:170px;font-weight:900;color:var(--amber);line-height:1;text-shadow:0 0 60px rgba(255,182,39,.45),0 10px 30px #000}
+#cap{position:absolute;left:0;right:0;top:1360px;text-align:center;font-size:58px;font-weight:900;color:#fff;text-shadow:0 6px 24px #000}
+#counter{position:absolute;left:0;right:0;top:250px;text-align:center;font-size:40px;font-weight:800;color:var(--mut)}
+#dots{position:absolute;left:0;right:0;top:1480px;text-align:center}
+#dots span{display:inline-block;width:20px;height:20px;border-radius:50%;margin:0 7px;background:rgba(255,255,255,.2)}
+#dots span.on{background:var(--amber);box-shadow:0 0 14px var(--amber)}
+.chip{position:absolute;top:1560px;height:96px;border-radius:48px;display:flex;align-items:center;gap:14px;padding:0 34px;font-size:40px;font-weight:800;
+ background:rgba(10,20,36,.65);border:2px solid rgba(255,255,255,.2);white-space:nowrap}
+.chip b{color:var(--amber);font-weight:900}
+#vig{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,transparent 55%,rgba(0,0,0,.7) 100%);pointer-events:none}
+#fade{position:absolute;inset:0;background:#000;opacity:0}
+</style></head><body>
+<div id="stage">
+ <div id="bgimg"></div><div id="bgtint"></div>
+ <div id="grid"></div>
+
+ <div class="ov" id="intro" style="top:560px">
+  <div class="kick">من 1886 إلى اليوم</div>
+  <div class="h" style="font-size:150px;margin-top:20px">تطوّر السيارات</div>
+  <div style="font-size:46px;font-weight:700;color:var(--mut);margin-top:30px">أكثر من قرن من الابتكار</div>
+ </div>
+
+ <div id="rail"><div id="track"></div></div>
+ <div id="pad"></div>
+
+ <div id="counter"></div>
+ <div id="year"></div>
+ <div id="cap"></div>
+ <div id="dots"></div>
+ <div class="chip" id="chipL" style="left:110px"><span id="ic">⛽</span> <b id="pw">بنزين</b></div>
+ <div class="chip" id="chipR" style="right:110px"><span>📅</span> <b id="yr2">1886</b></div>
+
+ <div class="ov" id="outro" style="top:700px;opacity:0">
+  <div class="kick">ومن القادم؟</div>
+  <div class="h" style="font-size:130px;margin-top:20px;color:var(--cyan)">المستقبل يتصل</div>
+  <div style="font-size:44px;font-weight:700;color:var(--mut);margin-top:30px">كهرباء • ذكاء • قيادة ذاتية</div>
+ </div>
+
+ <div id="vig"></div>
+ <div id="fade"></div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const eio=x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2;
+const lerp=(a,b,k)=>a+(b-a)*k;
+
+const TILES=[
+ ['1886','أول سيارة بمحرك','⛽','بنزين'],['1900s','السيارات الفاخرة المبكرة','⛽','بنزين'],['1910s','الإنتاج الجماعي يبدأ','⛽','بنزين'],['1920s','الصالون المغلق','⛽','بنزين'],
+ ['1930s','التصميم الانسيابي','⛽','بنزين'],['1940s','ما بعد الحرب','⛽','بنزين'],['1950s','الزعانف والكروم','⛽','بنزين'],['1960s','عضلات أمريكية','⛽','بنزين'],
+ ['1970s','عصر العضلات الكبيرة','⛽','بنزين'],['1980s','السيارات المدمجة','⛽','بنزين'],['1990s','أداء اليابان','⛽','بنزين'],['2000s','السرعة الرقمية','⛽','بنزين'],
+ ['2010s','الرياضية الألمانية','🔋','هجين'],['2020s','عصر الكهرباء','⚡','كهرباء'],['2025','الجيل الجديد','⚡','كهرباء'],['Now','المستقبل المتصل','⚡','كهرباء']
+];
+const T0=2.6, STEP=1.5, N=TILES.length, LAST=N-1, SP=1100, HOLD=.55;
+
+// tiles on a rail: each one sits SP px to the right of the previous
+const track=$('track');
+const tiles=TILES.map((_,i)=>{
+ const d=document.createElement('div');d.className='tile';
+ const im=new Image();im.src=`tiles/t${String(i).padStart(2,'0')}.png`;d.appendChild(im);
+ const sh=document.createElement('div');sh.className='sheen';d.appendChild(sh);
+ track.appendChild(d);return d;
+});
+const dotsEl=$('dots');TILES.forEach(()=>dotsEl.appendChild(document.createElement('span')));
+const dots=[...dotsEl.children];
+
+window.render=function(t){
+ // same motion grammar as the 3D car video: hold on each item, then glide to the next
+ const sc=Math.min(Math.max(0,(t-T0)/STEP),LAST);
+ const base=Math.floor(sc),f=sc-base;
+ const eased=base+(base<LAST?eio(clamp(f/HOLD)):0);
+ const lo=Math.floor(eased),hi=Math.min(lo+1,LAST),frac=eased-lo;
+
+ // tiles glide along X; a gentle yaw gives the same sense of depth as the 3D camera sway
+ const yaw=Math.sin(t*.55)*6, sway=Math.sin(t*.9)*6;
+ tiles.forEach((el,i)=>{
+  const x=(i-eased)*SP;
+  const near=1-clamp(Math.abs(i-eased)*.6,0,1);
+  const scale=.92+.08*near;
+  el.style.transform=`translateX(${x}px) translateY(${sway*near}px) rotateY(${-yaw*(i-eased)*.4}deg) scale(${scale})`;
+  el.style.opacity=clamp(1-Math.abs(i-eased)/2.2);
+  el.style.visibility=Math.abs(x)<1300?'visible':'hidden';
+  el.querySelector('.sheen').style.transform=`translateX(${(t*420+i*200)%1400-700}px)`;
+ });
+
+ // moving grid behind the rail, same as the 3D version
+ $('grid').style.transform=`translateX(${-((eased*SP*.25)%80)}px) translateY(${(t*30)%80}px)`;
+
+ // labels follow the nearest item
+ const cur=Math.round(eased), item=TILES[clamp(cur,0,LAST)];
+ const inTiles=t>=T0-.3&&t<=T0+N*STEP;
+ const u=(eased-cur);
+ $('year').textContent=item[0];
+ $('year').style.transform=`scale(${1+.04*Math.sin(Math.min(1,Math.abs(u)*6)*Math.PI)})`;
+ $('cap').textContent=item[1];
+ $('counter').textContent=`${clamp(cur,0,LAST)+1} / ${N}`;
+ dots.forEach((d,i)=>d.classList.toggle('on',i===clamp(cur,0,LAST)));
+ $('pw').textContent=item[3];$('chipL').querySelector('span').textContent=item[2];
+ $('yr2').textContent=item[0];
+
+ const fadeIn=clamp((t-T0+.3)/.5), endFade=1-clamp((t-27.2)/.6);
+ ['year','cap','counter','dots','chipL','chipR'].forEach(id=>$(id).style.opacity=inTiles?fadeIn*endFade:0);
+ $('pad').style.opacity=inTiles?fadeIn*endFade:0;
+ $('intro').style.opacity=clamp(t/.5)*(1-clamp((t-2.0)/.5));
+ $('track').style.opacity=clamp((t-T0+.3)/.5)*(1-clamp((t-26.4)/.6));
+ $('outro').style.opacity=clamp((t-26.6)/.6)*(1-clamp((t-29.0)/.6));
+ $('fade').style.opacity=clamp((t-29.3)/.7);
+};
+window.ready=true;
+</script></body></html>
