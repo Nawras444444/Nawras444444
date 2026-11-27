@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Godfather Collage Poster</title>
+<!--
+  Editorial collage animation rebuilt from the supplied poster (736x985, 3:4).
+  Layers: paper -> print metadata + columns -> orange slash -> cut-out subject
+  (torso / head / sliced eye band) -> title block -> grain.
+  The subject is the poster's own figure, cut out and embedded as Base64 (HERO_IMAGE_SRC).
+  Keys: Space play/pause · R replay · H hide controls
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Arimo:wght@400;700&family=Courier+Prime:wght@400;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+<style>
+  :root{
+    --paper:#f1eee6; --paper-hi:#f9f7f2; --paper-lo:#e4ded2;
+    --ink:#171512; --orange:#EE6A26; --black:#0B0B0B; --cream:#F3EDDF;
+    --ui-bg:rgba(14,14,14,.82); --ui-fg:#f1ead8; --ui-dim:rgba(241,234,216,.45);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:100%;height:100%;overflow:hidden;background:#1b1a18}
+  #viewport{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+  #poster-stage{position:relative;width:900px;height:1204px;flex:none;transform-origin:50% 50%;perspective:1800px}
+  #sheet{position:absolute;inset:0;overflow:hidden;background:var(--paper);transform-origin:50% 0%;
+    box-shadow:0 30px 80px rgba(0,0,0,.55),0 4px 14px rgba(0,0,0,.4)}
+  .layer{position:absolute;inset:0;pointer-events:none}
+
+  /* L0 paper */
+  #L0{background:
+      radial-gradient(ellipse 115% 95% at 50% 48%, transparent 62%, rgba(70,58,40,.22) 100%),
+      radial-gradient(ellipse 55% 40% at 25% 20%, rgba(255,253,246,.6), transparent 70%),
+      linear-gradient(180deg,var(--paper-hi),var(--paper) 45%,var(--paper-lo))}
+  #L0 svg{position:absolute;inset:0;width:100%;height:100%}
+  #creases{background:
+      linear-gradient(90deg,transparent calc(50% - 3px),rgba(255,255,255,.35) calc(50% - 1px),rgba(60,45,25,.16) 50%,transparent calc(50% + 4px)),
+      linear-gradient(180deg,transparent calc(50% - 3px),rgba(255,255,255,.3) calc(50% - 1px),rgba(60,45,25,.14) 50%,transparent calc(50% + 4px)),
+      linear-gradient(8deg,transparent 49.7%,rgba(60,45,25,.07) 50%,transparent 50.4%)}
+
+  /* L1 metadata */
+  #L1 svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+  .mono{font-family:"Courier Prime",monospace;fill:#2a2723}
+  .reg{transform-box:fill-box;transform-origin:50% 50%}
+
+  /* L1b columns */
+  #cols{mix-blend-mode:multiply}
+  .col{position:absolute;top:67px;width:182px;height:630px;overflow:hidden;color:var(--ink);
+    font-family:"Arimo",Arial,Helvetica,sans-serif;font-size:9.1px;line-height:1.2;text-align:left;letter-spacing:-.005em}
+  .col .wrap{float:right;width:182px;height:630px}
+  .col.mirror .wrap{float:left}
+  .col p{margin:0 0 0}
+  .col b{font-weight:700}
+  .blk{will-change:transform,clip-path}
+
+  /* L2 accents */
+  #L2{mix-blend-mode:multiply}
+  #patchWig{position:absolute;inset:0}
+  #patch{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+
+  /* L3 subject */
+  #heroShadow{position:absolute;inset:0;filter:drop-shadow(8px 12px 9px rgba(20,12,4,.35))}
+  #breath{position:absolute;inset:0;transform-origin:50% 75%}
+  .piece{position:absolute;inset:0}
+  .piece img{position:absolute;left:0;top:0;width:900px;height:1204px;filter:contrast(1.06)}
+  #torso{transform-origin:50% 80%}
+  #head{transform-origin:50% 50%}
+  #band{transform-origin:50% 30%}
+  #imgTorso{clip-path:inset(54% 0 0 0)}
+  #imgHead{clip-path:polygon(evenodd, 0 0, 100% 0, 100% 54.6%, 0 54.6%, 0 0, __BAND__, __BAND0__)}
+  #imgBand{clip-path:polygon(__BAND__)}
+  #sweep{position:absolute;left:0;top:0;width:900px;height:1204px;mix-blend-mode:soft-light;overflow:hidden;
+    -webkit-mask-size:100% 100%;mask-size:100% 100%;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat}
+  #sweepBand{position:absolute;top:-10%;left:0;width:36%;height:120%;
+    background:linear-gradient(90deg,transparent,rgba(255,248,230,.9) 50%,transparent);transform:translateX(-120%) skewX(-14deg)}
+
+  /* L4 title block (continues the suit; torn bottom edge like the source) */
+  #footer{position:absolute;left:49px;top:903px;width:801px;height:247px;background:var(--black);color:var(--cream);
+    clip-path:polygon(0 0,100% 0,100% 97%,96% 99.2%,90% 97.6%,82% 99.4%,73% 98%,64% 99.6%,55% 97.8%,46% 99.3%,37% 98%,28% 99.6%,19% 97.9%,10% 99.4%,4% 98.2%,0 99.5%)}
+  #title{position:absolute;left:0;right:0;top:13px;display:flex;justify-content:center;
+    font-family:"Anton",Impact,sans-serif;font-size:146.6px;line-height:1;letter-spacing:.044em;height:160px}
+  #title .m{display:inline-block;overflow:hidden;height:160px}
+  #title .ch{display:inline-block}
+  #title .sp{width:.26em}
+  #subtitle{position:absolute;left:0;right:0;top:160px;text-align:center;font-family:"Oswald",sans-serif;font-weight:600;
+    font-size:42.7px;line-height:1;letter-spacing:.63em;padding-left:.63em;white-space:nowrap}
+
+  /* L5 post */
+  #grain{position:absolute;inset:0;width:100%;height:100%;opacity:.12;mix-blend-mode:overlay;image-rendering:pixelated}
+  #halftone{background-image:radial-gradient(rgba(0,0,0,.09) 0.7px,transparent 1.1px);background-size:4px 4px;mix-blend-mode:multiply;opacity:.5}
+  #dust{position:absolute;inset:0}
+  .speck{position:absolute;border-radius:50%;background:rgba(30,22,12,.55)}
+  .hair{position:absolute;height:1px;background:rgba(30,22,12,.35)}
+
+  /* controls */
+  #ui{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:50;display:flex;align-items:center;gap:10px;
+    padding:8px 12px;border-radius:12px;background:var(--ui-bg);color:var(--ui-fg);backdrop-filter:blur(8px);
+    font:500 12px/1 "Courier Prime",monospace;box-shadow:0 10px 30px rgba(0,0,0,.4);transition:opacity .35s,transform .35s;width:min(600px,calc(100vw - 32px))}
+  #ui.hidden{opacity:0;pointer-events:none;transform:translateX(-50%) translateY(14px)}
+  #ui button,#ui select{background:transparent;color:var(--ui-fg);border:1px solid rgba(241,234,216,.22);border-radius:7px;height:30px;min-width:30px;padding:0 9px;font:inherit;cursor:pointer}
+  #ui button:hover,#ui select:hover{border-color:var(--orange);color:#fff}
+  #ui select option{background:#151515}
+  #scrub{flex:1;min-width:60px;accent-color:var(--orange);cursor:pointer}
+  #tc{min-width:44px;text-align:right;color:var(--ui-dim)}
+  html.render #ui{display:none!important}
+  html.render #sheet{box-shadow:none}
+  html.render body{background:#f1eee6}
+</style>
+</head>
+<body>
+<div id="viewport"><div id="poster-stage"><div id="sheet">
+
+  <!-- L0 — paper -->
+  <div id="L0" class="layer">
+    <svg viewBox="0 0 900 1204" preserveAspectRatio="none" aria-hidden="true">
+      <filter id="pg"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="3" seed="7"/><feColorMatrix type="matrix" values="0 0 0 0 .3  0 0 0 0 .25  0 0 0 0 .18  0 0 0 .5 -.17"/></filter>
+      <filter id="pf"><feTurbulence type="fractalNoise" baseFrequency=".012 .08" numOctaves="2" seed="3"/><feColorMatrix type="matrix" values="0 0 0 0 .4  0 0 0 0 .33  0 0 0 0 .22  0 0 0 .45 -.2"/></filter>
+      <filter id="pb"><feTurbulence type="fractalNoise" baseFrequency=".006" numOctaves="3" seed="11"/><feColorMatrix type="matrix" values="0 0 0 0 .5  0 0 0 0 .42  0 0 0 0 .3  0 0 0 .8 -.4"/></filter>
+      <rect width="900" height="1204" filter="url(#pb)"/>
+      <rect width="900" height="1204" filter="url(#pf)" opacity=".7"/>
+      <rect width="900" height="1204" filter="url(#pg)"/>
+    </svg>
+    <div id="creases" class="layer"></div>
+  </div>
+
+  <!-- L1 — editorial columns (generated) -->
+  <div id="cols" class="layer"></div>
+
+  <!-- L2 — orange slash + ink splat -->
+  <div id="L2" class="layer"><div id="patchWig">
+    <svg id="patch" viewBox="0 0 900 1204" aria-hidden="true">
+      <defs>
+        <filter id="rough" x="-10%" y="-20%" width="120%" height="140%">
+          <feTurbulence type="fractalNoise" baseFrequency=".04" numOctaves="3" seed="4" result="t"/>
+          <feDisplacementMap in="SourceGraphic" in2="t" scale="10" xChannelSelector="R" yChannelSelector="G" result="d"/>
+          <feTurbulence type="fractalNoise" baseFrequency=".9" seed="9" result="g"/>
+          <feColorMatrix in="g" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -.6 1.35" result="ga"/>
+          <feComposite in="d" in2="ga" operator="in"/>
+        </filter>
+      </defs>
+      <g id="stripe" filter="url(#rough)" fill="#EE6A26">
+        <path d="__STRIPE__"/>
+      </g>
+      <g id="splat" fill="#141210">
+        <circle cx="183" cy="478" r="9"/><circle cx="194" cy="490" r="4"/><circle cx="172" cy="466" r="3"/><circle cx="190" cy="470" r="2.4"/>
+      </g>
+    </svg>
+  </div></div>
+
+  <!-- L1 — print metadata (registration marks, serials) -->
+  <div id="L1" class="layer">
+    <svg viewBox="0 0 900 1204" aria-hidden="true">
+      <defs>
+        <g id="regMark"><circle r="9" fill="none" stroke="#1d1b18" stroke-width="1.3"/><line x1="-15" y1="0" x2="15" y2="0" stroke="#1d1b18" stroke-width="1.1"/><line x1="0" y1="-15" x2="0" y2="15" stroke="#1d1b18" stroke-width="1.1"/><circle r="3.2" fill="#1d1b18"/></g>
+      </defs>
+      <g id="crops" stroke="#1d1b18" stroke-width="1">
+        <line class="crop" x1="0" y1="56" x2="40" y2="56"/><line class="crop" x1="860" y1="56" x2="900" y2="56"/>
+        <line class="crop" x1="49" y1="1164" x2="49" y2="1204"/><line class="crop" x1="850" y1="1164" x2="850" y2="1204"/>
+        <line class="crop" x1="0" y1="1180" x2="30" y2="1180"/><line class="crop" x1="870" y1="1180" x2="900" y2="1180"/>
+      </g>
+      <g id="marks">
+        <g class="regWrap"><use class="reg" href="#regMark" x="67" y="25"/></g>
+        <g class="regWrap"><use class="reg" href="#regMark" x="450" y="25"/></g>
+        <g class="regWrap"><use class="reg" href="#regMark" x="831" y="25"/></g>
+        <g class="regWrap"><use class="reg" href="#regMark" x="17" y="601"/></g>
+        <g class="regWrap"><use class="reg" href="#regMark" x="881" y="601"/></g>
+        <g class="regWrap"><use class="reg" href="#regMark" x="450" y="1180"/></g>
+      </g>
+      <circle id="dotTL" cx="22" cy="24" r="10" fill="#8f8a83"/>
+      <circle id="dotBR" cx="875" cy="1180" r="10" fill="#5f5b56"/>
+      <text id="serialTop" class="mono" x="812" y="29" text-anchor="end" font-size="12.5" letter-spacing=".6">SER1A367882</text>
+      <text id="serialBot" class="mono" x="832" y="1186" text-anchor="end" font-size="12.5" letter-spacing=".6">5605120014003</text>
+    </svg>
+  </div>
+
+  <!-- L3 — cut-out subject in three paper pieces -->
+  <div id="L3" class="layer"><div id="heroShadow"><div id="breath">
+    <div id="torso" class="piece"><img id="imgTorso" alt=""></div>
+    <div id="head" class="piece"><img id="imgHead" alt=""></div>
+    <div id="band" class="piece"><img id="imgBand" alt=""></div>
+    <div id="sweep"><div id="sweepBand"></div></div>
+  </div></div></div>
+
+  <!-- L4 — title block -->
+  <div id="footer">
+    <div id="title"></div>
+    <div id="subtitle">THE GODFATHER</div>
+  </div>
+
+  <!-- L5 — analog post -->
+  <div id="L5" class="layer">
+    <div id="halftone" class="layer"></div>
+    <div id="dust"></div>
+    <canvas id="grain" width="300" height="400"></canvas>
+  </div>
+
+</div></div></div>
+
+<div id="ui">
+  <button id="bPlay" title="Play / Pause (Space)">❚❚</button>
+  <button id="bReplay" title="Replay (R)">↺</button>
+  <select id="speed" title="Speed"><option value="0.5">0.5x</option><option value="1" selected>1x</option><option value="1.5">1.5x</option></select>
+  <input id="scrub" type="range" min="0" max="1000" value="0" step="1" title="Timeline">
+  <span id="tc">0.00s</span>
+</div>
+
+<script>
+/* HERO IMAGE — the poster's own figure, cut out (transparent PNG, Base64, full-poster frame) */
+const HERO_IMAGE_SRC = "__HERO__";
+/* text-wrap shapes measured from the figure's alpha mask, one per column */
+const COL_SHAPES = __SHAPES__;
+
+(function(){
+"use strict";
+gsap.registerPlugin(CustomEase);
+const RENDER = /render=1/.test(location.search);
+if(RENDER){ gsap.ticker.remove(gsap.updateRoot); document.documentElement.classList.add("render"); }
+CustomEase.create("press", "M0,0 C0.25,0 0.25,1 0.5,1 0.75,1 0.8,1 1,1");
+
+const $ = s => document.querySelector(s), $$ = s => Array.from(document.querySelectorAll(s));
+function rng(seed){ return function(){ seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+
+const stage = $("#poster-stage");
+function fit(){ const s = Math.min(innerWidth/900, innerHeight/1204) * (RENDER ? 1 : 0.94); stage.style.transform = `scale(${s})`; }
+addEventListener("resize", fit); fit();
+
+/* hero pieces */
+["#imgTorso","#imgHead","#imgBand"].forEach(s => $(s).src = HERO_IMAGE_SRC);
+const m = `url("${HERO_IMAGE_SRC}")`; $("#sweep").style.webkitMaskImage = m; $("#sweep").style.maskImage = m;
+
+/* columns: bold lead + regular body, as in the source */
+const LEAD = "Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation in consectum laboris nisi sit ut";
+const WORDS = "lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua enim ad minim veniam quis nostrud exercitation ullamco laboris nisi aliquip ex ea commodo consequat duis aute irure in reprehenderit voluptate velit esse cillum fugiat nulla pariatur excepteur sint occaecat cupidatat non proident sunt culpa qui officia deserunt mollit anim id est laborum".split(" ");
+function body(r, n){ let s=[]; for(let i=0;i<n;i++) s.push(WORDS[Math.floor(r()*WORDS.length)]); s[0]=s[0][0].toUpperCase()+s[0].slice(1); return s.join(" ")+"."; }
+const COLX = [57,253,459,661];
+COLX.forEach((x, ci) => {
+  const r = rng(31 + ci*13), col = document.createElement("div");
+  col.className = "col" + (ci > 1 ? " mirror" : ""); col.style.left = x + "px";
+  const w = document.createElement("div"); w.className = "wrap"; w.style.shapeOutside = COL_SHAPES[ci]; col.appendChild(w);
+  let html = "";
+  for(let k=0;k<5;k++){
+    html += `<div class="blk"><p><b>${LEAD}</b></p></div>`;
+    for(let j=0;j<4;j++) html += `<div class="blk"><p>${body(r, 12 + Math.floor(r()*8))}</p></div>`;
+  }
+  col.insertAdjacentHTML("beforeend", html); $("#cols").appendChild(col);
+});
+
+/* title letters */
+$("#title").innerHTML = "AL PACINO".split("").map(c => c === " " ? `<span class="m sp"></span>` : `<span class="m"><span class="ch">${c}</span></span>`).join("");
+
+/* dust + grain */
+const dr = rng(77), specks = [];
+for(let i=0;i<24;i++){ const d=document.createElement("div"), h=dr()>.78; d.className=h?"hair":"speck"; const s=h?8+dr()*16:1+dr()*2.4;
+  d.style.width=s+"px"; if(!h) d.style.height=s+"px"; d.style.left=dr()*900+"px"; d.style.top=dr()*1204+"px"; if(h) d.style.transform=`rotate(${dr()*180}deg)`; d.style.opacity=0; $("#dust").appendChild(d); specks.push(d); }
+const gc=$("#grain"), gx=gc.getContext("2d"), gi=gx.createImageData(gc.width,gc.height);
+function grain(){ const d=gi.data; for(let i=0;i<d.length;i+=4){ const v=Math.random()*255|0; d[i]=d[i+1]=d[i+2]=v; d[i+3]=255; } gx.putImageData(gi,0,0); }
+grain(); if(!RENDER) setInterval(grain, 1000/12);
+
+/* ===================== MASTER TIMELINE (4.5 s, all fromTo => exact seeking) ===================== */
+const tl = gsap.timeline({ paused:true });
+const SCR = "ABCDEFGHJKLMNPQRSTUVWXYZ0123456789";
+function scramble(el, fin, at, dur, seed){ const o={p:0}; tl.fromTo(o,{p:0},{p:1,duration:dur,ease:"none",onUpdate(){ const r=rng(seed+Math.floor(o.p*24)), lock=Math.floor(o.p*fin.length*1.1); let s=""; for(let i=0;i<fin.length;i++) s+= i<lock?fin[i]:SCR[Math.floor(r()*SCR.length)]; el.textContent = o.p>=1?fin:s; }}, at); }
+
+/* Phase 1 — surface & structure (0–0.9) */
+tl.fromTo("#sheet",{rotationX:5,scale:1.03,y:-16,opacity:0},{rotationX:0,scale:1,y:0,opacity:1,duration:0.9,ease:"power3.out"},0);
+$$(".crop").forEach((l,i)=>{ const len=Math.hypot(l.x2.baseVal.value-l.x1.baseVal.value,l.y2.baseVal.value-l.y1.baseVal.value); l.style.strokeDasharray=len;
+  tl.fromTo(l,{strokeDashoffset:len},{strokeDashoffset:0,duration:0.4,ease:"power2.inOut"},0.15+i*0.05); });
+tl.fromTo(".reg",{scale:0,rotation:-90},{scale:1,rotation:0,duration:0.45,ease:"back.out(1.4)",stagger:0.05},0.25);
+tl.fromTo(["#dotTL","#dotBR"],{scale:0,transformOrigin:"50% 50%"},{scale:1,duration:0.3,ease:"back.out(2)",stagger:0.1},0.4);
+tl.fromTo(["#serialTop","#serialBot"],{opacity:0},{opacity:1,duration:0.05},0.3);
+scramble($("#serialTop"),"SER1A367882",0.3,0.6,11);
+scramble($("#serialBot"),"5605120014003",0.35,0.55,23);
+
+/* Phase 2 — print cascade (0.5–1.7) */
+$$(".col").forEach((c,ci)=> tl.fromTo(c.querySelectorAll(".blk"),
+  {clipPath:"inset(0 0 100% 0)",y:5,opacity:0},{clipPath:"inset(0 0 0% 0)",y:0,opacity:1,duration:0.3,ease:"press",stagger:0.04}, 0.5+ci*0.05));
+
+/* Phase 3 — orange slash + ink splat (1.3–2.2) */
+tl.fromTo("#stripe",{clipPath:"polygon(0 0,0 0,-8% 100%,-8% 100%)"},{clipPath:"polygon(0 0,108% 0,100% 100%,-8% 100%)",duration:0.7,ease:"expo.out"},1.3);
+tl.fromTo("#patchWig",{x:-16,skewX:-6},{x:0,skewX:0,duration:0.5,ease:"expo.out"},1.3);
+tl.fromTo("#splat circle",{scale:0,transformOrigin:"50% 50%"},{scale:1,duration:0.35,ease:"back.out(1.4)",stagger:0.04},1.8);
+
+/* Phase 4 — cut-out assembly (1.8–3.1): torso rises, head steps in with an eye-gap, eye band slices in */
+tl.fromTo("#torso",{yPercent:20,rotation:-2,opacity:0},{yPercent:0,rotation:0,opacity:1,duration:0.75,ease:"power3.out"},1.8);
+tl.fromTo("#head",{y:-50,rotation:2,opacity:0},{y:0,rotation:0,opacity:1,duration:0.45,ease:"steps(5)"},2.2);
+tl.fromTo("#band",{x:160,rotation:2,opacity:0},{x:0,rotation:0,opacity:1,duration:0.42,ease:"expo.out"},2.65);
+tl.fromTo("#heroShadow",{filter:"drop-shadow(24px 32px 18px rgba(20,12,4,0))"},{filter:"drop-shadow(8px 12px 9px rgba(20,12,4,.35))",duration:0.5,ease:"power2.out"},2.6);
+
+/* Phase 5 — title slam & kinetic type (2.7–4.2) */
+tl.fromTo("#footer",{yPercent:140},{yPercent:0,duration:0.6,ease:"power4.out"},2.7);
+tl.fromTo("#sheet",{y:0},{y:3,duration:0.06,ease:"power1.out",yoyo:true,repeat:1},3.05);
+tl.fromTo("#title .ch",{yPercent:110},{yPercent:0,duration:0.6,ease:"power4.out",stagger:0.05},3.0);
+tl.fromTo("#subtitle",{opacity:0,letterSpacing:"0.2em",paddingLeft:"0.2em"},{opacity:1,letterSpacing:"0.63em",paddingLeft:"0.63em",duration:0.8,ease:"power3.out"},3.4);
+tl.fromTo(".speck,.hair",{opacity:0},{opacity:i=>.3+(i%5)*.12,duration:.4,stagger:.01},3.7);
+tl.to({}, {duration:0.0001}, 4.5);
+
+/* Phase 6 — ambient (after assembly) */
+let amb=null, wig=null, on=false;
+function jitter(){ if(!on) return; const j=()=>Math.random()*2-1;
+  gsap.set("#patchWig",{x:j()*.4,y:j()*.4,rotation:j()*.2,transformOrigin:"40% 35%"});
+  $$(".regWrap").forEach(g=>gsap.set(g,{x:j()*.4,y:j()*.4,rotation:j()*.2,transformOrigin:"50% 50%"}));
+  wig = gsap.delayedCall(1/8, jitter); }
+function startAmbient(){ stopAmbient(); on=true; amb=gsap.timeline();
+  amb.add(gsap.to("#breath",{scale:1.008,y:-2,duration:4.5,ease:"sine.inOut",yoyo:true,repeat:-1}),0);
+  amb.add(gsap.fromTo("#heroShadow",{filter:"drop-shadow(8px 12px 9px rgba(20,12,4,.35))"},{filter:"drop-shadow(12px 17px 15px rgba(20,12,4,.5))",duration:3.2,ease:"sine.inOut",yoyo:true,repeat:-1}),0);
+  amb.add(gsap.fromTo("#sweepBand",{xPercent:-120},{xPercent:320,duration:3.4,ease:"power1.inOut",repeat:-1,repeatDelay:3.2}),0.4);
+  specks.forEach((s,i)=>amb.add(gsap.to(s,{x:"+="+(8+(i%4)*6),y:"-="+(10+(i%3)*8),duration:7+(i%5),ease:"sine.inOut",yoyo:true,repeat:-1}),0));
+  amb.timeScale(tl.timeScale()); jitter(); }
+function stopAmbient(){ on=false; if(wig) wig.kill(); if(amb){amb.kill(); amb=null;}
+  gsap.set(["#breath","#patchWig",".regWrap"],{clearProps:"transform"}); gsap.set("#sweepBand",{xPercent:-120}); specks.forEach(s=>gsap.set(s,{x:0,y:0})); }
+
+/* controls */
+const bPlay=$("#bPlay"), scrub=$("#scrub"), tc=$("#tc"); let scrubbing=false;
+function sync(){ const playing=(!tl.paused()&&tl.progress()<1)||(tl.progress()>=1&&amb&&!amb.paused()); bPlay.textContent=playing?"❚❚":"▶"; }
+tl.eventCallback("onUpdate",()=>{ if(!scrubbing) scrub.value=Math.round(tl.progress()*1000); tc.textContent=tl.time().toFixed(2)+"s"; });
+tl.eventCallback("onComplete",()=>{ startAmbient(); sync(); });
+function toggle(){ if(tl.progress()>=1){ if(amb){ amb.paused(!amb.paused()); on=!amb.paused(); if(on) jitter(); } else startAmbient(); } else tl.paused(!tl.paused()); sync(); }
+function replay(){ stopAmbient(); tl.restart(); sync(); }
+bPlay.onclick=toggle; $("#bReplay").onclick=replay;
+$("#speed").onchange=e=>{ const v=parseFloat(e.target.value); tl.timeScale(v); if(amb) amb.timeScale(v); };
+scrub.addEventListener("input",()=>{ scrubbing=true; stopAmbient(); tl.pause(); tl.progress(scrub.value/1000); tc.textContent=tl.time().toFixed(2)+"s"; sync(); });
+scrub.addEventListener("change",()=>{ scrubbing=false; if(tl.progress()>=1) startAmbient(); sync(); });
+const ui=$("#ui"); let hid=false, idle=null;
+function show(){ if(hid) return; ui.classList.remove("hidden"); clearTimeout(idle); idle=setTimeout(()=>ui.classList.add("hidden"),2600); }
+addEventListener("mousemove",show); addEventListener("touchstart",show,{passive:true});
+addEventListener("keydown",e=>{ const k=e.key.toLowerCase();
+  if(k==="h"){ hid=!hid; ui.classList.toggle("hidden",hid); if(!hid) show(); }
+  else if(k===" "){ e.preventDefault(); toggle(); } else if(k==="r") replay(); });
+
+window.posterTL = tl;
+if(RENDER){
+  window.renderStart = () => { gsap.updateRoot(0); tl.play(0); };
+  window.renderFrame = (f,fps) => { gsap.updateRoot(f/fps); if(f % Math.round(fps/12) === 0) grain(); };
+} else {
+  (document.fonts ? document.fonts.ready : Promise.resolve()).then(()=>setTimeout(()=>{ tl.play(0); show(); },150));
+}
+})();
+</script>
+</body>
+</html>
