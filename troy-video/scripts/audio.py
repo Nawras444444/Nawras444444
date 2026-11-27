@@ -17,7 +17,9 @@ def noise_sweep(d,lo,hi,shape=.5):
         f=lo+(hi-lo)*np.sin(np.pi*(k+.5)/8);out_[k*seg:(k+1)*seg]=bp(x[k*seg:(k+1)*seg+1][:seg],f*.6,f*1.6)
     t=np.linspace(0,1,n);return out_*np.sin(np.pi*t**shape)**2
 def S_whoosh(d,size): lo=250+30000/max(size,60);return noise_sweep(min(1.2,d*.9),lo,lo*6)*.45
-def S_slam(d,size): return S_whoosh(d,size)*.8+np.pad(tone(90,45,.35,.09),(int(SR*d*.5),0))[:int(SR*d*.5)+int(.35*SR)]*.9
+def S_slam(d,size):
+    a=S_whoosh(d,size)*.8;b=np.pad(tone(90,45,.35,.09),(int(SR*d*.5),0))*.9;n=max(len(a),len(b))
+    return np.pad(a,(0,n-len(a)))+np.pad(b,(0,n-len(b)))
 def S_stop(d,size):
     x=np.zeros(int(SR*d));
     for k in range(9): i=int(k/9*d*SR*.9);c=bp(rng.randn(500),800,4000)*env(500,.001,.006);x[i:i+500]+=c*.6
@@ -77,9 +79,9 @@ bed*=np.clip(t/3,0,1)*np.clip((D-t)/3,0,1)*(1+.25*np.sin(2*np.pi*t/14))
 out=out*0.32+bed.astype(np.float32)
 out=out[:int(SR*D)]
 from scipy.signal import resample_poly
-sr0,v=wavfile.read('src/narration.wav');v=v.astype(np.float32)/32768
+sr0,v=wavfile.read('out/narr44.wav');v=v.astype(np.float32)/32768
 if v.ndim>1: v=v.mean(1)
-v=resample_poly(v,147,80).astype(np.float32)  # 24k -> 44.1k
+v=v.astype(np.float32)  # ffmpeg already resampled to 44.1k
 v=v[:len(out)];mix=out.copy();mix[:len(v)]+=v*0.95
 mix=mix/max(1.0,float(np.abs(mix).max())/0.97)  # no clipping; loudness is set at mux
 wavfile.write('out/mix.wav',SR,(np.stack([mix,mix],1)*32767).astype(np.int16));print('ok',len(mix)/SR)
