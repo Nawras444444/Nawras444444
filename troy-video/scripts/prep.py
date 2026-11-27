@@ -87,7 +87,7 @@ def paperkey(img, b):
 
 def textmask(img, b, rm):
     c = img[b[1]:b[3], b[0]:b[2]].astype(np.int32); lum = c.mean(axis=2); sat = c.max(axis=2) - c.min(axis=2)
-    m = (lum < 105) if rm == 'dark' else ((lum > 175) & (sat < 90))
+    m = (lum < 105) if rm == 'dark' else ((lum > 158) & (sat < 110))
     full = np.zeros((H, W), np.uint8); full[b[1]:b[3], b[0]:b[2]] = u8(m)
     return cv2.dilate(full, k(7))
 
