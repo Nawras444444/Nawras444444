@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>خرافة الإنتاجية</title>
+<style>
+@font-face{font-family:'CairoX';font-weight:900;src:url(fonts/cairo-arabic-900-normal.woff2) format('woff2');unicode-range:U+0600-06FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE80-FEFC;}
+@font-face{font-family:'CairoX';font-weight:900;src:url(fonts/cairo-latin-900-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
+@font-face{font-family:'CairoX';font-weight:700;src:url(fonts/cairo-arabic-700-normal.woff2) format('woff2');unicode-range:U+0600-06FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE80-FEFC;}
+@font-face{font-family:'CairoX';font-weight:700;src:url(fonts/cairo-latin-700-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
+:root{--N:#1B2A5C;--R:#F04545;--G:#17B26A;--Y:#FFC414;}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1080px;height:1920px;background:#fff;overflow:hidden;font-family:'CairoX',sans-serif;font-weight:900;color:var(--N)}
+#stage{position:relative;width:1080px;height:1920px;background:#fff;overflow:hidden}
+.scene{position:absolute;inset:0;display:none}
+.wrap{position:absolute;inset:0;transform-origin:50% 0;transform:translateY(45px) scale(.75)}
+.theme{position:absolute;inset:0;opacity:0;transition:opacity .6s ease}
+.theme svg{width:1080px;height:1920px}
+.imgc{overflow:hidden;border-radius:46px}
+.imgc img{width:100%;height:100%;object-fit:contain;filter:contrast(1.2) brightness(1.06)}
+.a{position:absolute;will-change:transform,opacity}
+.t{position:absolute;left:30px;width:1020px;text-align:center;line-height:1.22;font-weight:900;color:var(--N)}
+.pill{position:absolute;text-align:center;font-weight:900;border-radius:999px;border:8px solid var(--N);box-shadow:0 10px 0 var(--N);white-space:nowrap;line-height:1.2;padding:6px 44px 14px}
+.card{position:absolute;background:#fff;border:9px solid var(--N);border-radius:56px;box-shadow:0 14px 0 var(--N)}
+.num{direction:ltr;unicode-bidi:isolate}
+svg{display:block;overflow:visible}
+#prog{position:absolute;left:60px;top:58px;width:960px;height:14px;display:flex;gap:10px;direction:ltr;z-index:50}
+#prog i{flex:1;background:#E3E7F4;border-radius:9px;overflow:hidden;position:relative}
+#prog b{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--N);border-radius:9px}
+</style>
+</head>
+<body>
+<div id="stage">
+<div class="theme" id="thA"></div><div class="theme" id="thB"></div><div class="theme" id="thC"></div><div class="theme" id="thD"></div>
+<div id="prog"></div>
+<svg width="0" height="0" style="position:absolute">
+ <defs>
+  <symbol id="i-clock" viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="none" stroke="#1B2A5C" stroke-width="7"/><path d="M50 24 V50 L66 60" fill="none" stroke="#1B2A5C" stroke-width="7" stroke-linecap="round"/></symbol>
+  <symbol id="i-battery" viewBox="0 0 100 100"><rect x="8" y="30" width="78" height="40" rx="8" fill="none" stroke="#1B2A5C" stroke-width="7"/><rect x="88" y="42" width="6" height="16" fill="#1B2A5C"/><rect x="16" y="38" width="26" height="24" rx="4" fill="#F04545"/></symbol>
+  <symbol id="i-brain" viewBox="0 0 100 100"><path d="M30 72 C12 72 12 46 30 46 C28 26 58 20 64 34 C84 28 92 58 76 68 C86 84 62 90 56 80 C46 90 30 88 30 72Z" fill="none" stroke="#1B2A5C" stroke-width="6" stroke-linejoin="round"/></symbol>
+  <symbol id="i-q" viewBox="0 0 100 100"><text x="50" y="82" text-anchor="middle" font-size="96" font-weight="900" font-family="CairoX" fill="#1B2A5C">?</text></symbol>
+  <symbol id="i-target" viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="none" stroke="#1B2A5C" stroke-width="7"/><circle cx="50" cy="50" r="24" fill="none" stroke="#F04545" stroke-width="7"/><circle cx="50" cy="50" r="7" fill="#17B26A"/></symbol>
+  <symbol id="i-check" viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="none" stroke="#17B26A" stroke-width="7"/><polyline points="30,52 45,67 72,36" fill="none" stroke="#17B26A" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 100 100"><circle cx="50" cy="50" r="36" fill="none" stroke="#1B2A5C" stroke-width="14" stroke-dasharray="9 8"/><circle cx="50" cy="50" r="24" fill="none" stroke="#1B2A5C" stroke-width="7"/></symbol>
+  <symbol id="i-bars" viewBox="0 0 100 100"><rect x="12" y="50" width="16" height="36" rx="4" fill="#FFC414" stroke="#1B2A5C" stroke-width="5"/><rect x="36" y="30" width="16" height="56" rx="4" fill="#F04545" stroke="#1B2A5C" stroke-width="5"/><rect x="60" y="12" width="16" height="74" rx="4" fill="#FFC414" stroke="#1B2A5C" stroke-width="5"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 100 100"><rect x="28" y="6" width="44" height="88" rx="9" fill="none" stroke="#1B2A5C" stroke-width="7"/><line x1="42" y1="82" x2="58" y2="82" stroke="#1B2A5C" stroke-width="6" stroke-linecap="round"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 100 100"><path d="M24 70 V46 Q24 20 50 20 Q76 20 76 46 V70 L86 78 H14 Z" fill="none" stroke="#1B2A5C" stroke-width="7" stroke-linejoin="round"/><circle cx="50" cy="88" r="6" fill="#F04545"/></symbol>
+  <symbol id="i-timer" viewBox="0 0 100 100"><rect x="40" y="4" width="20" height="10" rx="3" fill="#1B2A5C"/><circle cx="50" cy="56" r="36" fill="none" stroke="#1B2A5C" stroke-width="7"/><path d="M50 56 L50 34" stroke="#17B26A" stroke-width="7" stroke-linecap="round"/></symbol>
+  <symbol id="i-coffee" viewBox="0 0 100 100"><path d="M18 40 H70 V64 Q70 86 44 86 H44 Q18 86 18 64 Z" fill="none" stroke="#1B2A5C" stroke-width="7" stroke-linejoin="round"/><path d="M70 48 H80 Q88 48 88 58 Q88 68 78 68 H70" fill="none" stroke="#1B2A5C" stroke-width="7"/><path d="M34 26 q-6 -8 0 -14 M52 26 q-6 -8 0 -14" fill="none" stroke="#F04545" stroke-width="5" stroke-linecap="round"/></symbol>
+  <symbol id="i-bookmark" viewBox="0 0 100 100"><path d="M30 12 H70 V90 L50 72 L30 90 Z" fill="#FFC414" stroke="#1B2A5C" stroke-width="7" stroke-linejoin="round"/></symbol>
+  <symbol id="i-share" viewBox="0 0 100 100"><circle cx="24" cy="50" r="10" fill="#1B2A5C"/><circle cx="76" cy="24" r="10" fill="#1B2A5C"/><circle cx="76" cy="76" r="10" fill="#1B2A5C"/><path d="M24 50 L76 24 M24 50 L76 76" stroke="#1B2A5C" stroke-width="6"/></symbol>
+  <symbol id="i-comment" viewBox="0 0 100 100"><rect x="10" y="18" width="80" height="54" rx="20" fill="none" stroke="#1B2A5C" stroke-width="7"/><path d="M30 72 L24 90 L48 72" fill="none" stroke="#1B2A5C" stroke-width="7" stroke-linejoin="round"/></symbol>
+  <symbol id="i-thumb" viewBox="0 0 100 100"><path d="M14 46 H30 V88 H14 Z" fill="#17B26A" stroke="#1B2A5C" stroke-width="6"/><path d="M30 50 L48 22 Q56 16 60 28 L56 46 H82 Q90 46 88 56 L80 82 Q78 88 70 88 H30" fill="#17B26A" stroke="#1B2A5C" stroke-width="6" stroke-linejoin="round"/></symbol>
+ </defs>
+</svg>
+
+<!-- ============ 1 ============ -->
+<section class="scene" id="s1"><div class="wrap">
+  <div class="a" id="s1ring" style="left:240px;top:560px;width:600px;height:600px;border:14px solid var(--R);border-radius:50%"></div>
+  <svg class="a" id="s1sp" style="left:0;top:0" width="1080" height="1920" viewBox="0 0 1080 1920"></svg>
+  <div class="t" id="s1h" style="top:170px;font-size:270px;color:var(--R);text-shadow:0 14px 0 var(--N);-webkit-text-stroke:0">توقف!</div>
+  <div class="a" id="s1x" style="left:215px;top:520px;width:650px;height:650px"></div>
+  <div class="t" id="s1t1" style="top:1190px;font-size:80px;line-height:1.3">هذه <span style="color:var(--R)">الخرافة</span> تستهلك<br>طاقتك دون نتيجة.</div>
+  <div class="pill" id="s1chip" style="left:60px;width:960px;top:1480px;font-size:50px;background:var(--Y);color:var(--N)">هل ساعات أكثر = إنتاجية أعلى؟</div>
+</div>
+  <div class="a" id="s1flash" style="inset:0;background:var(--R);opacity:0"></div>
+  <div class="card imgc" id="c1" style="left:200px;top:1285px;width:680px;height:380px;padding:18px"><img src="images/c1.png"></div>
+</section>
+
+<!-- ============ 2 ============ -->
+<section class="scene" id="s2"><div class="wrap">
+  <div class="pill" id="s2chip" style="left:290px;width:500px;top:170px;font-size:110px;background:var(--R);color:#fff">الخرافة</div>
+  <div class="a" id="s2clock" style="left:640px;top:480px;width:380px;height:380px"></div>
+  <div class="a" id="s2arrow" style="left:880px;top:380px;width:190px;height:190px"></div>
+  <div class="a" id="s2eq" style="left:445px;top:580px;width:190px;height:190px"></div>
+  <div class="a" id="s2target" style="left:60px;top:480px;width:380px;height:380px"></div>
+  <div class="t" id="s2txt" style="top:1000px;font-size:118px;line-height:1.3">ساعات أكثر<br>= إنتاجية أعلى</div>
+  <svg class="a" id="s2strike" style="left:0;top:0" width="1080" height="1920" viewBox="0 0 1080 1920"><line id="s2sl" x1="90" y1="1190" x2="990" y2="1030" stroke="#F04545" stroke-width="26" stroke-linecap="round"/></svg>
+  <div class="a" id="s2stamp" style="left:240px;top:1370px;width:600px;text-align:center;font-size:150px;color:var(--R);border:16px solid var(--R);border-radius:36px;line-height:1.3;padding:0 0 10px;background:#fff">خرافة!</div>
+</div>
+  <div class="card imgc" id="c2" style="left:200px;top:1285px;width:680px;height:380px;padding:18px"><img src="images/c2.png"></div>
+</section>
+
+<!-- ============ 3 ============ -->
+<section class="scene" id="s3"><div class="wrap">
+  <div class="t" style="top:150px;font-size:150px"><span class="a" id="s3w1" style="position:relative;display:inline-block">تبدو</span> <span class="a" id="s3w2" style="position:relative;display:inline-block;color:var(--N)">منطقية…</span></div>
+  <div class="a" id="s3brain" style="left:150px;top:420px;width:560px;height:480px"></div>
+  <div class="a" id="s3q" style="left:690px;top:370px;font-size:430px;line-height:1;color:var(--Y);-webkit-text-stroke:14px var(--N);paint-order:stroke fill">؟</div>
+  <div class="a" id="s3b1" style="left:660px;top:760px;width:46px;height:46px;border-radius:50%;background:#fff;border:9px solid var(--N)"></div>
+  <div class="a" id="s3b2" style="left:720px;top:700px;width:30px;height:30px;border-radius:50%;background:#fff;border:8px solid var(--N)"></div>
+  <div class="a" id="s3bat" style="left:150px;top:990px;width:780px;height:320px"></div>
+  <div class="pill" id="s3yel" style="left:70px;width:940px;top:1380px;font-size:70px;background:var(--Y);color:var(--N);border-radius:50px;white-space:normal">لأن التعب يوهمك<br>بأنك تنجز.</div>
+  <div class="pill" id="s3red" style="left:70px;width:940px;top:1380px;font-size:74px;background:var(--R);color:#fff;border-radius:50px;white-space:normal;line-height:1.3">لكن الشعور<br>ليس دليلًا</div>
+</div>
+  <div class="card imgc" id="c3" style="left:200px;top:1285px;width:680px;height:380px;padding:18px"><img src="images/c3.png"></div>
+</section>
+
+<!-- ============ 4 ============ -->
+<section class="scene" id="s4"><div class="wrap">
+  <div class="pill" id="s4chip" style="left:260px;width:560px;top:170px;font-size:104px;background:var(--G);color:#fff">التصحيح</div>
+  <div class="a" id="s4ok" style="left:810px;top:130px;width:170px;height:170px"></div>
+  <div class="t" id="s4prod" style="top:400px;font-size:225px;color:var(--G);text-shadow:0 12px 0 var(--N)">الإنتاجية</div>
+  <div class="t" id="s4eq" style="top:610px;font-size:150px;color:var(--Y);-webkit-text-stroke:12px var(--N);paint-order:stroke fill">=</div>
+  <div class="card" id="s4c1" style="left:560px;top:830px;width:440px;height:470px"></div>
+  <div class="a" id="s4i1" style="left:640px;top:850px;width:280px;height:280px"></div>
+  <div class="a" id="s4w1" style="left:560px;top:1130px;width:440px;text-align:center;font-size:104px;line-height:1.2;color:var(--N)">النتيجة</div>
+  <div class="card" id="s4c2" style="left:80px;top:830px;width:440px;height:470px"></div>
+  <div class="a" id="s4i2" style="left:160px;top:850px;width:280px;height:280px"></div>
+  <div class="a" id="s4w2" style="left:80px;top:1130px;width:440px;text-align:center;font-size:104px;line-height:1.2;color:var(--N)">الوقت</div>
+  <div class="a" id="s4div" style="left:455px;top:960px;width:170px;height:170px;border-radius:50%;background:var(--Y);border:9px solid var(--N);text-align:center;font-size:130px;line-height:140px;color:var(--N)">÷</div>
+  <div class="pill" id="s4mult" style="left:100px;width:880px;top:1380px;font-size:78px;background:#fff;color:var(--N)">التركيز <span style="color:var(--G)">هو المضاعف</span></div>
+  <svg class="a" id="s4arrow" style="left:470px;top:1290px" width="140" height="110" viewBox="0 0 140 110"><path d="M70 100 V20 M30 55 L70 15 L110 55" stroke="#1B2A5C" stroke-width="22" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M70 100 V20 M30 55 L70 15 L110 55" stroke="#FFC414" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <div class="a" id="s4ring" style="left:90px;top:1340px;width:900px;height:200px;border:12px solid var(--G);border-radius:100px;opacity:0"></div>
+</div>
+  <div class="card imgc" id="c4" style="left:200px;top:1285px;width:680px;height:380px;padding:18px"><img src="images/c4.png"></div>
+</section>
+
+<!-- ============ 5 ============ -->
+<section class="scene" id="s5"><div class="wrap">
+  <div class="t" id="s5t1" style="top:150px;font-size:96px;line-height:1.25">بعد نقطة معينة…<br><span style="color:var(--R)">تبدأ الإنتاجية بالانخفاض</span></div>
+  <svg class="a" id="s5chart" style="left:20px;top:470px" width="1040" height="960" viewBox="0 0 1040 960"></svg>
+  <div class="pill" id="s5note" style="left:340px;width:400px;top:1450px;font-size:44px;border-width:6px;box-shadow:0 8px 0 var(--N);background:#fff">رسم توضيحي</div>
+</div>
+  <div class="card imgc" id="c5" style="left:200px;top:1285px;width:680px;height:380px;padding:18px"><img src="images/c5.png"></div>
+</section>
+
+<!-- ============ 6 ============ -->
+<section class="scene" id="s6"><div class="wrap">
+  <div class="a" id="s6div" style="left:534px;top:170px;width:12px;height:1330px;background:var(--N);border-radius:6px"></div>
+  <!-- right: focus -->
+  <div class="pill" id="s6rh" style="left:560px;width:480px;top:190px;font-size:62px;background:var(--G);color:#fff;padding:6px 10px 12px;white-space:normal;line-height:1.15">3 ساعات<br>تركيز</div>
+  <div class="t" id="s6rs" style="left:550px;width:500px;top:440px;font-size:66px;color:var(--G)">مهمة واحدة</div>
+  <div class="a" id="s6ri" style="left:610px;top:590px;width:380px;height:380px"></div>
+  <div class="a" id="s6rl" style="left:650px;top:1010px;width:300px;height:360px"></div>
+  <div class="a" id="s6rc" style="left:810px;top:1220px;width:200px;height:200px"></div>
+  <!-- left: distraction -->
+  <div class="pill" id="s6lh" style="left:40px;width:480px;top:190px;font-size:62px;background:var(--R);color:#fff;padding:6px 10px 12px;white-space:normal;line-height:1.15">8 ساعات<br>تشتيت</div>
+  <div class="t" id="s6ls" style="left:30px;width:500px;top:440px;font-size:66px;color:var(--R)">مهام مقطّعة</div>
+  <div class="a" id="s6li" style="left:90px;top:590px;width:380px;height:380px"></div>
+  <div class="a" id="s6ll" style="left:130px;top:1010px;width:300px;height:360px"></div>
+  <div class="a" id="s6lc" style="left:60px;top:1220px;width:200px;height:200px"></div>
+</div>
+  <div class="a" id="s6flash" style="inset:0;background:#fff;opacity:0"></div>
+  <div class="card imgc" id="c6" style="left:200px;top:1285px;width:680px;height:380px;padding:18px"><img src="images/c6.png"></div>
+</section>
+
+<!-- ============ 7 ============ -->
+<section class="scene" id="s7"><div class="wrap">
+  <div class="pill" id="s7chip" style="left:290px;width:500px;top:170px;font-size:104px;background:var(--Y);color:var(--N)">جرّب غدًا</div>
+  <!-- card 1 -->
+  <div class="card" id="s7c1" style="left:70px;top:380px;width:940px;height:330px"></div>
+  <div class="a" id="s7i1" style="left:730px;top:400px;width:230px;height:290px"></div>
+  <div class="a" id="s7t1" style="left:110px;top:430px;width:600px;text-align:center;font-size:90px;line-height:1.25;color:var(--N)">مهمة واحدة<br>واضحة</div>
+  <div class="a" id="s7k1" style="left:880px;top:330px;width:120px;height:120px"></div>
+  <!-- card 2 -->
+  <div class="card" id="s7c2" style="left:70px;top:750px;width:940px;height:330px"></div>
+  <div class="a" id="s7i2" style="left:700px;top:775px;width:280px;height:280px"></div>
+  <div class="a num" id="s7n2" style="left:700px;top:845px;width:280px;text-align:center;font-size:110px;line-height:1.2;color:var(--N)">25</div>
+  <div class="a" id="s7t2" style="left:110px;top:800px;width:560px;text-align:center;font-size:92px;line-height:1.25;color:var(--N)"><span class="num" style="font-size:150px;color:var(--G);text-shadow:0 8px 0 var(--N)">25</span> دقيقة<br>تركيز</div>
+  <!-- card 3 -->
+  <div class="card" id="s7c3" style="left:70px;top:1120px;width:940px;height:330px"></div>
+  <div class="a" id="s7i3" style="left:720px;top:1150px;width:250px;height:250px"></div>
+  <div class="a" id="s7t3" style="left:110px;top:1170px;width:560px;text-align:center;font-size:92px;line-height:1.25;color:var(--N)"><span class="num" style="font-size:150px;color:var(--Y);-webkit-text-stroke:10px var(--N);paint-order:stroke fill">5</span> دقائق<br>راحة</div>
+</div>
+  <div class="card imgc" id="c7" style="left:200px;top:1285px;width:680px;height:380px;padding:18px"><img src="images/c7.png"></div>
+</section>
+
+<!-- ============ 8 ============ -->
+<section class="scene" id="s8"><div class="wrap">
+  <div class="t" id="s8h" style="top:170px;font-size:190px;line-height:1.1">هل كنت<br><span style="color:var(--G)">تعرف؟</span></div>
+  <div class="a" id="s8yes" style="left:560px;top:700px;width:450px;height:330px;background:var(--G);border:10px solid var(--N);border-radius:70px;box-shadow:0 16px 0 var(--N);text-align:center;color:#fff;font-size:190px;line-height:1.6">نعم</div>
+  <div class="a" id="s8no" style="left:70px;top:700px;width:450px;height:330px;background:var(--R);border:10px solid var(--N);border-radius:70px;box-shadow:0 16px 0 var(--N);text-align:center;color:#fff;font-size:190px;line-height:1.6">لا</div>
+  <div class="t" id="s8w" style="top:1090px;font-size:64px;color:var(--N)">اكتب في التعليقات</div>
+  <div class="card" id="s8k1" style="left:700px;top:1210px;width:280px;height:280px;border-radius:70px"></div>
+  <div class="a" id="s8i1" style="left:745px;top:1235px;width:190px;height:230px"></div>
+  <div class="card" id="s8k2" style="left:400px;top:1210px;width:280px;height:280px;border-radius:70px"></div>
+  <div class="a" id="s8i2" style="left:445px;top:1260px;width:190px;height:190px"></div>
+  <div class="card" id="s8k3" style="left:100px;top:1210px;width:280px;height:280px;border-radius:70px"></div>
+  <div class="a" id="s8i3" style="left:145px;top:1260px;width:190px;height:190px"></div>
+  <div class="a" id="s8save" style="left:500px;top:1060px;width:500px;text-align:center;font-size:0"></div>
+</div>
+  <div class="card imgc" id="c8" style="left:200px;top:1285px;width:680px;height:380px;padding:18px"><img src="images/c8.png"></div>
+</section>
+
+<!-- ============ cover ============ -->
+<section class="scene" id="s9">
+  <div class="a" id="s9x" style="left:140px;top:170px;width:800px;height:800px"></div>
+  <div class="t" style="top:1010px;font-size:190px;line-height:1.15;color:var(--R);text-shadow:0 12px 0 var(--N)">خرافة<br>الإنتاجية!</div>
+  <div class="pill" style="left:90px;width:900px;top:1400px;font-size:62px;background:var(--Y);color:var(--N)">لا تصدّقها قبل أن تشاهد الفيديو</div>
+</section>
+</div>
+
+<script>
+const N='#1B2A5C',R='#F04545',G='#17B26A',Y='#FFC414';
+const $=id=>document.getElementById(id);
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const pr=(t,s,d)=>clamp((t-s)/d);
+const eo=x=>1-Math.pow(1-x,3);
+const eio=x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2;
+const ob=x=>{const c=1.70158,c3=c+1;return 1+c3*Math.pow(x-1,3)+c*Math.pow(x-1,2)};
+/* anim helper: pop/slide in */
+function an(el,t,s,o={}){
+  const d=o.d||.5,p=pr(t,s,d),e=(o.ease||ob)(p);
+  const dx=(o.dx||0)*(1-e),dy=(o.dy||0)*(1-e),sc=(o.sc===undefined?.2:o.sc),S=sc+(1-sc)*e,rot=(o.rot||0)*(1-e);
+  el.style.opacity=t<s?0:clamp(p*5);
+  el.style.transform=`translate(${dx}px,${dy}px) scale(${S}) rotate(${rot}deg) ${o.extra||''}`;
+}
+const fade=(el,t,s,d=.3)=>{el.style.opacity=pr(t,s,d)};
+const pulse=(t,f=2,a=.06)=>1+a*Math.sin(t*Math.PI*2*f);
+
+/* ---------- icons (sticker style, navy outlines) ---------- */
+const ico={
+ x:()=>`<svg viewBox="0 0 200 200" width="100%" height="100%"><g stroke-linecap="round"><line x1="38" y1="38" x2="162" y2="162" stroke="${N}" stroke-width="52"/><line x1="162" y1="38" x2="38" y2="162" stroke="${N}" stroke-width="52"/><line x1="38" y1="38" x2="162" y2="162" stroke="${R}" stroke-width="34"/><line x1="162" y1="38" x2="38" y2="162" stroke="${R}" stroke-width="34"/></g></svg>`,
+ clock:()=>{let tk='';for(let i=0;i<12;i++){const a=i*30*Math.PI/180;tk+=`<line x1="${100+70*Math.sin(a)}" y1="${100-70*Math.cos(a)}" x2="${100+80*Math.sin(a)}" y2="${100-80*Math.cos(a)}" stroke="${N}" stroke-width="${i%3?5:8}" stroke-linecap="round"/>`}
+  return `<svg viewBox="0 0 200 200" width="100%" height="100%"><circle cx="100" cy="100" r="92" fill="#fff" stroke="${N}" stroke-width="12"/>${tk}<g class="hh"><line x1="100" y1="100" x2="100" y2="54" stroke="${N}" stroke-width="12" stroke-linecap="round"/></g><g class="hm"><line x1="100" y1="100" x2="100" y2="34" stroke="${R}" stroke-width="9" stroke-linecap="round"/></g><circle cx="100" cy="100" r="11" fill="${N}"/></svg>`},
+ target:()=>`<svg viewBox="0 0 200 200" width="100%" height="100%"><circle cx="100" cy="108" r="86" fill="${R}" stroke="${N}" stroke-width="12"/><circle cx="100" cy="108" r="60" fill="#fff" stroke="${N}" stroke-width="8"/><circle cx="100" cy="108" r="36" fill="${R}" stroke="${N}" stroke-width="8"/><circle cx="100" cy="108" r="14" fill="#fff" stroke="${N}" stroke-width="6"/><g stroke-linecap="round" stroke-linejoin="round"><line x1="100" y1="108" x2="168" y2="38" stroke="${N}" stroke-width="22"/><line x1="100" y1="108" x2="168" y2="38" stroke="${Y}" stroke-width="8"/><path d="M150 56 L172 14 L186 30 Z M150 56 L196 40 L184 24 Z" fill="${Y}" stroke="${N}" stroke-width="9"/></g></svg>`,
+ up:()=>`<svg viewBox="0 0 200 200" width="100%" height="100%"><path d="M100 12 L184 104 L132 104 L132 188 L68 188 L68 104 L16 104 Z" fill="${Y}" stroke="${N}" stroke-width="12" stroke-linejoin="round"/></svg>`,
+ eq:()=>`<svg viewBox="0 0 200 200" width="100%" height="100%"><rect x="20" y="42" width="160" height="42" rx="21" fill="${Y}" stroke="${N}" stroke-width="10"/><rect x="20" y="116" width="160" height="42" rx="21" fill="${Y}" stroke="${N}" stroke-width="10"/></svg>`,
+ check:(c=G)=>`<svg viewBox="0 0 200 200" width="100%" height="100%"><circle cx="100" cy="100" r="88" fill="${c}" stroke="${N}" stroke-width="12"/><path d="M56 104 L90 138 L146 66" fill="none" stroke="${N}" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/><path d="M56 104 L90 138 L146 66" fill="none" stroke="#fff" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+ cross:()=>`<svg viewBox="0 0 200 200" width="100%" height="100%"><circle cx="100" cy="100" r="88" fill="${R}" stroke="${N}" stroke-width="12"/><path d="M64 64 L136 136 M136 64 L64 136" stroke="${N}" stroke-width="34" stroke-linecap="round"/><path d="M64 64 L136 136 M136 64 L64 136" stroke="#fff" stroke-width="20" stroke-linecap="round"/></svg>`,
+ brain:()=>{const c=[[100,200,50],[145,150,52],[210,140,50],[265,175,48],[255,250,48],[185,285,50],[110,265,46],[185,215,62]];
+  const s=c.map(a=>`<circle cx="${a[0]}" cy="${a[1]-60}" r="${a[2]+9}" fill="${N}"/>`).join(''),f=c.map(a=>`<circle cx="${a[0]}" cy="${a[1]-60}" r="${a[2]}" fill="${Y}"/>`).join('');
+  return `<svg viewBox="0 0 340 330" width="100%" height="100%">${s}${f}<path d="M178 92 C150 120 210 150 178 185 C150 215 205 240 180 275" fill="none" stroke="${N}" stroke-width="9" stroke-linecap="round"/><path d="M92 120 C112 108 128 128 112 142 M250 112 C230 104 214 120 230 134 M110 200 C130 192 140 212 122 224 M250 200 C232 194 222 212 238 224" fill="none" stroke="${N}" stroke-width="8" stroke-linecap="round"/></svg>`},
+ battery:()=>`<svg viewBox="0 0 400 180" width="100%" height="100%"><rect x="372" y="55" width="26" height="70" rx="10" fill="${N}"/><rect x="8" y="8" width="366" height="164" rx="36" fill="#fff" stroke="${N}" stroke-width="14"/><clipPath id="bcl"><rect x="26" y="26" width="330" height="128" rx="22"/></clipPath><rect class="bfill" x="26" y="26" width="330" height="128" fill="${G}" clip-path="url(#bcl)"/></svg>`,
+ phone:()=>`<svg viewBox="0 0 200 220" width="100%" height="100%"><rect x="42" y="8" width="116" height="204" rx="26" fill="${N}"/><rect x="54" y="34" width="92" height="152" rx="10" fill="#fff"/><circle cx="100" cy="20" r="4" fill="#fff"/><g transform="translate(100 108)"><path d="M-26 20 H26 L18 6 V-14 C18 -30 -18 -30 -18 -14 V6 Z" fill="${Y}" stroke="${N}" stroke-width="7" stroke-linejoin="round"/><circle cx="0" cy="28" r="7" fill="${N}"/><line x1="0" y1="-30" x2="0" y2="-22" stroke="${N}" stroke-width="7" stroke-linecap="round"/></g></svg>`,
+ list:(m)=>{let r='';[85,140,195].forEach((y,i)=>{const k=m[i];r+=`<rect x="44" y="${y-18}" width="38" height="38" rx="9" fill="#fff" stroke="${N}" stroke-width="8"/>`;
+   if(k==='g')r+=`<path class="lk" data-i="${i}" d="M50 ${y} L62 ${y+12} L80 ${y-16}" fill="none" stroke="${G}" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>`;
+   if(k==='r')r+=`<path d="M52 ${y-10} L74 ${y+12} M74 ${y-10} L52 ${y+12}" fill="none" stroke="${R}" stroke-width="12" stroke-linecap="round"/>`;
+   r+=`<line x1="104" y1="${y}" x2="${k==='r'?140:158}" y2="${y}" stroke="${N}" stroke-width="9" stroke-linecap="round" ${k==='r'?'stroke-dasharray="14 12"':''}/>`;});
+  return `<svg viewBox="0 0 200 240" width="100%" height="100%"><rect x="20" y="22" width="160" height="206" rx="22" fill="#fff" stroke="${N}" stroke-width="11"/><rect x="66" y="6" width="68" height="34" rx="12" fill="${N}"/>${r}</svg>`},
+ reticle:()=>`<svg viewBox="0 0 300 300" width="100%" height="100%"><g fill="none" stroke="${G}" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"><path d="M30 100 V30 H100 M200 30 H270 V100 M270 200 V270 H200 M100 270 H30 V200"/></g><g transform="translate(60 60) scale(.9)"><circle cx="100" cy="100" r="82" fill="${R}" stroke="${N}" stroke-width="12"/><circle cx="100" cy="100" r="56" fill="#fff" stroke="${N}" stroke-width="8"/><circle cx="100" cy="100" r="32" fill="${R}" stroke="${N}" stroke-width="8"/><circle cx="100" cy="100" r="11" fill="#fff"/></g></svg>`,
+ cup:()=>`<svg viewBox="0 0 240 220" width="100%" height="100%"><g class="steam" fill="none" stroke="${N}" stroke-width="9" stroke-linecap="round"><path class="st" d="M80 70 q-14 -16 0 -32 q14 -16 0 -32"/><path class="st" d="M120 70 q-14 -16 0 -32 q14 -16 0 -32"/></g><path d="M40 84 H168 V142 Q168 188 120 188 H88 Q40 188 40 142 Z" fill="${Y}" stroke="${N}" stroke-width="12" stroke-linejoin="round"/><path d="M168 100 H190 Q218 100 218 128 Q218 156 186 156 H168" fill="none" stroke="${N}" stroke-width="12"/><ellipse cx="108" cy="198" rx="92" ry="14" fill="#fff" stroke="${N}" stroke-width="9"/></svg>`,
+ bookmark:()=>`<svg viewBox="0 0 160 200" width="100%" height="100%"><path d="M26 12 H134 V186 L80 142 L26 186 Z" fill="${Y}" stroke="${N}" stroke-width="14" stroke-linejoin="round"/></svg>`,
+ share:()=>`<svg viewBox="0 0 200 200" width="100%" height="100%"><path d="M16 164 Q22 82 108 76 V34 L188 100 L108 166 V124 Q58 124 16 164 Z" fill="${N}" stroke="${N}" stroke-width="10" stroke-linejoin="round"/></svg>`,
+ comment:()=>`<svg viewBox="0 0 200 200" width="100%" height="100%"><rect x="14" y="26" width="172" height="120" rx="44" fill="${N}"/><path d="M62 138 L52 186 L104 142 Z" fill="${N}" stroke="${N}" stroke-width="8" stroke-linejoin="round"/><circle cx="62" cy="86" r="13" fill="#fff"/><circle cx="100" cy="86" r="13" fill="#fff"/><circle cx="138" cy="86" r="13" fill="#fff"/></svg>`,
+ timer:()=>`<svg viewBox="0 0 220 240" width="100%" height="100%"><rect x="88" y="4" width="44" height="22" rx="8" fill="${N}"/><rect x="100" y="22" width="20" height="18" fill="${N}"/><circle cx="110" cy="132" r="100" fill="#fff" stroke="${N}" stroke-width="12"/><circle cx="110" cy="132" r="76" fill="none" stroke="#E3E7F4" stroke-width="22"/><circle class="arc" cx="110" cy="132" r="76" fill="none" stroke="${G}" stroke-width="22" stroke-linecap="round" transform="rotate(-90 110 132)" stroke-dasharray="477.5" stroke-dashoffset="0"/></svg>`
+};
+const put=(id,html)=>{$(id).innerHTML=html};
+
+/* ---------- build static icons ---------- */
+put('s1x',ico.x()); put('s9x',ico.x());
+put('s2clock',ico.clock()); put('s2arrow',ico.up()); put('s2eq',ico.eq()); put('s2target',ico.target());
+put('s3brain',ico.brain()); put('s3bat',ico.battery());
+put('s4ok',ico.check()); put('s4i1',ico.target()); put('s4i2',ico.clock());
+put('s6ri',ico.reticle()); put('s6rl',ico.list(['g','g','g'])); put('s6rc',ico.check());
+put('s6li',ico.phone()); put('s6ll',ico.list(['r','r','r'])); put('s6lc',ico.cross());
+put('s7i1',ico.list(['g','','']));put('s7k1',ico.check());put('s7i2',ico.timer());put('s7i3',ico.cup());
+put('s8i1',ico.bookmark());put('s8i2',ico.share());put('s8i3',ico.comment());
+
+/* extra DOM for s1 sparks, s6 notifications */
+const sp=$('s1sp');let spk='';for(let i=0;i<14;i++)spk+=`<line class="sk" x1="0" y1="0" x2="0" y2="0" stroke="${i%2?Y:R}" stroke-width="16" stroke-linecap="round"/>`;sp.innerHTML=spk;
+const notif=[];for(let i=0;i<5;i++){const d=document.createElement('div');d.className='a';d.style.cssText='width:96px;height:96px;border-radius:50%;background:'+R+';border:8px solid '+N+';color:#fff;font-size:50px;line-height:84px;text-align:center';d.textContent=[12,'9+',7,3,'15'][i];$('s6').appendChild(d);notif.push(d)}
+const nPos=[[390,570],[60,640],[400,800],[70,860],[230,520]];
+
+/* ---------- chart (scene 5) ---------- */
+const CH={x0:140,x1:980,y0:760,y1:80};
+const hx=h=>CH.x0+(h-3)/10*(CH.x1-CH.x0), vy=v=>CH.y0-v/100*(CH.y0-CH.y1);
+const pts=[[3,33],[4,40],[6,70],[8,85],[10,65],[12,45],[13,38]].map(a=>[hx(a[0]),vy(a[1])]);
+function seg(i){const P=k=>pts[clamp(k,0,pts.length-1)],p0=P(i-1),p1=P(i),p2=P(i+1),p3=P(i+2);
+ return `C${p1[0]+(p2[0]-p0[0])/6} ${p1[1]+(p2[1]-p0[1])/6} ${p2[0]-(p3[0]-p1[0])/6} ${p2[1]-(p3[1]-p1[1])/6} ${p2[0]} ${p2[1]}`}
+const gP=`M${pts[0][0]} ${pts[0][1]} ${seg(0)} ${seg(1)} ${seg(2)}`;
+const rP=`M${pts[3][0]} ${pts[3][1]} ${seg(3)} ${seg(4)} ${seg(5)}`;
+const data=[[4,40],[6,70],[8,85],[10,65],[12,45]];
+(function(){let s='';
+ [20,40,60,80,100].forEach(v=>{s+=`<line x1="${CH.x0}" y1="${vy(v)}" x2="${CH.x1}" y2="${vy(v)}" stroke="#E3E7F4" stroke-width="3"/>`});
+ s+=`<g stroke="${N}" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M${CH.x0} ${CH.y1-20} V${CH.y0} H${CH.x1+30}"/><path d="M${CH.x0-18} ${CH.y1+6} L${CH.x0} ${CH.y1-22} L${CH.x0+18} ${CH.y1+6}"/><path d="M${CH.x1+8} ${CH.y0-18} L${CH.x1+34} ${CH.y0} L${CH.x1+8} ${CH.y0+18}"/></g>`;
+ [4,6,8,10,12].forEach(h=>{s+=`<line x1="${hx(h)}" y1="${CH.y0}" x2="${hx(h)}" y2="${CH.y0+14}" stroke="${N}" stroke-width="7"/><text x="${hx(h)}" y="${CH.y0+68}" text-anchor="middle" font-size="54" fill="${N}" font-family="CairoX" font-weight="900">${h}</text>`});
+ s+=`<text x="${(CH.x0+CH.x1)/2}" y="${CH.y0+150}" text-anchor="middle" font-size="58" fill="${N}" font-family="CairoX" font-weight="900" direction="rtl">ساعات العمل</text>`;
+ s+=`<text transform="translate(52 ${(CH.y0+CH.y1)/2}) rotate(-90)" text-anchor="middle" font-size="54" fill="${N}" font-family="CairoX" font-weight="900" direction="rtl">مؤشر الإنتاجية</text>`;
+ s+=`<path id="cg" d="${gP}" fill="none" stroke="${N}" stroke-width="36" stroke-linecap="round"/><path id="cr" d="${rP}" fill="none" stroke="${N}" stroke-width="36" stroke-linecap="round"/>`;
+ s+=`<path id="cg2" d="${gP}" fill="none" stroke="${G}" stroke-width="22" stroke-linecap="round"/><path id="cr2" d="${rP}" fill="none" stroke="${R}" stroke-width="22" stroke-linecap="round"/>`;
+ data.forEach((d,i)=>{const x=hx(d[0]),y=vy(d[1]),c=d[0]>8?R:G;
+  s+=`<g id="cp${i}" style="opacity:0"><circle cx="${x}" cy="${y}" r="20" fill="#fff" stroke="${N}" stroke-width="9"/><circle cx="${x}" cy="${y}" r="9" fill="${c}"/>
+  <rect x="${x-62}" y="${y-112}" width="124" height="72" rx="22" fill="${d[0]>8?'#fff':'#fff'}" stroke="${N}" stroke-width="8"/><text x="${x}" y="${y-60}" text-anchor="middle" font-size="52" fill="${c}" font-family="CairoX" font-weight="900">${d[1]}</text></g>`});
+ s+=`<circle id="cpk" cx="${hx(8)}" cy="${vy(85)}" r="40" fill="none" stroke="${Y}" stroke-width="12" style="opacity:0"/>`;
+ [10,12].forEach((h,i)=>{const x=hx(h);s+=`<g id="cw${i}" style="opacity:0"><path d="M${x} ${CH.y0-150} l-46 80 h92 z" fill="${Y}" stroke="${N}" stroke-width="10" stroke-linejoin="round"/><text x="${x}" y="${CH.y0-86}" text-anchor="middle" font-size="50" fill="${N}" font-family="CairoX" font-weight="900">!</text></g>`});
+ $('s5chart').innerHTML=s;})();
+const LEN={};['cg','cr','cg2','cr2'].forEach(k=>{LEN[k]=$(k).getTotalLength()});
+
+/* ---------- scene functions ---------- */
+function s1(t,s){
+  const q=t-s;
+  const dropP=pr(t,s+.05,.5), shake=t>s+.55&&t<s+1.15?Math.sin(t*90)*18*(1-pr(t,s+.55,.6)):0;
+  const y=-900*(1-eo(dropP));
+  $('s1x').style.transform=`translate(${shake*.6}px,${y}px) rotate(${(1-eo(dropP))*-30}deg) scale(${1+.0*dropP})`;
+  $('s1x').style.opacity=t<s+.05?0:1;
+  an($('s1h'),t,s,{d:.4,sc:1.5,extra:`translateX(${shake}px)`});
+  const rp=pr(t,s+.55,.7);
+  $('s1ring').style.opacity=rp>0&&rp<1?(1-rp)*.9:0;
+  $('s1ring').style.transform=`scale(${.4+rp*1.1})`;
+  [...document.querySelectorAll('#s1sp .sk')].forEach((l,i)=>{const a=i/14*Math.PI*2,p=pr(t,s+.55,.6);const r0=350+p*80,r1=350+p*230;
+    l.setAttribute('x1',540+Math.cos(a)*r0);l.setAttribute('y1',845+Math.sin(a)*r0);l.setAttribute('x2',540+Math.cos(a)*r1);l.setAttribute('y2',845+Math.sin(a)*r1);l.style.opacity=p>0&&p<1?1-p*p:0});
+  an($('s1t1'),t,s+1.1,{d:.6,dy:70,sc:.9,ease:eo});
+  an($('s1chip'),t,s+2.6,{d:.5,dy:60,sc:.8});
+  $('s1flash').style.opacity=t>s+6.0?clamp((t-s-6.0)/.2)*.22:(t<s+.6?(pr(t,s+.55,.05)*(1-pr(t,s+.6,.3)))*.25:0);
+}
+function s2(t,s){
+  an($('s2chip'),t,s+.1,{d:.5});
+  an($('s2clock'),t,s+.4,{d:.55,dx:300,sc:.5});
+  const q=t-s;
+  const ha=q*540, ma=ha*12;
+  const hh=$('s2clock').querySelector('.hh'),hm=$('s2clock').querySelector('.hm');
+  hh.setAttribute('transform',`rotate(${ha/12*4} 100 100)`);hm.setAttribute('transform',`rotate(${ma} 100 100)`);
+  const ap=pr(t,s+.9,.8);
+  $('s2arrow').style.opacity=ap>0?1:0;$('s2arrow').style.transform=`translateY(${(1-eo(ap))*260}px) scale(${.6+.4*eo(ap)})`;
+  an($('s2eq'),t,s+1.6,{d:.5,dx:150});
+  an($('s2target'),t,s+2.2,{d:.6,dx:300,sc:.5});
+  an($('s2txt'),t,s+3.0,{d:.6,dy:60,sc:.9,ease:eo});
+  const sl=pr(t,s+4.1,.35);
+  $('s2strike').style.opacity=sl>0?1:0;const L=$('s2sl');L.setAttribute('x2',90+900*eo(sl));L.setAttribute('y2',1190-160*eo(sl));
+  an($('s2stamp'),t,s+4.5,{d:.45,sc:2.2,rot:-25,extra:'rotate(-9deg)'});
+}
+function s3(t,s){
+  an($('s3w1'),t,s+.1,{d:.45,dy:60,sc:.7});an($('s3w2'),t,s+.7,{d:.5,dy:60,sc:.7});
+  an($('s3brain'),t,s+.9,{d:.6,sc:.4});
+  $('s3brain').style.transform+=` rotate(${Math.sin(t*3)*2}deg)`;
+  an($('s3q'),t,s+1.6,{d:.5,sc:.2,extra:`scale(${pulse(t,1.6,.07)})`});
+  an($('s3b1'),t,s+1.3,{d:.3});an($('s3b2'),t,s+1.45,{d:.3});
+  an($('s3bat'),t,s+2.0,{d:.5,dy:80,sc:.8});
+  const lv=1-eio(pr(t,s+2.4,5.2)); /* drain 14.7 -> 19.9 */
+  const f=$('s3bat').querySelector('.bfill');const col=lv>.5?G:(lv>.22?Y:R);
+  f.setAttribute('width',Math.max(10,330*Math.max(lv,.04)));f.setAttribute('fill',col);
+  an($('s3yel'),t,s+2.3,{d:.5,dy:80,sc:.85});
+  const yOut=pr(t,s+6.55,.25);
+  if(t>=s+6.55){$('s3yel').style.opacity=1-yOut;}
+  an($('s3red'),t,s+6.7,{d:.5,sc:.6,extra:`scale(${t>s+7.2?pulse(t,2,.04):1})`});
+}
+function s4(t,s){
+  an($('s4chip'),t,s+.15,{d:.45});an($('s4ok'),t,s+.55,{d:.45,sc:0});
+  an($('s4prod'),t,s+1.5,{d:.55,dy:60,sc:.8});
+  an($('s4eq'),t,s+1.8,{d:.4,sc:.4});
+  an($('s4c1'),t,s+2.2,{d:.5,dx:200,sc:.8});an($('s4i1'),t,s+2.3,{d:.5,sc:.3});an($('s4w1'),t,s+2.35,{d:.45,dy:30,sc:.9});
+  an($('s4div'),t,s+3.0,{d:.4,sc:0,rot:-90});
+  an($('s4c2'),t,s+3.1,{d:.5,dx:-200,sc:.8});an($('s4i2'),t,s+3.2,{d:.5,sc:.3});an($('s4w2'),t,s+3.25,{d:.45,dy:30,sc:.9});
+  const h=$('s4i2').querySelector('.hh'),m=$('s4i2').querySelector('.hm');m.setAttribute('transform',`rotate(${(t-s)*160} 100 100)`);h.setAttribute('transform',`rotate(${(t-s)*13} 100 100)`);
+  an($('s4mult'),t,s+4.0,{d:.5,dy:80,sc:.85});an($('s4arrow'),t,s+4.3,{d:.4,dy:40,sc:.5,extra:`translateY(${Math.sin(t*8)*-8}px)`});
+  const gp=pr(t,s+4.2,.9);const rg=$('s4ring');rg.style.opacity=gp>0&&gp<1?1-gp:0;rg.style.transform=`scale(${1+gp*.12})`;
+}
+function s5(t,s){
+  an($('s5t1'),t,s+.2,{d:.55,dy:50,sc:.9,ease:eo});
+  const g=pr(t,s+.8,2.0),r=pr(t,s+2.8,1.8);
+  const ge=eo(g),re=eo(r);
+  $('cg').style.strokeDasharray=$('cg2').style.strokeDasharray=LEN.cg;$('cg').style.strokeDashoffset=$('cg2').style.strokeDashoffset=LEN.cg*(1-ge);
+  $('cr').style.strokeDasharray=$('cr2').style.strokeDasharray=LEN.cr;$('cr').style.strokeDashoffset=$('cr2').style.strokeDashoffset=LEN.cr*(1-re);
+  $('cg').style.opacity=ge>0?1:0;$('cr').style.opacity=re>0?1:0;
+  /* points appear as line reaches (x fraction) */
+  const reach=[s+1.0+.0,s+1.0+.9,s+1.0+1.8,s+3.1+.0,s+3.1+1.6];
+  const th=[s+1.0,s+1.55,s+2.2,s+3.3,s+4.2];
+  data.forEach((d,i)=>{const e=$('cp'+i);const p=pr(t,th[i],.3);e.style.opacity=p>0?1:0;e.style.transformOrigin=`${hx(d[0])}px ${vy(d[1])}px`;e.style.transform=`scale(${.4+.6*ob(p)})`});
+  const pk=pr(t,s+2.5,1);const pe=$('cpk');pe.style.opacity=pk>0&&t<s+3.5?1:0;pe.style.transformOrigin=`${hx(8)}px ${vy(85)}px`;pe.style.transform=`scale(${1+.5*pk})`;pe.style.opacity=pk>0&&pk<1?1-pk*.8:0;
+  [0,1].forEach(i=>{const e=$('cw'+i);const st=s+(i?4.7:4.1);const p=pr(t,st,.4);e.style.opacity=p>0?1:0;const x=hx(i?12:10);e.style.transformOrigin=`${x}px ${CH.y0}px`;e.style.transform=`scale(${ob(p)}) translateY(${Math.sin(t*10+i)*-4*(p>=1?1:0)}px)`});
+  an($('s5note'),t,s+3.4,{d:.5,dy:30,sc:.9,ease:eo});
+}
+function s6(t,s){
+  const dv=pr(t,s+.05,.5);$('s6div').style.transformOrigin='50% 0';$('s6div').style.transform=`scaleY(${eo(dv)})`;
+  an($('s6rh'),t,s+.15,{d:.5,dx:150,sc:.7});an($('s6rs'),t,s+.55,{d:.45,dy:30,sc:.9,ease:eo});
+  an($('s6ri'),t,s+.8,{d:.6,sc:.3});
+  an($('s6rl'),t,s+1.5,{d:.5,sc:.4});
+  const l=document.querySelectorAll('#s6rl .lk');l.forEach((e,i)=>{const p=pr(t,s+2.0+i*.4,.3);e.style.strokeDasharray=60;e.style.strokeDashoffset=60*(1-p)});
+  an($('s6rc'),t,s+3.2,{d:.5,sc:0,rot:-60,extra:`scale(${pulse(t,1.5,.04)})`});
+  /* left */
+  const L0=s+2.7;
+  an($('s6lh'),t,L0,{d:.5,dx:-150,sc:.7});an($('s6ls'),t,L0+.4,{d:.45,dy:30,sc:.9,ease:eo});
+  const ph=$('s6li');an(ph,t,L0+.6,{d:.5,sc:.3,extra:t>L0+1.1?`translate(${Math.sin(t*70)*7}px,${Math.cos(t*55)*4}px) rotate(${Math.sin(t*60)*3}deg)`:''});
+  notif.forEach((d,i)=>{const st=L0+1.2+i*.28;const p=pr(t,st,.3);const x=nPos[i][0],y=nPos[i][1];d.style.left=x+'px';d.style.top=y+'px';d.style.opacity=p>0?1:0;d.style.transform=`scale(${ob(p)*(1+.1*Math.sin(t*14+i))}) translateX(${Math.sin(t*50+i)*3}px)`});
+  an($('s6ll'),t,L0+1.8,{d:.5,sc:.4,extra:`rotate(${Math.sin(t*25)*4}deg) translateX(${Math.sin(t*40)*5}px)`});
+  an($('s6lc'),t,L0+2.7,{d:.5,sc:0,rot:60});
+  const fl=pr(t,L0+3.2,.1)*(1-pr(t,L0+3.3,.35));$('s6flash').style.opacity=fl*.5;
+}
+function s7(t,s){
+  an($('s7chip'),t,s+.1,{d:.5});
+  /* card1 */
+  an($('s7c1'),t,s+1.4,{d:.5,dx:200,sc:.9});an($('s7i1'),t,s+1.6,{d:.5,sc:.3});an($('s7t1'),t,s+1.7,{d:.5,dy:30,sc:.9});an($('s7k1'),t,s+2.4,{d:.45,sc:0,rot:-60});
+  const li=document.querySelectorAll('#s7i1 .lk');li.forEach(e=>{const p=pr(t,s+2.5,.35);e.style.strokeDasharray=60;e.style.strokeDashoffset=60*(1-p)});
+  /* card2 timer 45.0 -> 48.0 */
+  const c2=s+3.4;
+  an($('s7c2'),t,c2,{d:.5,dx:200,sc:.9});an($('s7i2'),t,c2+.15,{d:.5,sc:.3});an($('s7t2'),t,c2+.25,{d:.5,dy:30,sc:.9});
+  const tp=pr(t,c2+.8,2.6);const arc=$('s7i2').querySelector('.arc');arc.setAttribute('stroke-dashoffset',477.5*tp);
+  const n=Math.max(0,Math.ceil(25*(1-tp)));const nn=$('s7n2');nn.textContent=t<c2+.8?'25':String(tp>=1?0:n);nn.style.opacity=t>c2+.25?1:0;
+  const hot=t>c2+.8&&t<c2+3.4;$('s7c2').style.borderColor=hot?G:N;$('s7c2').style.boxShadow=`0 14px 0 ${hot?G:N}`;
+  /* card3 */
+  const c3=s+6.8;
+  an($('s7c3'),t,c3,{d:.5,dx:200,sc:.9});an($('s7i3'),t,c3+.15,{d:.5,sc:.3});an($('s7t3'),t,c3+.25,{d:.5,dy:30,sc:.9});
+  const st=document.querySelectorAll('#s7i3 .st');st.forEach((e,i)=>{const L=80;e.style.strokeDasharray='40 30';e.style.strokeDashoffset=-(t*60+i*30)%70;e.style.opacity=t>c3?1:0});
+}
+function s8(t,s){
+  an($('s8h'),t,s+.1,{d:.6,dy:60,sc:.8});
+  const y=pr(t,s+2.0,.5),no=pr(t,s+2.3,.5);
+  an($('s8yes'),t,s+2.0,{d:.5,dx:200,sc:.7,extra:`scale(${t>s+3?1+.03*Math.sin(t*6):1})`});
+  an($('s8no'),t,s+2.3,{d:.5,dx:-200,sc:.7,extra:`scale(${t>s+3?1+.03*Math.sin(t*6+3):1})`});
+  an($('s8w'),t,s+2.6,{d:.5,dy:30,sc:.9,ease:eo});
+  an($('s8k1'),t,s+3.5,{d:.45,sc:.2});an($('s8i1'),t,s+3.6,{d:.45,sc:.2});
+  an($('s8k2'),t,s+4.0,{d:.45,sc:.2});an($('s8i2'),t,s+4.1,{d:.45,sc:.2});
+  an($('s8k3'),t,s+4.4,{d:.45,sc:.2});an($('s8i3'),t,s+4.5,{d:.45,sc:.2});
+  if(t>s+4.9){const k=1+.07*Math.sin(t*7);$('s8k1').style.transform=`scale(${k})`;$('s8i1').style.transform=`scale(${k})`}
+}
+function s9(t,s){an($('s9x'),t,0,{d:.0001})}
+
+const scenes=[
+ {el:$('s1'),s:0,e:6.55,fn:s1},{el:$('s2'),s:6.55,e:12.3,fn:s2},{el:$('s3'),s:12.3,e:20.8,fn:s3},{el:$('s4'),s:20.8,e:26.6,fn:s4},
+ {el:$('s5'),s:26.6,e:33.8,fn:s5},{el:$('s6'),s:33.8,e:41.3,fn:s6},{el:$('s7'),s:41.3,e:50.9,fn:s7},{el:$('s8'),s:50.9,e:57.2,fn:s8}];
+const pg=$('prog');scenes.forEach(()=>{const i=document.createElement('i');i.appendChild(document.createElement('b'));pg.appendChild(i)});
+/* ---------- background icon themes (fixed icons, change per topic) ---------- */
+function buildTheme(id,icons,seed){
+  let s=seed;const rnd=()=>{s=(s*9301+49297)%233280;return s/233280};
+  let h=`<svg viewBox="0 0 1080 1920">`;
+  const cols=5,rows=9,cw=1080/cols,rh=1920/rows;
+  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
+    const ic=icons[(r*cols+c)%icons.length];
+    const x=c*cw+cw/2-70+(r%2?40:0),y=r*rh+rh/2-70,rot=(rnd()*24-12).toFixed(1);
+    h+=`<use href="#${ic}" x="${x}" y="${y}" width="140" height="140" opacity="0.13" transform="rotate(${rot} ${x+70} ${y+70})"/>`;
+  }
+  h+='</svg>';$(id).innerHTML=h;
+}
+buildTheme('thA',['i-clock','i-battery','i-brain','i-q'],7);
+buildTheme('thB',['i-target','i-check','i-gear','i-bars'],11);
+buildTheme('thC',['i-phone','i-bell','i-timer','i-coffee'],23);
+buildTheme('thD',['i-bookmark','i-share','i-comment','i-thumb'],31);
+const themes=[{id:'thA',s:0,e:20.8},{id:'thB',s:20.8,e:33.8},{id:'thC',s:33.8,e:50.9},{id:'thD',s:50.9,e:999}];
+const COVER=location.search.includes('cover');
+function render(t){
+  if(COVER){document.querySelectorAll('.scene').forEach(e=>e.style.display='none');document.querySelectorAll('.theme').forEach(e=>e.style.opacity=0);$('thD').style.opacity=1;$('s9').style.display='block';$('s9').style.opacity=1;pg.style.display='none';return}
+  themes.forEach(th=>{$(th.id).style.opacity=(t>=th.s&&t<th.e)?1:0});
+  scenes.forEach((sc,i)=>{const on=t>=sc.s&&t<sc.e;sc.el.style.display=on?'block':'none';if(on){sc.el.style.opacity=clamp((t-sc.s)/.16);sc.fn(t,sc.s);an($('c'+(i+1)),t,sc.s+.6,{d:.6,dy:90,sc:.9,ease:eo})}
+    pg.children[i].firstChild.style.width=(100*clamp((t-sc.s)/(sc.e-sc.s)))+'%'});
+}
+window.render=render;
+render(0);
+</script>
+</body>
+</html>
