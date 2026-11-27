@@ -11,6 +11,7 @@ html,body{width:1080px;height:1920px;background:#000;overflow:hidden}
 .shake,.cam{position:absolute;inset:0;transform-origin:50% 50%}
 .cam img,.el,.ic,.ov{position:absolute}
 .plate{left:0;top:0;width:941px;height:1672px}
+.ghostm{-webkit-mask-image:radial-gradient(ellipse closest-side,#000 60%,transparent 100%)}
 .feather{-webkit-mask-image:radial-gradient(ellipse closest-side,#000 72%,transparent 100%)}
 .ic{filter:drop-shadow(0 10px 14px rgba(0,0,0,.6))}
 .vig{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 55%,rgba(5,8,14,.55) 100%)}
@@ -21,10 +22,17 @@ html,body{width:1080px;height:1920px;background:#000;overflow:hidden}
 #end{position:absolute;inset:0;background:#06090f;opacity:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
 #end .t{font-family:Oswald;font-size:120px;color:#f4f1ea;letter-spacing:4px;line-height:1}
 #end .s{font-size:26px;margin-top:18px;color:#d92b2b}
+#subs{position:absolute;left:0;right:0;top:1520px;display:flex;justify-content:center;pointer-events:none}
+.cap{position:absolute;max-width:860px;padding:10px 22px 12px;background:rgba(6,9,15,.82);border-bottom:4px solid #d92b2b;
+ font-family:Oswald,sans-serif;font-size:52px;line-height:1.12;color:#f4f1ea;text-align:center;letter-spacing:0;word-spacing:4px;opacity:0;
+ box-shadow:0 10px 30px rgba(0,0,0,.6)}
+.cap span{display:inline-block}
+.cap .hl{color:#eab308}
 </style></head><body>
 <div id="view"><div id="stage"></div></div>
 <script src="assets/gsap.min.js"></script>
 <script src="assets/config.js"></script>
+<script src="assets/subs.js"></script>
 <script>
 const C = window.CFG, S = document.getElementById('stage'), tl = gsap.timeline({paused:true});
 const IN_PLACE = {spin:1,bob:1,swing:1,swingTop:1,blink:1};
@@ -36,7 +44,7 @@ const ICONS = {
   4:[['magnifier',150,250,230,4.3,'sweep']],
   5:[['crew',300,1440,340,7.4,'fog']],
   6:[['lifebuoy',30,1330,150,6.6,'rollL'],['barrelvapor',790,850,120,3.4,'pop']],
-  7:[['gavel',730,920,190,3.3,'strike'],['hourglass',45,1080,95,6.0,'pop']],
+  7:[['gavel',730,920,190,3.3,'strike']],
 };
 const sc = [];
 function el(tag, cls, css, parent){const e=document.createElement(tag);e.className=cls;Object.assign(e.style,css||{});parent.appendChild(e);return e;}
@@ -52,7 +60,7 @@ C.scenes.forEach((s, i) => {
   const shakeAt=t=>tl.fromTo(shake,{x:0,y:0},{keyframes:[{x:-9,y:6},{x:7,y:-5},{x:-4,y:3},{x:0,y:0}],duration:0.28,ease:'none'},t);
   s.els.forEach(o=>{
     const [x0,y0,x1,y1]=o.b, at=t0+o.t, w=x1-x0, h=y1-y0;
-    const e=el('img','el'+(IN_PLACE[o.a]?' feather':''),{left:x0+'px',top:y0+'px',width:w+'px',height:h+'px'},cam);
+    const e=el('img','el'+(IN_PLACE[o.a]?' feather':'')+(o.a==='ghost'?' ghostm':''),{left:x0+'px',top:y0+'px',width:w+'px',height:h+'px'},cam);
     e.src=`assets/s${n}_${o.n}.webp`;
     const hold=t1-at;
     switch(o.a){
@@ -65,7 +73,7 @@ C.scenes.forEach((s, i) => {
       case 'drop': tl.fromTo(e,{y:-560,rotation:9},{y:0,rotation:0,duration:0.9,ease:'bounce.out'},at); break;
       case 'pop': tl.fromTo(e,{scale:0},{scale:1,duration:0.5,ease:'back.out(2.6)'},at); break;
       case 'flip': tl.fromTo(e,{rotationY:-95,opacity:0},{rotationY:0,opacity:1,duration:0.55,ease:'power2.out'},at); break;
-      case 'ghost': tl.to(e,{opacity:0.1,x:40,duration:6,ease:'sine.inOut'},t0+2.2); break;
+      case 'ghost': tl.to(e,{opacity:0,x:40,duration:6,ease:'sine.inOut'},t0+2.2); break;
       case 'spin': tl.fromTo(e,{rotation:-120},{rotation:0,duration:2.2,ease:'elastic.out(1,0.35)'},at+0.2); break;
       case 'bob': tl.to(e,{keyframes:[{y:-7,rotation:0.7},{y:5,rotation:-0.6},{y:-4,rotation:0.4},{y:0,rotation:0}],duration:dur,ease:'sine.inOut'},t0); break;
       case 'swing': tl.set(e,{transformOrigin:'50% 0%'},t0); tl.to(e,{keyframes:[{rotation:9},{rotation:-7},{rotation:5},{rotation:-3},{rotation:0}],duration:dur,ease:'sine.inOut'},t0); break;
@@ -140,6 +148,16 @@ sc.forEach((s,i)=>{ if(!i) return; const t=s.t0, prev=sc[i-1].scene, cur=s.scene
   tl.set(prev,{visibility:'hidden'},t+0.3);
 });
 
+// ---------- French captions ----------
+const subs=el('div','',{},S); subs.id='subs';
+const HL=/\d|^(Dix|neuf|sept|personne|disparu|vides|volé|Mary|Celeste|choc|parfait|panique|pourquoi)/i;
+SUBS.forEach(([a,b,txt])=>{
+  const c=el('div','cap',{},subs);
+  c.innerHTML=txt.split(' ').map(w=>`<span class="${HL.test(w)?'hl':''}">${w}</span>`).join(' ');
+  tl.set(c,{opacity:1},a);
+  tl.fromTo(c.children,{y:22,opacity:0},{y:0,opacity:1,stagger:Math.min(0.09,(b-a)*0.5/c.children.length),duration:0.22,ease:'back.out(2)'},a);
+  tl.set(c,{opacity:0},b);
+});
 // ---------- end card ----------
 const end=el('div','',{},S); end.id='end';
 end.innerHTML='<img src="assets/i_question.webp" style="width:230px"><div class="t">UNSOLVED</div><div class="mono s">MARY CELESTE // 1872 — 2026</div>';

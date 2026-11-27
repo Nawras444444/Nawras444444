@@ -67,10 +67,10 @@ EL = {
      ("photo", (35, 90, 525, 335), "drop", 0.5),
      ("arms", (530, 120, 905, 345), "flyR", 0.9),
      ("seal", (625, 350, 925, 645), "slam", 1.3),
-     ("gib", (15, 415, 645, 625), "wipe", 0.6),
-     ("year", (95, 615, 615, 705), "pop", 1.0),
-     ("check", (20, 745, 375, 1055), "wipeDown", 2.4),
-     ("ghost", (380, 712, 941, 1110), "ghost", 0.0),
+     ("gib", (15, 415, 645, 688), "wipe", 0.6),
+     ("year", (40, 688, 640, 800), "pop", 1.0),
+     ("check", (20, 802, 375, 1060), "wipeDown", 2.4),
+     ("ghost", (545, 700, 941, 1110), "ghost", 0.0),
      ("unsolved", (55, 1105, 895, 1435), "slam", 4.0),
      ("bar", (20, 1435, 920, 1645), "flyB", 5.4)],
 }
@@ -85,7 +85,13 @@ for s in range(1, 8):
     els = []
     for name, box, anim, t in EL[s]:
         im.crop(box).save(f"{A}s{s}_{name}.png" if False else f"{A}s{s}_{name}.webp", quality=92)
-        if anim in HOLE:
+        if anim == "ghost":
+            fog = ImageEnhance.Brightness(im.filter(ImageFilter.GaussianBlur(30))).enhance(0.95)
+            mask = Image.new("L", (box[2]-box[0], box[3]-box[1]), 0)
+            from PIL import ImageDraw
+            ImageDraw.Draw(mask).rectangle((40, 40, mask.width-40, mask.height-40), fill=255)
+            plate.paste(fog.crop(box), box[:2], mask.filter(ImageFilter.GaussianBlur(25)))
+        elif anim in HOLE:
             plate.paste(blur.crop(box), box[:2])
         els.append({"n": name, "b": box, "a": anim, "t": t})
     plate.save(f"{A}s{s}_plate.jpg", quality=92)
