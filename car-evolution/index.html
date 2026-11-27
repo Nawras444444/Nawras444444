@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8">
+<title>Car Evolution</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a1324;--amber:#ffb627;--cyan:#3fd0e0;--ink:#eaf2ff;--mut:#8aa0c2;--line:rgba(120,170,255,.09)}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1080px;height:1920px;overflow:hidden;background:var(--bg)}
+#stage{position:relative;width:1080px;height:1920px;overflow:hidden;font-family:Cairo,sans-serif;color:var(--ink);
+ background:radial-gradient(ellipse at 50% 35%,#16284a 0%,var(--bg) 70%)}
+#grid{position:absolute;inset:-80px;background-image:linear-gradient(var(--line) 2px,transparent 2px),linear-gradient(90deg,var(--line) 2px,transparent 2px);background-size:80px 80px}
+.scene{position:absolute;inset:0;opacity:0}
+.c{position:absolute;left:0;right:0;text-align:center}
+.kick{font-size:42px;font-weight:700;color:var(--cyan);letter-spacing:2px}
+.h1{font-weight:900;color:#fff;text-shadow:0 8px 40px rgba(63,208,224,.35)}
+.chip{position:absolute;height:96px;border-radius:48px;display:flex;align-items:center;gap:16px;padding:0 36px;font-size:40px;font-weight:800;
+ background:rgba(255,255,255,.06);border:2px solid rgba(255,255,255,.18);backdrop-filter:blur(4px);white-space:nowrap}
+.chip b{color:var(--amber);font-weight:900}
+.panel{position:absolute;left:60px;right:60px;border-radius:28px;background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.1)}
+svg text{font-family:Cairo,sans-serif}
+.tile{position:absolute;width:290px;height:330px;border-radius:28px;background:rgba(255,255,255,.05);border:2px solid rgba(63,208,224,.45);text-align:center;padding-top:40px}
+.tile div{font-size:40px;font-weight:900;margin-top:22px}
+.vign{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,transparent 55%,rgba(0,0,0,.65) 100%);z-index:50}
+#prog{position:absolute;top:0;right:0;height:10px;background:linear-gradient(90deg,var(--cyan),var(--amber));z-index:60}
+</style></head><body>
+<div id="stage">
+<div id="grid"></div>
+
+<!-- S1 title -->
+<div class="scene" id="s1">
+ <div class="c kick" id="k1" style="top:560px">قصة اختراع غيّر العالم</div>
+ <div class="c h1" id="t1" style="top:650px;font-size:140px;white-space:nowrap">تطوّر السيارات</div>
+ <div class="c" id="y1" style="top:880px;font-size:64px;font-weight:800;color:var(--amber)">1886 ← 2024</div>
+ <svg id="road1" width="1080" height="300" style="position:absolute;top:1150px;left:0"></svg>
+</div>
+
+<!-- S2 timeline -->
+<div class="scene" id="s2">
+ <div class="c kick" style="top:170px">رحلة عبر الزمن</div>
+ <div class="c" id="year" style="top:220px;font-size:230px;font-weight:900;color:var(--amber);line-height:1.2;text-shadow:0 0 60px rgba(255,182,39,.35)">1886</div>
+ <div class="c h1" id="eraT" style="top:540px;font-size:72px">أول سيارة بمحرك</div>
+ <svg id="car" viewBox="0 0 400 200" width="1000" height="500" style="position:absolute;left:40px;top:680px;overflow:visible"></svg>
+ <div class="chip" id="chipS" style="right:110px;top:1240px">⚡ السرعة <b id="spd">16</b> كم/س</div>
+ <div class="chip" id="chipP" style="left:110px;top:1240px">⛽ <b id="pw">بنزين</b></div>
+ <svg id="tl" width="1080" height="260" style="position:absolute;top:1450px;left:0"></svg>
+</div>
+
+<!-- S3 speed chart -->
+<div class="scene" id="s3">
+ <div class="c kick" style="top:250px">بالأرقام</div>
+ <div class="c h1" id="t3" style="top:310px;font-size:96px">السرعة القصوى تقريبًا</div>
+ <div class="c" style="top:450px;font-size:38px;color:var(--mut);font-weight:700">كم/ساعة — سيارة نموذجية من كل حقبة</div>
+ <div class="panel" style="top:560px;height:900px"></div>
+ <svg id="ch1" width="960" height="860" style="position:absolute;left:60px;top:580px;overflow:visible"></svg>
+ <div class="c" id="x3" style="top:1520px;font-size:56px;font-weight:900">أسرع <span style="color:var(--amber)">15 مرة</span> من أول سيارة</div>
+</div>
+
+<!-- S4 cars in use + EV share -->
+<div class="scene" id="s4">
+ <div class="c h1" id="t4" style="top:200px;font-size:88px">السيارات في العالم</div>
+ <div class="c" style="top:320px;font-size:38px;color:var(--mut);font-weight:700">عدد المركبات قيد الاستخدام (تقديري)</div>
+ <svg id="ch2" width="960" height="720" style="position:absolute;left:60px;top:400px;overflow:visible"></svg>
+ <div class="panel" style="top:1210px;height:470px"></div>
+ <svg id="donut" width="360" height="360" style="position:absolute;right:110px;top:1265px"></svg>
+ <div id="evtxt" style="position:absolute;left:110px;top:1300px;width:520px;text-align:right">
+  <div style="font-size:40px;color:var(--cyan);font-weight:800">السيارات الكهربائية 2024</div>
+  <div style="font-size:52px;font-weight:900;line-height:1.35;margin-top:14px">سيارة من كل 5 سيارات جديدة تُباع كهربائية</div>
+ </div>
+</div>
+
+<!-- S5 future -->
+<div class="scene" id="s5">
+ <div class="c kick" style="top:360px">وماذا بعد؟</div>
+ <div class="c h1" id="t5" style="top:420px;font-size:170px">المستقبل</div>
+ <div class="tile" id="f1" style="right:60px;top:760px"><svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="#3fd0e0" stroke-width="1.6" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg><div>كهربائية</div></div>
+ <div class="tile" id="f2" style="right:395px;top:760px"><svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="#3fd0e0" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.5"/><path d="M12 14.5V21M9.6 11.2 3.5 10M14.4 11.2 20.5 10"/></svg><div>ذاتية القيادة</div></div>
+ <div class="tile" id="f3" style="right:730px;top:760px"><svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="#3fd0e0" stroke-width="1.6" stroke-linecap="round"><path d="M2 9a15 15 0 0 1 20 0M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0"/><circle cx="12" cy="19.5" r="1" fill="#3fd0e0"/></svg><div>متصلة</div></div>
+ <svg id="carF" viewBox="0 0 400 200" width="900" height="450" style="position:absolute;left:90px;top:1170px;overflow:visible"></svg>
+</div>
+
+<div class="vign"></div><div id="prog"></div>
+<div id="fade" style="position:absolute;inset:0;background:#000;opacity:0;z-index:70"></div>
+</div>
+<script>
+const $=id=>document.getElementById(id), NS='http://www.w3.org/2000/svg';
+const cl=(x,a=0,b=1)=>Math.min(b,Math.max(a,x)), p=(t,s,d)=>cl((t-s)/d);
+const eo=x=>1-Math.pow(1-x,3), ei=x=>x*x*x, eio=x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2;
+const back=x=>{const c=1.70158;return 1+(c+1)*Math.pow(x-1,3)+c*Math.pow(x-1,2)};
+const lerp=(a,b,k)=>a+(b-a)*k;
+function inEl(el,t,s,dy=50,d=.5,sc=false){const k=p(t,s,d);el.style.opacity=cl(k*1.7);
+ el.style.transform=sc?`scale(${.5+.5*back(k)})`:`translateY(${(1-eo(k))*dy}px)`}
+
+/* ---------- cars (side profile, facing right; flipped to drive leftward) ---------- */
+const W='#9fd6ff', S='stroke="#f4f8ff" stroke-width="3" stroke-linejoin="round"';
+const CARS=[
+ {y:1886,t:'أول سيارة بمحرك بنزين',s:16,pw:'بنزين',ic:'⛽',c:'#9a6a3a',rim:'spoke',w:[[250,128,55],[92,158,28]],
+  g:`<path d="M92,158 L250,128" stroke="#f4f8ff" stroke-width="5"/><path d="M175,118 H300 V98 H182Z" fill="#9a6a3a" ${S}/>
+     <path d="M288,98 L298,58 H310 L302,98Z" fill="#6b4524" ${S}/><rect x="262" y="118" width="54" height="18" rx="3" fill="#555" ${S}/>
+     <path d="M120,152 L142,82 H166" fill="none" stroke="#f4f8ff" stroke-width="5" stroke-linecap="round"/>`},
+ {y:1908,t:'عصر الإنتاج الضخم',s:70,pw:'بنزين',ic:'⛽',c:'#2a2f3a',rim:'spoke',w:[[110,142,32],[300,142,32]],
+  g:`<path d="M50,135 V105 L95,100 H150 L155,58 L252,56 L256,100 L335,104 L346,118 V135Z" fill="#2a2f3a" ${S}/>
+     <path d="M162,66 L246,64 L249,98 H164Z" fill="${W}" opacity=".5"/><rect x="336" y="104" width="12" height="30" fill="#c9a24a" ${S}/>
+     <path d="M66,128 Q110,92 154,128 M256,128 Q300,92 344,128" fill="none" stroke="#f4f8ff" stroke-width="6"/><circle cx="350" cy="100" r="7" fill="#ffe27a" ${S}/>`},
+ {y:1955,t:'الرفاهية والتصميم',s:150,pw:'بنزين',ic:'⛽',c:'#e2445c',rim:'chrome',w:[[100,142,27],[305,142,27]],
+  g:`<path d="M30,140 Q28,112 70,108 L18,96 L135,106 Q165,74 202,72 L258,74 Q290,78 310,106 L372,110 Q388,114 382,140Z" fill="#e2445c" ${S}/>
+     <path d="M142,106 Q166,82 202,80 L255,82 Q280,86 296,106Z" fill="${W}" opacity=".55"/><path d="M40,124 H375" stroke="#e8eef8" stroke-width="5"/><circle cx="374" cy="118" r="7" fill="#ffe27a"/>`},
+ {y:1975,t:'الأمان وكفاءة الوقود',s:180,pw:'بنزين',ic:'⛽',c:'#f29e38',rim:'chrome',w:[[95,142,27],[305,142,27]],
+  g:`<path d="M24,140 L30,116 L120,106 L170,80 H272 L322,106 L382,112 L380,140Z" fill="#f29e38" ${S}/>
+     <path d="M130,106 L174,86 H268 L310,106Z" fill="${W}" opacity=".55"/><path d="M220,86 V106" stroke="#f4f8ff" stroke-width="4"/><rect x="368" y="114" width="14" height="10" fill="#ffe27a"/>`},
+ {y:2000,t:'الإلكترونيات والهجين',s:220,pw:'هجين',ic:'🔋',c:'#8fa2bd',rim:'alloy',w:[[95,142,28],[300,142,28]],
+  g:`<path d="M24,140 Q22,112 60,107 L122,100 Q162,68 222,66 Q290,68 322,98 L366,106 Q384,114 380,140Z" fill="#8fa2bd" ${S}/>
+     <path d="M132,100 Q166,76 222,74 Q282,76 310,100Z" fill="${W}" opacity=".55"/><path d="M220,76 V100" stroke="#f4f8ff" stroke-width="4"/><path d="M360,112 L380,116" stroke="#ffe27a" stroke-width="7" stroke-linecap="round"/>`},
+ {y:2024,t:'الكهرباء والذكاء',s:250,pw:'كهرباء',ic:'⚡',c:'#21b8b0',rim:'aero',w:[[92,142,30],[305,142,30]],
+  g:`<path d="M20,140 Q22,116 60,108 Q140,60 232,58 Q312,62 352,98 Q386,108 382,140Z" fill="#21b8b0" ${S}/>
+     <path d="M120,100 Q170,70 232,67 Q296,70 330,98Z" fill="${W}" opacity=".55"/><path d="M340,104 L382,112" stroke="#bff6ff" stroke-width="6" stroke-linecap="round"/>
+     <path d="M206,112 l-8,12 h7 l-3,10 l10,-14 h-7 l4,-8z" fill="#fff"/>`}
+];
+function wheel(x,y,r,rim){let sp='';const n=rim=='spoke'?10:rim=='aero'?3:5;
+ for(let i=0;i<n;i++){const a=i/n*Math.PI*2,rr=rim=='spoke'?r-4:r*.62;sp+=`<line x1="0" y1="0" x2="${Math.cos(a)*rr}" y2="${Math.sin(a)*rr}" stroke="${rim=='spoke'?'#e9d8b8':'#cfd9e8'}" stroke-width="${rim=='spoke'?2.5:rim=='aero'?7:5}" stroke-linecap="round"/>`}
+ const tire=rim=='spoke'?`<circle r="${r}" fill="none" stroke="#e9d8b8" stroke-width="5"/>`:`<circle r="${r}" fill="#151a24" stroke="#f4f8ff" stroke-width="3"/><circle r="${r*.66}" fill="#5d6b80"/>`;
+ return `<g transform="translate(${x},${y})"><g class="wh">${tire}${sp}<circle r="${r*.18}" fill="#f4f8ff"/></g></g>`}
+function carSVG(c){return `<ellipse cx="200" cy="${c.y==1886?186:175}" rx="190" ry="10" fill="#000" opacity=".35"/>`+
+ `<g class="lines"></g><g transform="translate(400,0) scale(-1,1)">${c.g}${c.w.map(w=>wheel(...w,c.rim)).join('')}</g>`}
+const carEl=$('car');CARS.forEach((c,i)=>{const g=document.createElementNS(NS,'g');g.id='car'+i;g.innerHTML=carSVG(c);g.style.opacity=0;carEl.appendChild(g)});
+$("carF").innerHTML=`<defs><filter id="gl"><feGaussianBlur stdDeviation="6"/></filter></defs><ellipse cx="200" cy="175" rx="210" ry="18" fill="#3fd0e0" opacity=".35" filter="url(#gl)"/>`+carSVG(CARS[5]);
+
+/* speed lines */
+const lines=[...Array(6)].map((_,i)=>{const l=document.createElementNS(NS,'line');l.setAttribute('stroke','#3fd0e0');l.setAttribute('stroke-width',3);l.setAttribute('stroke-linecap','round');carEl.appendChild(l);return l});
+
+/* S1 road with silhouettes */
+$('road1').innerHTML=`<line x1="0" y1="200" x2="1080" y2="200" stroke="#3fd0e0" stroke-width="4" id="r1l" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/>
+ <g id="dash"></g>`+CARS.map((c,i)=>`<g id="sil${i}" transform="translate(${900-i*160},120) scale(.4)" opacity="0"><g transform="translate(400,0) scale(-1,1)"><g fill="${c.c}">${c.g}</g>${c.w.map(w=>wheel(...w,c.rim)).join('')}</g></g>`).join('');
+for(let i=0;i<14;i++)$('dash').innerHTML+=`<rect y="240" width="50" height="8" rx="4" fill="#ffffff22" class="d"/>`;
+
+/* timeline */
+const TX=i=>960-i*168; let tl=`<line x1="${TX(0)}" y1="90" x2="${TX(5)}" y2="90" stroke="#ffffff22" stroke-width="10" stroke-linecap="round"/><line id="tlf" x1="${TX(0)}" y1="90" x2="${TX(0)}" y2="90" stroke="url(#tg)" stroke-width="10" stroke-linecap="round"/>
+<defs><linearGradient id="tg" x1="1" x2="0"><stop offset="0" stop-color="#ffb627"/><stop offset="1" stop-color="#3fd0e0"/></linearGradient></defs>`;
+CARS.forEach((c,i)=>tl+=`<circle id="td${i}" cx="${TX(i)}" cy="90" r="18" fill="#0a1324" stroke="#ffffff55" stroke-width="5"/><text id="tt${i}" x="${TX(i)}" y="160" text-anchor="middle" font-size="36" font-weight="800" fill="#8aa0c2">${c.y}</text>`);
+$('tl').innerHTML=tl;
+
+/* chart 1: speed line */
+const CW=960,CH=860,L=110,R=880,T=60,B=700,X=i=>R-i*(R-L)/5,Y=v=>B-v/260*(B-T);
+let c1='';[0,50,100,150,200,250].forEach(v=>c1+=`<line x1="${L-20}" x2="${R+20}" y1="${Y(v)}" y2="${Y(v)}" stroke="#ffffff14" stroke-width="2"/><text x="${R+40}" y="${Y(v)+12}" font-size="30" fill="#8aa0c2" text-anchor="start">${v}</text>`);
+const pts=CARS.map((c,i)=>[X(i),Y(c.s)]);
+const dPath='M'+pts.map(q=>q.join(',')).join(' L');
+c1+=`<defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3fd0e0" stop-opacity=".45"/><stop offset="1" stop-color="#3fd0e0" stop-opacity="0"/></linearGradient><clipPath id="cp"><rect id="cpr" x="${R}" y="0" width="0" height="${CH}"/></clipPath></defs>
+<path d="${dPath} L${X(5)},${B} L${X(0)},${B}Z" fill="url(#ag)" clip-path="url(#cp)"/>
+<path id="sl" d="${dPath}" fill="none" stroke="#3fd0e0" stroke-width="8" stroke-linejoin="round" stroke-linecap="round" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/>`;
+CARS.forEach((c,i)=>c1+=`<g id="sp${i}" transform="translate(${pts[i][0]},${pts[i][1]})" opacity="0"><circle r="16" fill="#ffb627" stroke="#0a1324" stroke-width="5"/><text y="-34" text-anchor="middle" font-size="40" font-weight="900" fill="#fff">${c.s}</text></g>
+ <text x="${X(i)}" y="${B+60}" text-anchor="middle" font-size="32" font-weight="800" fill="#8aa0c2">${c.y}</text>
+ <g transform="translate(${X(i)-34},${B+82}) scale(.17)"><g transform="translate(400,0) scale(-1,1)"><g>${c.g}</g></g></g>`);
+$('ch1').innerHTML=c1;
+
+/* chart 2: bars */
+const BARS=[[1950,70,'70 مليون'],[1970,250,'250 مليون'],[1990,600,'600 مليون'],[2010,1000,'1 مليار'],[2023,1500,'1.5 مليار']];
+let c2='';const bw=130,gap=(860-5*bw)/4,BB=620;
+BARS.forEach((b,i)=>{const x=860-i*(bw+gap)-bw+50;c2+=`<rect id="bb${i}" x="${x}" y="${BB}" width="${bw}" height="0" rx="14" fill="${i==4?'#ffb627':'#3fd0e0'}" opacity="${i==4?1:.55+i*.1}"/>
+ <text id="bv${i}" x="${x+bw/2}" y="${BB}" text-anchor="middle" font-size="34" font-weight="900" fill="#fff" opacity="0">${b[2]}</text>
+ <text x="${x+bw/2}" y="${BB+56}" text-anchor="middle" font-size="36" font-weight="800" fill="#8aa0c2">${b[0]}</text>`});
+c2+=`<line x1="20" x2="940" y1="${BB}" y2="${BB}" stroke="#ffffff33" stroke-width="3"/>`;
+$('ch2').innerHTML=c2;
+$('donut').innerHTML=`<circle cx="180" cy="180" r="140" fill="none" stroke="#ffffff18" stroke-width="44"/>
+ <circle id="dn" cx="180" cy="180" r="140" fill="none" stroke="#3fd0e0" stroke-width="44" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100" transform="rotate(-90 180 180)"/>
+ <text id="dv" x="180" y="205" text-anchor="middle" font-size="84" font-weight="900" fill="#fff">0%</text>`;
+
+/* ---------- timeline of scenes ---------- */
+const SC=[[0,2.3],[2.1,8],[7.8,10.6],[10.4,13.3],[13.1,15.2]];
+const E0=2.3, ED=0.95; // era slots in S2
+window.render=function(t){
+ SC.forEach(([a,b],i)=>$('s'+(i+1)).style.opacity=Math.min(i?cl((t-a)/.25):1,cl((b-t)/.25)));
+ $('grid').style.transform=`translate(${(t*40)%80}px,${(t*15)%80}px)`;
+ $('prog').style.width=(t/15*100)+'%';
+ document.querySelectorAll('.wh').forEach(w=>w.setAttribute('transform',`rotate(${-t*720})`));
+ // S1
+ inEl($('k1'),t,.15,-30);inEl($('t1'),t,.3,80,.6);inEl($('y1'),t,.7,0,.5,true);
+ $('r1l').setAttribute('stroke-dashoffset',1-eo(p(t,.2,.9)));
+ CARS.forEach((c,i)=>{const k=eo(p(t,.6+i*.12,.4));const g=$('sil'+i);g.setAttribute('opacity',k);g.setAttribute('transform',`translate(${900-i*160+(1-k)*80},${120+(1-k)*20}) scale(.4)`)});
+ document.querySelectorAll('.d').forEach((d,i)=>d.setAttribute('x',((i*90-t*500)%1260+1260)%1260-90));
+ // S2 eras
+ const f=(t-E0)/ED, idx=cl(Math.floor(f),0,5), k=f-Math.floor(f);
+ CARS.forEach((c,i)=>{const g=$('car'+i);let x=0,o=0;
+  if(i==idx&&t>=E0-.1){const a=eo(cl(k/.32)),b=i<5?ei(cl((k-.8)/.2)):0;x=(1-a)*700-b*900;o=cl(k/.12)*(1-b*.8);if(t<E0)o=0}
+  g.style.opacity=o;g.setAttribute('transform',`translate(${x/2.5},0)`)});
+ const moving=(k<.32||(k>.8&&idx<5))&&t>E0&&t<8;
+ lines.forEach((l,i)=>{const y=60+i*20,len=moving?60+((i*37)%50):0,x0=250+((i*71+t*900)%160);l.setAttribute('x1',x0);l.setAttribute('x2',x0+len);l.setAttribute('y1',y);l.setAttribute('y2',y);l.setAttribute('opacity',moving?.6:0)});
+ const kk=eio(cl(k/.35)), prev=CARS[Math.max(idx-1,0)], cur=CARS[idx];
+ const yr=idx==0?1886:Math.round(lerp(prev.y,cur.y,kk));
+ $('year').textContent=yr;$('spd').textContent=idx==0?16:Math.round(lerp(prev.s,cur.s,kk));
+ $('eraT').textContent=cur.t;$('pw').textContent=cur.pw;$('chipP').firstChild.textContent=cur.ic+' ';
+ const pop=back(cl(k/.3));$('eraT').style.transform=`translateY(${(1-eo(cl(k/.3)))*30}px)`;$('eraT').style.opacity=cl(k/.2);
+ [$('chipS'),$('chipP')].forEach(ch=>ch.style.transform=`scale(${.85+.15*pop})`);
+ $('tlf').setAttribute('x2',lerp(TX(0),TX(5),cl((idx+kk)/5)));
+ CARS.forEach((c,i)=>{const on=i<=idx;$('td'+i).setAttribute('fill',on?(i==idx?'#ffb627':'#3fd0e0'):'#0a1324');$('td'+i).setAttribute('r',i==idx?18+6*Math.max(0,1-k*3):18);$('tt'+i).setAttribute('fill',i==idx?'#ffb627':on?'#eaf2ff':'#8aa0c2')});
+ // S3
+ inEl($('t3'),t,7.9,40);
+ const lk=eio(p(t,8.2,1.4));$('sl').setAttribute('stroke-dashoffset',1-lk);$('cpr').setAttribute('x',R-lk*(R-L));$('cpr').setAttribute('width',lk*(R-L)+20);
+ CARS.forEach((c,i)=>{const kd=p(t,8.2+i*.26,.3),s=back(kd);const g=$('sp'+i);g.setAttribute('opacity',cl(kd*2));g.setAttribute('transform',`translate(${pts[i][0]},${pts[i][1]}) scale(${Math.max(0,s)})`)});
+ inEl($('x3'),t,9.8,40);
+ // S4
+ inEl($('t4'),t,10.5,40);
+ BARS.forEach((b,i)=>{const kb=eo(p(t,10.7+i*.12,.7)),h=b[1]/1500*520*kb;$('bb'+i).setAttribute('y',BB-h);$('bb'+i).setAttribute('height',h);$('bv'+i).setAttribute('y',BB-h-18);$('bv'+i).setAttribute('opacity',cl(p(t,11.2+i*.12,.3)))});
+ const dk=eo(p(t,11.8,1));$('dn').setAttribute('stroke-dasharray',`${22*dk} 100`);$('dv').textContent=Math.round(22*dk)+'%';
+ inEl($('evtxt'),t,12,40);
+ // S5
+ inEl($('t5'),t,13.2,60,.5);['f1','f2','f3'].forEach((id,i)=>inEl($(id),t,13.45+i*.1,0,.45,true));
+ const ck=eo(p(t,13.6,.8));$("carF").style.transform=`translateX(${(1-ck)*-900}px)`;$("carF").style.opacity=cl(ck*2);
+ $('fade').style.opacity=cl((t-14.6)/.4);
+};
+if(!navigator.webdriver){const t0=performance.now();(function f(){render(((performance.now()-t0)/1000)%15);requestAnimationFrame(f)})()}else render(0);
+</script></body></html>
