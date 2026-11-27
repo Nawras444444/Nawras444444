@@ -1,0 +1,111 @@
+<!doctype html><html lang="ar"><head><meta charset="utf-8"><style>
+@font-face{font-family:Cairo;src:url(fonts/Cairo-700.ttf);font-weight:700}
+@font-face{font-family:Cairo;src:url(fonts/Cairo-800.ttf);font-weight:800}
+@font-face{font-family:Cairo;src:url(fonts/Cairo-900.ttf);font-weight:900}
+@font-face{font-family:Naskh;src:url(fonts/Naskh-700.ttf);font-weight:700}
+html,body{margin:0;background:#000;overflow:hidden}
+#view{position:relative;width:1920px;height:1080px;overflow:hidden;background:#0d1a20}
+#stage{position:absolute;left:0;top:0;width:1672px;height:941px;transform-origin:0 0;transform:scale(1.148325,1.147715)}
+.scene{position:absolute;inset:0;overflow:hidden;display:none}
+.cam{position:absolute;inset:0;transform-origin:50% 45%}
+.cam img,.cam canvas{position:absolute;display:block}
+.sh{filter:drop-shadow(3px 6px 5px rgba(0,0,0,.35))}
+.tb{position:absolute;display:flex;justify-content:center;align-items:center;direction:rtl;white-space:nowrap;column-gap:.24em}
+.tb span{display:inline-block;line-height:1.25}
+.title{font-family:Cairo;font-weight:900;color:#1d1915}
+.label{font-family:Naskh;font-weight:700;color:#fbecd2;text-shadow:0 1px 0 rgba(0,0,0,.35)}
+.num{font-family:Cairo;font-weight:800;color:#fbecd2;text-shadow:0 2px 0 rgba(0,0,0,.35)}
+.map{font-family:Cairo;font-weight:800;color:#fff;-webkit-text-stroke:5px #16303a;paint-order:stroke fill}
+.mapdark{font-family:Cairo;font-weight:900;color:#2b2119}
+#sub{position:absolute;left:0;right:0;bottom:22px;display:flex;justify-content:center;pointer-events:none}
+#sub div{direction:rtl;font-family:Cairo;font-weight:700;font-size:38px;line-height:1.35;color:#fff7e6;background:rgba(20,14,10,.74);
+ padding:6px 30px 9px;border-radius:14px;border:2px solid rgba(214,170,90,.55);box-shadow:0 6px 18px rgba(0,0,0,.35);white-space:nowrap}
+</style></head><body><div id="view"><div id="stage"></div><div id="sub"><div></div></div></div>
+<script src="data.js"></script><script src="noro.js"></script>
+<script>
+const D=window.DATA, stageEl=document.getElementById('stage'), stage={W:1672,H:941};
+const subBox=document.querySelector('#sub div');
+const CANVAS_T=['mosaic','pixel','slices','mosaicT','slicesT'];
+const TEXT_T=['type','blurT','stampT','marker','flipT','drop','spinT','glitch'];
+const BASE_T=['slide','arc','slam','zoom','stretch','flip','stop'];
+const PIECE_T=['slide','arc','slam','stop','flip','zoom','stretch','pendulum','spin'];
+const imgs=[]; const scenes=[]; NORO.setSeed(7);
+function mkImg(par,sid,n,r,cls){const i=new Image();i.src=`L/${sid}/${n}.${n==='base'?'jpg':'png'}`;imgs.push(i);
+  i.style.cssText=`left:${r[0]}px;top:${r[1]}px;width:${r[2]}px;height:${r[3]}px;opacity:0`;if(cls)i.className=cls;par.appendChild(i);
+  return {name:n,el:i,img:i,x:r[0],y:r[1],w:r[2],h:r[3],pad:200}}
+function needCanvas(par,sp,spec){if(!CANVAS_T.includes(spec.tech))return;const c=document.createElement('canvas');
+  c.width=sp.w+400;c.height=sp.h+400;c.style.cssText=`left:${sp.x-200}px;top:${sp.y-200}px;display:none`;par.appendChild(c);sp.canvas=c}
+function build(sc,si){
+  const root=document.createElement('div');root.className='scene';root.style.zIndex=si+1;stageEl.appendChild(root);
+  const cam=document.createElement('div');cam.className='cam';root.appendChild(cam);
+  const S={sc,root,cam,items:[],chars:[],texts:[]};
+  const add=(sp,spec,t0,dur,gain=1,snd=true)=>{S.items.push({sp,spec,t0,dur});if(snd)S.snd=(S.snd||[]).concat([{t:t0,dur,tech:spec.tech,name:sp.name,size:Math.sqrt(sp.w*sp.h),gain}]);return spec};
+  let t=0;
+  // 1) background: base, then each real piece, each from a new side
+  const base=mkImg(cam,sc.id,'base',[0,0,1672,941]);
+  S.base=add(base,NORO.pick('outside',{techs:BASE_T,ease:'quint'}),t,1.0,.9);S.baseItem=S.items[0];t+=0.55;
+  for(const e of sc.els.filter(e=>e.k==='piece')){const sp=mkImg(cam,sc.id,e.n,e.r);const sp2=NORO.pick('outside',{techs:PIECE_T});needCanvas(cam,sp,sp2);add(sp,sp2,t,0.95,.6);t+=0.38}
+  t+=0.3;
+  // 2) characters
+  for(const e of sc.els.filter(e=>e.k==='char')){const sp=mkImg(cam,sc.id,e.n,e.r,'sh');add(sp,NORO.pick('outside',{techs:['slide','arc','slam','flip','zoom','stretch','stop']}),t,1.2,1);S.chars.push(sp);t+=0.6}
+  t+=0.25;
+  // 3) shapes & symbols: arrive / hidden-then-appear / form, rotating
+  const mix=['outside','reveal','form'];let mi=0;let lastGrp=null;
+  for(const e of sc.els.filter(e=>['shape','line','tag'].includes(e.k))){
+    const sp=mkImg(cam,sc.id,e.n,e.r,e.k==='shape'?'sh':'');let spec;
+    if(e.k==='line'){spec=NORO.pick('reveal',{techs:['draw','wipe','torn','shutter']});if(Math.abs(e.r[2])<40)spec=NORO.pick('form',{techs:['stretchF','grow']});}
+    else if(e.k==='tag')spec=NORO.pick('form',{techs:['unfold','rubber','stretchF','slices']});
+    else{spec=NORO.pick(mix[mi%3]);mi++}
+    needCanvas(cam,sp,spec);
+    const grp=e.grp&&e.grp===lastGrp;add(sp,spec,t,e.k==='line'?0.7:0.85,e.k==='line'?.5:.8,!grp);
+    t+=grp?0.13:(e.k==='line'?0.28:0.42);lastGrp=e.grp||null}
+  t+=0.35;
+  // 4) text last: title first, then labels; each line a different text technique, words right->left
+  for(const e of sc.els.filter(e=>e.k==='text')){
+    const b=e.box,div=document.createElement('div');div.className='tb '+e.role;
+    div.style.cssText+=`left:${b[0]}px;top:${b[1]}px;width:${b[2]-b[0]}px;height:${b[3]-b[1]}px`;
+    for(const w of e.s.split(' ')){const s=document.createElement('span');s.textContent=w;s.style.opacity=0;div.appendChild(s)}
+    cam.appendChild(div);S.texts.push({e,div,t0:t});t+=0.15*e.s.split(' ').length+0.55}
+  S.natEnd=t;return S}
+D.scenes.forEach((sc,i)=>scenes.push(build(sc,i)));
+function layoutText(){
+  for(const S of scenes){S.root.style.display='block';
+    for(const T of S.texts){const {e,div}=T,b=e.box,bw=b[2]-b[0],bh=b[3]-b[1];
+      let fs=bh*(e.role==='title'?0.74:e.role==='label'?0.8:0.8);div.style.fontSize=fs+'px';
+      while(div.scrollWidth>bw*1.0&&fs>8){fs-=1;div.style.fontSize=fs+'px'}
+      const spec=NORO.pick('text',{techs:TEXT_T});const words=[...div.children];
+      words.forEach((s,k)=>{const sp={name:e.n+'_'+k,el:s,x:b[0]+s.offsetLeft,y:b[1]+s.offsetTop,w:s.offsetWidth,h:s.offsetHeight};
+        S.items.push({sp,spec,t0:T.t0+k*0.15,dur:0.6});
+        if(k===0)S.snd.push({t:T.t0,dur:0.6+0.15*words.length,tech:spec.tech,name:e.n,size:120,gain:.7})});
+    }
+    S.root.style.display='none';
+    // fit the montage into the scene: entrances in the first part, then hold with idle life
+    const dur=S.sc.end-S.sc.start, win=Math.min(dur*0.62,dur-3.5), KT=Math.min(1.25,win/S.natEnd), KD=Math.min(1.1,Math.sqrt(KT));
+    for(const it of S.items){it.t0*=KT;it.dur*=KD}for(const e of S.snd){e.t*=KT;e.dur*=KD}
+    S.tEnd=S.natEnd*KT; S.baseDone=S.baseItem.t0+S.baseItem.dur;
+  }}
+function render(T){
+  for(let i=0;i<scenes.length;i++){const S=scenes[i],sc=S.sc,nx=scenes[i+1];
+    const vis=T>=sc.start&&(nx?T<nx.sc.start+nx.baseDone:true);
+    S.root.style.display=vis?'block':'none';if(!vis)continue;
+    const tau=T-sc.start;
+    for(const it of S.items){NORO.apply(it.sp,it.spec,(tau-it.t0)/it.dur,tau,stage)}
+    // idle life: slow camera push, breathing characters
+    const dur=sc.end-sc.start,cp=Math.min(1,Math.max(0,tau/(dur+1)));
+    S.cam.style.transform=`scale(${1+0.035*(cp*cp*(3-2*cp))})`;
+    S.chars.forEach((c,j)=>{const it=S.items.find(x=>x.sp===c);if(tau>it.t0+it.dur)c.el.style.transform+=` translateY(${Math.sin(tau*1.3+j*1.7)*2.2}px)`});
+  }
+  // subtitles
+  let cue=null;for(const s of D.subs)if(T>=s[0]-0.05&&T<s[1]+0.15){cue=s;break}
+  if(cue){if(subBox.textContent!==cue[2])subBox.textContent=cue[2];const a=Math.min(1,(T-cue[0]+0.05)/0.22),z=Math.min(1,(cue[1]+0.15-T)/0.18);
+    subBox.style.opacity=Math.min(a,z);subBox.style.transform=`translateY(${(1-Math.min(a,1))*10}px)`;subBox.parentElement.style.display='flex'}
+  else subBox.parentElement.style.display='none';
+}
+window.ready=false;
+document.fonts.ready.then(()=>Promise.all([...document.fonts].map(f=>f.load()))).then(()=>{
+  const chk=()=>{if(imgs.every(i=>i.complete&&i.naturalWidth>0)){layoutText();
+    window.SCHED=scenes.flatMap(S=>S.snd.map(e=>({...e,t:e.t+S.sc.start,sound:NORO.SOUND[e.tech]})));
+    window.SPECS=scenes.map(S=>({id:S.sc.id,items:S.items.filter(it=>!it.sp.name.includes('_')||it.sp.name.endsWith('_0')).map(it=>[it.sp.name,it.spec.tech,it.spec.dir,+(it.t0+S.sc.start).toFixed(2)])}));
+    window.ready=true}else setTimeout(chk,100)};chk()});
+window.render=render;window.DUR=D.dur;
+</script></body></html>

@@ -1,0 +1,8 @@
+numpy
+scipy
+pillow
+opencv-python-headless
+onnxruntime
+rembg
+soundfile
+faster-whisper

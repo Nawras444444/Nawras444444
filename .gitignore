@@ -1,0 +1,4 @@
+troy-video/L/
+troy-video/out/
+troy-video/models/*.onnx
+__pycache__/
