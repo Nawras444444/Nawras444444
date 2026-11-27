@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>خرافة الإنتاجية</title>
+<style>
+@font-face{font-family:'CairoX';font-weight:900;src:url(fonts/cairo-arabic-900-normal.woff2) format('woff2');unicode-range:U+0600-06FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE80-FEFC;}
+@font-face{font-family:'CairoX';font-weight:900;src:url(fonts/cairo-latin-900-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
+@font-face{font-family:'CairoX';font-weight:700;src:url(fonts/cairo-arabic-700-normal.woff2) format('woff2');unicode-range:U+0600-06FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE80-FEFC;}
+@font-face{font-family:'CairoX';font-weight:700;src:url(fonts/cairo-latin-700-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
+:root{--N:#1B2A5C;--R:#F04545;--G:#17B26A;--Y:#FFC414;}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1080px;height:1920px;background:#fff;overflow:hidden;font-family:'CairoX',sans-serif;font-weight:900;color:var(--N)}
+#stage{position:relative;width:1080px;height:1920px;background:#fff;overflow:hidden}
+.scene{position:absolute;inset:0;display:none}
+.a{position:absolute;will-change:transform,opacity}
+.t{position:absolute;left:30px;width:1020px;text-align:center;line-height:1.22;font-weight:900;color:var(--N)}
+.pill{position:absolute;text-align:center;font-weight:900;border-radius:999px;border:8px solid var(--N);box-shadow:0 10px 0 var(--N);white-space:nowrap;line-height:1.2;padding:6px 44px 14px}
+.img{position:absolute;-webkit-mask-image:linear-gradient(to bottom,transparent 0,transparent 26%,#000 40%,#000 90%,transparent 100%);mask-image:linear-gradient(to bottom,transparent 0,transparent 26%,#000 40%,#000 90%,transparent 100%);object-fit:contain;filter:contrast(1.3) brightness(1.09)}
+.card{position:absolute;background:#fff;border:9px solid var(--N);border-radius:56px;box-shadow:0 12px 0 var(--N)}
+.num{direction:ltr;unicode-bidi:isolate}
+svg{display:block;overflow:visible}
+.theme{position:absolute;inset:0;opacity:0;transition:opacity .6s ease}
+.theme svg{width:1080px;height:1920px}
+#prog{position:absolute;left:60px;top:58px;width:960px;height:14px;display:flex;gap:10px;direction:ltr;z-index:50}
+#prog i{flex:1;background:#E3E7F4;border-radius:9px;overflow:hidden;position:relative}
+#prog b{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--N);border-radius:9px}
+</style>
+</head>
+<body>
+<div id="stage">
+<div class="theme" id="thA"></div>
+<div class="theme" id="thB"></div>
+<div class="theme" id="thC"></div>
+<div class="theme" id="thD"></div>
+<div id="prog"></div>
+
+<svg width="0" height="0" style="position:absolute">
+ <defs>
+  <symbol id="i-clock" viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="none" stroke="#1B2A5C" stroke-width="7"/><path d="M50 24 V50 L66 60" fill="none" stroke="#1B2A5C" stroke-width="7" stroke-linecap="round"/></symbol>
+  <symbol id="i-battery" viewBox="0 0 100 100"><rect x="8" y="30" width="78" height="40" rx="8" fill="none" stroke="#1B2A5C" stroke-width="7"/><rect x="88" y="42" width="6" height="16" fill="#1B2A5C"/><rect x="16" y="38" width="26" height="24" rx="4" fill="#F04545"/></symbol>
+  <symbol id="i-brain" viewBox="0 0 100 100"><path d="M30 72 C12 72 12 46 30 46 C28 26 58 20 64 34 C84 28 92 58 76 68 C86 84 62 90 56 80 C46 90 30 88 30 72Z" fill="none" stroke="#1B2A5C" stroke-width="6" stroke-linejoin="round"/></symbol>
+  <symbol id="i-q" viewBox="0 0 100 100"><text x="50" y="82" text-anchor="middle" font-size="96" font-weight="900" font-family="CairoX" fill="#1B2A5C">?</text></symbol>
+  <symbol id="i-target" viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="none" stroke="#1B2A5C" stroke-width="7"/><circle cx="50" cy="50" r="24" fill="none" stroke="#F04545" stroke-width="7"/><circle cx="50" cy="50" r="7" fill="#17B26A"/></symbol>
+  <symbol id="i-check" viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="none" stroke="#17B26A" stroke-width="7"/><polyline points="30,52 45,67 72,36" fill="none" stroke="#17B26A" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 100 100"><circle cx="50" cy="50" r="36" fill="none" stroke="#1B2A5C" stroke-width="14" stroke-dasharray="9 8"/><circle cx="50" cy="50" r="24" fill="none" stroke="#1B2A5C" stroke-width="7"/></symbol>
+  <symbol id="i-bars" viewBox="0 0 100 100"><rect x="12" y="50" width="16" height="36" rx="4" fill="#FFC414" stroke="#1B2A5C" stroke-width="5"/><rect x="36" y="30" width="16" height="56" rx="4" fill="#F04545" stroke="#1B2A5C" stroke-width="5"/><rect x="60" y="12" width="16" height="74" rx="4" fill="#FFC414" stroke="#1B2A5C" stroke-width="5"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 100 100"><rect x="28" y="6" width="44" height="88" rx="9" fill="none" stroke="#1B2A5C" stroke-width="7"/><line x1="42" y1="82" x2="58" y2="82" stroke="#1B2A5C" stroke-width="6" stroke-linecap="round"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 100 100"><path d="M24 70 V46 Q24 20 50 20 Q76 20 76 46 V70 L86 78 H14 Z" fill="none" stroke="#1B2A5C" stroke-width="7" stroke-linejoin="round"/><circle cx="50" cy="88" r="6" fill="#F04545"/></symbol>
+  <symbol id="i-timer" viewBox="0 0 100 100"><rect x="40" y="4" width="20" height="10" rx="3" fill="#1B2A5C"/><circle cx="50" cy="56" r="36" fill="none" stroke="#1B2A5C" stroke-width="7"/><path d="M50 56 L50 34" stroke="#17B26A" stroke-width="7" stroke-linecap="round"/></symbol>
+  <symbol id="i-coffee" viewBox="0 0 100 100"><path d="M18 40 H70 V64 Q70 86 44 86 H44 Q18 86 18 64 Z" fill="none" stroke="#1B2A5C" stroke-width="7" stroke-linejoin="round"/><path d="M70 48 H80 Q88 48 88 58 Q88 68 78 68 H70" fill="none" stroke="#1B2A5C" stroke-width="7"/><path d="M34 26 q-6 -8 0 -14 M52 26 q-6 -8 0 -14" fill="none" stroke="#F04545" stroke-width="5" stroke-linecap="round"/></symbol>
+  <symbol id="i-bookmark" viewBox="0 0 100 100"><path d="M30 12 H70 V90 L50 72 L30 90 Z" fill="#FFC414" stroke="#1B2A5C" stroke-width="7" stroke-linejoin="round"/></symbol>
+  <symbol id="i-share" viewBox="0 0 100 100"><circle cx="24" cy="50" r="10" fill="#1B2A5C"/><circle cx="76" cy="24" r="10" fill="#1B2A5C"/><circle cx="76" cy="76" r="10" fill="#1B2A5C"/><path d="M24 50 L76 24 M24 50 L76 76" stroke="#1B2A5C" stroke-width="6"/></symbol>
+  <symbol id="i-comment" viewBox="0 0 100 100"><rect x="10" y="18" width="80" height="54" rx="20" fill="none" stroke="#1B2A5C" stroke-width="7"/><path d="M30 72 L24 90 L48 72" fill="none" stroke="#1B2A5C" stroke-width="7" stroke-linejoin="round"/></symbol>
+  <symbol id="i-thumb" viewBox="0 0 100 100"><path d="M14 46 H30 V88 H14 Z" fill="#17B26A" stroke="#1B2A5C" stroke-width="6"/><path d="M30 50 L48 22 Q56 16 60 28 L56 46 H82 Q90 46 88 56 L80 82 Q78 88 70 88 H30" fill="#17B26A" stroke="#1B2A5C" stroke-width="6" stroke-linejoin="round"/></symbol>
+ </defs>
+</svg>
+
+<!-- ============ 1 ============ -->
+<section class="scene" id="s1">
+  <div class="t" id="s1h" style="top:150px;font-size:250px;color:var(--R);text-shadow:0 14px 0 var(--N)">توقف!</div>
+  <img class="img" id="s1img" src="images/s1.png" style="left:245px;top:300px;width:590px;height:1050px;">
+  <div class="a" id="s1x" style="left:790px;top:1000px;width:200px;height:200px"></div>
+  <div class="t" id="s1t1" style="top:1420px;font-size:80px;line-height:1.3">هذه <span style="color:var(--R)">الخرافة</span> تستهلك<br>طاقتك دون نتيجة.</div>
+  <div class="pill" id="s1chip" style="left:60px;width:960px;top:1665px;font-size:50px;background:var(--Y);color:var(--N)">هل ساعات أكثر = إنتاجية أعلى؟</div>
+  <div class="a" id="s1flash" style="inset:0;background:var(--R);opacity:0"></div>
+</section>
+
+<!-- ============ 2 ============ -->
+<section class="scene" id="s2">
+  <div class="pill" id="s2chip" style="left:290px;width:500px;top:150px;font-size:110px;background:var(--R);color:#fff">الخرافة</div>
+  <img class="img" id="s2img" src="images/s2.png" style="left:245px;top:300px;width:590px;height:1050px;">
+  <div class="t" id="s2txt" style="top:1420px;font-size:118px;line-height:1.3">ساعات أكثر<br>= إنتاجية أعلى</div>
+  <svg class="a" id="s2strike" style="left:0;top:0" width="1080" height="1920" viewBox="0 0 1080 1920"><line id="s2sl" x1="90" y1="1480" x2="990" y2="1480" stroke="#F04545" stroke-width="26" stroke-linecap="round"/></svg>
+  <div class="a" id="s2stamp" style="left:620px;top:380px;width:380px;text-align:center;font-size:120px;color:var(--R);border:16px solid var(--R);border-radius:36px;line-height:1.3;padding:0 0 10px;background:#fff">خرافة!</div>
+</section>
+
+<!-- ============ 3 ============ -->
+<section class="scene" id="s3">
+  <div class="t" style="top:150px;font-size:150px"><span class="a" id="s3w1" style="position:relative;display:inline-block">تبدو</span> <span class="a" id="s3w2" style="position:relative;display:inline-block">منطقية…</span></div>
+  <img class="img" id="s3img" src="images/s3.png" style="left:215px;top:300px;width:650px;height:1157px;">
+  <div class="pill" id="s3yel" style="left:70px;width:940px;top:1420px;font-size:70px;background:var(--Y);color:var(--N);border-radius:50px;white-space:normal;line-height:1.3">لأن التعب يوهمك<br>بأنك تنجز.</div>
+  <div class="pill" id="s3red" style="left:70px;width:940px;top:1420px;font-size:74px;background:var(--R);color:#fff;border-radius:50px;white-space:normal;line-height:1.3">لكن الشعور<br>ليس دليلًا</div>
+</section>
+
+<!-- ============ 4 ============ -->
+<section class="scene" id="s4">
+  <div class="pill" id="s4chip" style="left:260px;width:560px;top:150px;font-size:104px;background:var(--G);color:#fff">التصحيح</div>
+  <img class="img" id="s4img" src="images/s4.png" style="left:280px;top:300px;width:520px;height:925px;">
+  <div class="t" id="s4prod" style="top:1300px;font-size:104px;line-height:1.35">الإنتاجية =<br><span style="color:var(--G)">النتيجة ÷ الوقت</span></div>
+  <div class="pill" id="s4mult" style="left:150px;width:780px;top:1600px;font-size:80px;background:#fff;color:var(--N)">التركيز <span style="color:var(--G)">هو المضاعف</span></div>
+</section>
+
+<!-- ============ 5 ============ -->
+<section class="scene" id="s5">
+  <div class="t" id="s5t1" style="top:150px;font-size:96px;line-height:1.25">بعد نقطة معينة…<br><span style="color:var(--R)">تبدأ الإنتاجية بالانخفاض</span></div>
+  <svg class="a" id="s5chart" style="left:20px;top:470px" width="1040" height="960" viewBox="0 0 1040 960"></svg>
+  <div class="pill" id="s5note" style="left:340px;width:400px;top:1450px;font-size:44px;border-width:6px;box-shadow:0 8px 0 var(--N);background:#fff">رسم توضيحي</div>
+</section>
+
+<!-- ============ 6 ============ -->
+<section class="scene" id="s6">
+  <div class="pill" id="s6lh" style="left:50px;width:440px;top:160px;font-size:60px;background:var(--R);color:#fff;padding:6px 10px 12px;white-space:normal;line-height:1.15">8 ساعات<br>تشتيت</div>
+  <div class="pill" id="s6rh" style="left:590px;width:440px;top:160px;font-size:60px;background:var(--G);color:#fff;padding:6px 10px 12px;white-space:normal;line-height:1.15">3 ساعات<br>تركيز</div>
+  <img class="img" id="s6img" src="images/s6.png" style="left:240px;top:420px;width:600px;height:1067px;">
+  <div class="t" id="s6ls" style="left:40px;width:460px;top:330px;font-size:64px;color:var(--R)">مهام مقطّعة</div>
+  <div class="t" id="s6rs" style="left:580px;width:460px;top:330px;font-size:64px;color:var(--G)">مهمة واحدة</div>
+  <div class="a" id="s6flash" style="inset:0;background:#fff;opacity:0"></div>
+</section>
+
+<!-- ============ 7 ============ -->
+<section class="scene" id="s7">
+  <div class="pill" id="s7chip" style="left:290px;width:500px;top:150px;font-size:104px;background:var(--Y);color:var(--N)">جرّب غدًا</div>
+  <img class="img" id="s7img" src="images/s7.png" style="left:270px;top:280px;width:540px;height:960px;">
+  <div class="card" id="s7c1" style="left:70px;top:1190px;width:940px;height:150px"></div>
+  <div class="a" id="s7t1" style="left:110px;top:1215px;width:860px;text-align:center;font-size:72px;line-height:1.2;color:var(--N)">مهمة واحدة واضحة</div>
+  <div class="a" id="s7k1" style="left:880px;top:1160px;width:110px;height:110px"></div>
+  <div class="card" id="s7c2" style="left:70px;top:1370px;width:940px;height:150px"></div>
+  <div class="a" id="s7t2" style="left:110px;top:1395px;width:860px;text-align:center;font-size:72px;line-height:1.2;color:var(--N)"><span class="num" id="s7n2" style="font-size:96px;color:var(--G)">25</span> دقيقة تركيز</div>
+  <div class="card" id="s7c3" style="left:70px;top:1550px;width:940px;height:150px"></div>
+  <div class="a" id="s7t3" style="left:110px;top:1575px;width:860px;text-align:center;font-size:72px;line-height:1.2;color:var(--N)"><span class="num" style="font-size:96px;color:var(--Y);-webkit-text-stroke:8px var(--N);paint-order:stroke fill">5</span> دقائق راحة</div>
+</section>
+
+<!-- ============ 8 ============ -->
+<section class="scene" id="s8">
+  <div class="t" id="s8h" style="top:120px;font-size:150px;line-height:1.1">هل كنت <span style="color:var(--G)">تعرف؟</span></div>
+  <img class="img" id="s8img" src="images/s8.png" style="left:245px;top:300px;width:590px;height:1050px;">
+  <div class="a" id="s8yes" style="left:560px;top:1330px;width:450px;height:220px;background:var(--G);border:10px solid var(--N);border-radius:70px;box-shadow:0 14px 0 var(--N);text-align:center;color:#fff;font-size:140px;line-height:1.5">نعم</div>
+  <div class="a" id="s8no" style="left:70px;top:1330px;width:450px;height:220px;background:var(--R);border:10px solid var(--N);border-radius:70px;box-shadow:0 14px 0 var(--N);text-align:center;color:#fff;font-size:140px;line-height:1.5">لا</div>
+  <div class="t" id="s8w" style="top:1600px;font-size:64px;color:var(--N)">اكتب نعم أو لا، واحفظ الفيديو</div>
+</section>
+
+<!-- ============ cover ============ -->
+<section class="scene" id="s9">
+  <img class="img" src="images/s2.png" style="left:150px;top:330px;width:780px;height:1387px;">
+  <div class="t" style="top:150px;font-size:190px;line-height:1.15;color:var(--R);text-shadow:0 12px 0 var(--N)">خرافة<br>الإنتاجية!</div>
+  <div class="pill" style="left:90px;width:900px;top:1600px;font-size:62px;background:var(--Y);color:var(--N)">لا تصدّقها قبل أن تشاهد الفيديو</div>
+</section>
+</div>
+
+<script>
+const N='#1B2A5C',R='#F04545',G='#17B26A',Y='#FFC414';
+const $=id=>document.getElementById(id);
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const pr=(t,s,d)=>clamp((t-s)/d);
+const eo=x=>1-Math.pow(1-x,3);
+const ob=x=>{const c=1.70158,c3=c+1;return 1+c3*Math.pow(x-1,3)+c*Math.pow(x-1,2)};
+function an(el,t,s,o={}){
+  const d=o.d||.5,p=pr(t,s,d),e=(o.ease||ob)(p);
+  const dx=(o.dx||0)*(1-e),dy=(o.dy||0)*(1-e),sc=(o.sc===undefined?.2:o.sc),S=sc+(1-sc)*e,rot=(o.rot||0)*(1-e);
+  el.style.opacity=t<s?0:clamp(p*5);
+  el.style.transform=`translate(${dx}px,${dy}px) scale(${S}) rotate(${rot}deg) ${o.extra||''}`;
+}
+const pulse=(t,f=2,a=.06)=>1+a*Math.sin(t*Math.PI*2*f);
+
+/* ---------- background icon themes (fixed icons, change per topic) ---------- */
+function buildTheme(id,icons,seed){
+  let s=seed;const rnd=()=>{s=(s*9301+49297)%233280;return s/233280};
+  let h=`<svg viewBox="0 0 1080 1920">`;
+  const cols=5,rows=9,cw=1080/cols,rh=1920/rows;
+  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
+    const ic=icons[(r*cols+c)%icons.length];
+    const x=c*cw+cw/2-70+(r%2?40:0),y=r*rh+rh/2-70,rot=(rnd()*24-12).toFixed(1);
+    h+=`<use href="#${ic}" x="${x}" y="${y}" width="140" height="140" opacity="0.13" transform="rotate(${rot} ${x+70} ${y+70})"/>`;
+  }
+  h+='</svg>';$(id).innerHTML=h;
+}
+buildTheme('thA',['i-clock','i-battery','i-brain','i-q'],7);
+buildTheme('thB',['i-target','i-check','i-gear','i-bars'],11);
+buildTheme('thC',['i-phone','i-bell','i-timer','i-coffee'],23);
+buildTheme('thD',['i-bookmark','i-share','i-comment','i-thumb'],31);
+const themes=[{id:'thA',s:0,e:20.8},{id:'thB',s:20.8,e:33.8},{id:'thC',s:33.8,e:50.9},{id:'thD',s:50.9,e:999}];
+
+/* ---------- small icons ---------- */
+$('s1x').innerHTML=`<svg viewBox="0 0 200 200" width="100%" height="100%"><g stroke-linecap="round"><line x1="38" y1="38" x2="162" y2="162" stroke="${N}" stroke-width="52"/><line x1="162" y1="38" x2="38" y2="162" stroke="${N}" stroke-width="52"/><line x1="38" y1="38" x2="162" y2="162" stroke="${R}" stroke-width="34"/><line x1="162" y1="38" x2="38" y2="162" stroke="${R}" stroke-width="34"/></g></svg>`;
+$('s7k1').innerHTML=`<svg viewBox="0 0 200 200" width="100%" height="100%"><circle cx="100" cy="100" r="88" fill="${G}" stroke="${N}" stroke-width="12"/><path d="M56 104 L90 138 L146 66" fill="none" stroke="${N}" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/><path d="M56 104 L90 138 L146 66" fill="none" stroke="#fff" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
+/* ---------- chart (scene 5) ---------- */
+const CH={x0:140,x1:980,y0:760,y1:80};
+const hx=h=>CH.x0+(h-3)/10*(CH.x1-CH.x0), vy=v=>CH.y0-v/100*(CH.y0-CH.y1);
+const pts=[[3,33],[4,40],[6,70],[8,85],[10,65],[12,45],[13,38]].map(a=>[hx(a[0]),vy(a[1])]);
+function seg(i){const P=k=>pts[clamp(k,0,pts.length-1)],p0=P(i-1),p1=P(i),p2=P(i+1),p3=P(i+2);
+ return `C${p1[0]+(p2[0]-p0[0])/6} ${p1[1]+(p2[1]-p0[1])/6} ${p2[0]-(p3[0]-p1[0])/6} ${p2[1]-(p3[1]-p1[1])/6} ${p2[0]} ${p2[1]}`}
+const gP=`M${pts[0][0]} ${pts[0][1]} ${seg(0)} ${seg(1)} ${seg(2)}`;
+const rP=`M${pts[3][0]} ${pts[3][1]} ${seg(3)} ${seg(4)} ${seg(5)}`;
+const data=[[4,40],[6,70],[8,85],[10,65],[12,45]];
+(function(){let s='';
+ [20,40,60,80,100].forEach(v=>{s+=`<line x1="${CH.x0}" y1="${vy(v)}" x2="${CH.x1}" y2="${vy(v)}" stroke="#E3E7F4" stroke-width="3"/>`});
+ s+=`<g stroke="${N}" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M${CH.x0} ${CH.y1-20} V${CH.y0} H${CH.x1+30}"/><path d="M${CH.x0-18} ${CH.y1+6} L${CH.x0} ${CH.y1-22} L${CH.x0+18} ${CH.y1+6}"/><path d="M${CH.x1+8} ${CH.y0-18} L${CH.x1+34} ${CH.y0} L${CH.x1+8} ${CH.y0+18}"/></g>`;
+ [4,6,8,10,12].forEach(h=>{s+=`<line x1="${hx(h)}" y1="${CH.y0}" x2="${hx(h)}" y2="${CH.y0+14}" stroke="${N}" stroke-width="7"/><text x="${hx(h)}" y="${CH.y0+68}" text-anchor="middle" font-size="54" fill="${N}" font-family="CairoX" font-weight="900">${h}</text>`});
+ s+=`<text x="${(CH.x0+CH.x1)/2}" y="${CH.y0+150}" text-anchor="middle" font-size="58" fill="${N}" font-family="CairoX" font-weight="900">ساعات العمل</text>`;
+ s+=`<text transform="translate(52 ${(CH.y0+CH.y1)/2}) rotate(-90)" text-anchor="middle" font-size="54" fill="${N}" font-family="CairoX" font-weight="900">مؤشر الإنتاجية</text>`;
+ s+=`<path id="cg" d="${gP}" fill="none" stroke="${N}" stroke-width="36" stroke-linecap="round"/><path id="cr" d="${rP}" fill="none" stroke="${N}" stroke-width="36" stroke-linecap="round"/>`;
+ s+=`<path id="cg2" d="${gP}" fill="none" stroke="${G}" stroke-width="22" stroke-linecap="round"/><path id="cr2" d="${rP}" fill="none" stroke="${R}" stroke-width="22" stroke-linecap="round"/>`;
+ data.forEach((d,i)=>{const x=hx(d[0]),y=vy(d[1]),c=d[0]>8?R:G;
+  s+=`<g id="cp${i}" style="opacity:0"><circle cx="${x}" cy="${y}" r="20" fill="#fff" stroke="${N}" stroke-width="9"/><circle cx="${x}" cy="${y}" r="9" fill="${c}"/><rect x="${x-62}" y="${y-112}" width="124" height="72" rx="22" fill="#fff" stroke="${N}" stroke-width="8"/><text x="${x}" y="${y-60}" text-anchor="middle" font-size="52" fill="${c}" font-family="CairoX" font-weight="900">${d[1]}</text></g>`});
+ [10,12].forEach((h,i)=>{const x=hx(h);s+=`<g id="cw${i}" style="opacity:0"><path d="M${x} ${CH.y0-150} l-46 80 h92 z" fill="${Y}" stroke="${N}" stroke-width="10" stroke-linejoin="round"/><text x="${x}" y="${CH.y0-86}" text-anchor="middle" font-size="50" fill="${N}" font-family="CairoX" font-weight="900">!</text></g>`});
+ $('s5chart').innerHTML=s;})();
+const LEN={};['cg','cr','cg2','cr2'].forEach(k=>{LEN[k]=$(k).getTotalLength()});
+
+/* ---------- scenes ---------- */
+function s1(t,s){
+  const dropP=pr(t,s+.05,.5), shake=t>s+.55&&t<s+1.15?Math.sin(t*90)*18*(1-pr(t,s+.55,.6)):0;
+  const y=-900*(1-eo(dropP));
+  $('s1x').style.transform=`translate(${shake*.6}px,${y}px) rotate(${(1-eo(dropP))*-30}deg)`;
+  $('s1x').style.opacity=t<s+.05?0:1;
+  an($('s1h'),t,s,{d:.4,sc:1.5,extra:`translateX(${shake}px)`});
+  an($('s1img'),t,s+.3,{d:.6,sc:.9,ease:eo});
+  an($('s1t1'),t,s+1.1,{d:.6,dy:70,sc:.9,ease:eo});
+  an($('s1chip'),t,s+2.6,{d:.5,dy:60,sc:.8});
+  $('s1flash').style.opacity=t>s+6.0?clamp((t-s-6.0)/.2)*.22:(t<s+.6?(pr(t,s+.55,.05)*(1-pr(t,s+.6,.3)))*.25:0);
+}
+function s2(t,s){
+  an($('s2chip'),t,s+.1,{d:.5});
+  an($('s2img'),t,s+.4,{d:.6,sc:.8,ease:eo});
+  an($('s2txt'),t,s+1.6,{d:.6,dy:60,sc:.9,ease:eo});
+  const sl=pr(t,s+3.6,.35);
+  $('s2strike').style.opacity=sl>0?1:0;$('s2sl').setAttribute('x2',90+900*eo(sl));
+  an($('s2stamp'),t,s+4.2,{d:.45,sc:2.2,rot:-25,extra:'rotate(-9deg)'});
+}
+function s3(t,s){
+  an($('s3w1'),t,s+.1,{d:.45,dy:60,sc:.7});an($('s3w2'),t,s+.7,{d:.5,dy:60,sc:.7});
+  an($('s3img'),t,s+.9,{d:.6,sc:.8,ease:eo});
+  an($('s3yel'),t,s+2.3,{d:.5,dy:80,sc:.85});
+  if(t>=s+6.55){$('s3yel').style.opacity=1-pr(t,s+6.55,.25);}
+  an($('s3red'),t,s+6.7,{d:.5,sc:.6,extra:`scale(${t>s+7.2?pulse(t,2,.04):1})`});
+}
+function s4(t,s){
+  an($('s4chip'),t,s+.15,{d:.45});
+  an($('s4img'),t,s+.6,{d:.6,sc:.8,ease:eo});
+  an($('s4prod'),t,s+1.8,{d:.55,dy:60,sc:.8});
+  an($('s4mult'),t,s+4.0,{d:.5,dy:80,sc:.85});
+}
+function s5(t,s){
+  an($('s5t1'),t,s+.2,{d:.55,dy:50,sc:.9,ease:eo});
+  const ge=eo(pr(t,s+.8,2.0)),re=eo(pr(t,s+2.8,1.8));
+  $('cg').style.strokeDasharray=$('cg2').style.strokeDasharray=LEN.cg;$('cg').style.strokeDashoffset=$('cg2').style.strokeDashoffset=LEN.cg*(1-ge);
+  $('cr').style.strokeDasharray=$('cr2').style.strokeDasharray=LEN.cr;$('cr').style.strokeDashoffset=$('cr2').style.strokeDashoffset=LEN.cr*(1-re);
+  $('cg').style.opacity=ge>0?1:0;$('cr').style.opacity=re>0?1:0;
+  const th=[s+1.0,s+1.55,s+2.2,s+3.3,s+4.2];
+  data.forEach((d,i)=>{const e=$('cp'+i);const p=pr(t,th[i],.3);e.style.opacity=p>0?1:0;e.style.transformOrigin=`${hx(d[0])}px ${vy(d[1])}px`;e.style.transform=`scale(${.4+.6*ob(p)})`});
+  [0,1].forEach(i=>{const e=$('cw'+i);const p=pr(t,s+(i?4.7:4.1),.4);e.style.opacity=p>0?1:0;const x=hx(i?12:10);e.style.transformOrigin=`${x}px ${CH.y0}px`;e.style.transform=`scale(${ob(p)})`});
+  an($('s5note'),t,s+3.4,{d:.5,dy:30,sc:.9,ease:eo});
+}
+function s6(t,s){
+  an($('s6lh'),t,s+.1,{d:.5,dx:-150,sc:.7});an($('s6rh'),t,s+.1,{d:.5,dx:150,sc:.7});
+  an($('s6img'),t,s+.5,{d:.6,sc:.8,ease:eo});
+  an($('s6ls'),t,s+1.2,{d:.45,dy:30,sc:.9,ease:eo});
+  an($('s6rs'),t,s+3.0,{d:.45,dy:30,sc:.9,ease:eo});
+  $('s6flash').style.opacity=pr(t,s+3.0,.1)*(1-pr(t,s+3.1,.35))*.4;
+}
+function s7(t,s){
+  an($('s7chip'),t,s+.1,{d:.5});
+  an($('s7img'),t,s+.4,{d:.6,sc:.8,ease:eo});
+  an($('s7c1'),t,s+1.4,{d:.5,dx:200,sc:.9});an($('s7t1'),t,s+1.5,{d:.5,dy:30,sc:.9});
+  an($('s7k1'),t,s+2.2,{d:.45,sc:0,rot:-60});
+  an($('s7c2'),t,s+3.2,{d:.5,dx:200,sc:.9});an($('s7t2'),t,s+3.3,{d:.5,dy:30,sc:.9});
+  $('s7n2').textContent=String(t<s+3.8?25:Math.max(0,Math.ceil(25*(1-pr(t,s+3.8,3)))));
+  an($('s7c3'),t,s+6.8,{d:.5,dx:200,sc:.9});an($('s7t3'),t,s+6.9,{d:.5,dy:30,sc:.9});
+}
+function s8(t,s){
+  an($('s8h'),t,s+.1,{d:.6,dy:60,sc:.8});
+  an($('s8img'),t,s+.5,{d:.6,sc:.8,ease:eo});
+  an($('s8yes'),t,s+2.0,{d:.5,dx:200,sc:.7,extra:`scale(${t>s+3?1+.03*Math.sin(t*6):1})`});
+  an($('s8no'),t,s+2.3,{d:.5,dx:-200,sc:.7,extra:`scale(${t>s+3?1+.03*Math.sin(t*6+3):1})`});
+  an($('s8w'),t,s+2.8,{d:.5,dy:30,sc:.9,ease:eo});
+}
+
+const scenes=[
+ {el:$('s1'),s:0,e:6.55,fn:s1},{el:$('s2'),s:6.55,e:12.3,fn:s2},{el:$('s3'),s:12.3,e:20.8,fn:s3},{el:$('s4'),s:20.8,e:26.6,fn:s4},
+ {el:$('s5'),s:26.6,e:33.8,fn:s5},{el:$('s6'),s:33.8,e:41.3,fn:s6},{el:$('s7'),s:41.3,e:50.9,fn:s7},{el:$('s8'),s:50.9,e:57.2,fn:s8}];
+const pg=$('prog');scenes.forEach(()=>{const i=document.createElement('i');i.appendChild(document.createElement('b'));pg.appendChild(i)});
+const COVER=location.search.includes('cover');
+function render(t){
+  if(COVER){document.querySelectorAll('.scene').forEach(e=>e.style.display='none');document.querySelectorAll('.theme').forEach(e=>e.style.opacity=0);$('thD').style.opacity=1;$('s9').style.display='block';$('s9').style.opacity=1;pg.style.display='none';return}
+  themes.forEach(th=>{$(th.id).style.opacity=(t>=th.s&&t<th.e)?1:0});
+  scenes.forEach((sc,i)=>{const on=t>=sc.s&&t<sc.e;sc.el.style.display=on?'block':'none';if(on){sc.el.style.opacity=clamp((t-sc.s)/.16);sc.fn(t,sc.s)}
+    pg.children[i].firstChild.style.width=(100*clamp((t-sc.s)/(sc.e-sc.s)))+'%'});
+}
+window.render=render;
+render(0);
+</script>
+</body>
+</html>
