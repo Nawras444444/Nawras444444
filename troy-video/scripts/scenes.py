@@ -56,8 +56,8 @@ lay = [('IX', 266), ('VIII', 314), ('VIIa', 357), ('VII', 397), ('VI', 441), ('V
 S.append(dict(src='s03', t0=32.4, t1=47.6, els=common([255, 10, 1420, 137], [352, 38, 1322, 108], 'طبقات حصارليك : I–IX | الأبرز: VI و VIIa',
    [[112, 58, 258, 97], [1408, 58, 1558, 97]], [32, 722, 1642, 928], [[558, 743, 577, 893], [1053, 743, 1072, 893]]) + [
    dict(k='char', n='digger', box=[1365, 415, 1672, 728]),
-   *[dict(k='shape', n=f'lay{i}', box=[112, y - 24, 338, y + 22], grp='layers') for i, (nm, y) in enumerate(lay)],
-   dict(k='line', n='hl', box=[262, 312, 980, 482], key='red'),
+   *[dict(k='line', n=f'lay{i}', box=[112, y - 24, 338, y + 22], key='white', fill=True, grp='layers') for i, (nm, y) in enumerate(lay)],
+   dict(k='line', n='hl', box=[262, 312, 980, 482], key='redline'),
    dict(k='shape', n='strata', box=[132, 742, 482, 898]),
    dict(k='shape', n='trowel', box=[598, 732, 988, 902]),
    dict(k='shape', n='ruin', box=[1108, 732, 1598, 902]),

@@ -50,9 +50,10 @@ def inpaint(img, mask):
 def boxmask(b):
     m = np.zeros((H, W), np.uint8); m[b[1]:b[3], b[0]:b[2]] = 255; return m
 
-def key(img, b, kind, excl=()):
+def key(img, b, kind, excl=(), fill=False):
     I = img.astype(np.int32); R, G, B = I[..., 0], I[..., 1], I[..., 2]
     if kind == 'red': m = (R > 120) & (G < 95) & (B < 95) & (R - G > 55)
+    elif kind == 'redline': m = (R > 165) & (G < 60) & (B < 60)
     else: m = (I.min(axis=2) > 200) & (I.max(axis=2) - I.min(axis=2) < 45)
     m = u8(m) & boxmask(b)
     for e in excl: m[e[1]:e[3], e[0]:e[2]] = 0
@@ -61,6 +62,9 @@ def key(img, b, kind, excl=()):
     keep = np.zeros_like(m)
     for i in range(1, n):
         if st[i, 4] >= 18: keep[lab == i] = 255
+    if fill:
+        keep = cv2.morphologyEx(keep, cv2.MORPH_CLOSE, k(7)); cnt, _ = cv2.findContours(keep, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+        keep = np.zeros_like(keep); cv2.drawContours(keep, cnt, -1, 255, -1)
     return cv2.dilate(keep, k(3))
 
 def fillred(img, b):
@@ -136,7 +140,7 @@ def run(sc):
                 a = np.where(a > 12, a, 0).astype(np.uint8)
                 if inside(b, panel): a = np.maximum(a, cv2.GaussianBlur(paperkey(A, b), (0, 0), .7))
         elif e['k'] == 'line':
-            a = cv2.GaussianBlur(key(A, b, e['key'], e.get('excl', ())), (0, 0), .7)
+            a = cv2.GaussianBlur(key(A, b, e['key'], e.get('excl', ()), e.get('fill', False)), (0, 0), .7)
         elif e['k'] == 'piece' and e['mask'] == 'red':
             a = cv2.GaussianBlur(fillred(A, b), (0, 0), .8)
         else: continue
