@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>Mary Celeste 1872</title>
+<style>
+@font-face{font-family:Oswald;src:url(assets/oswald-latin-700-normal.woff2)}
+@font-face{font-family:SpaceMono;src:url(assets/space-mono-latin-700-normal.woff2)}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1920px;background:#000;overflow:hidden}
+#view{position:relative;width:1080px;height:1920px;overflow:hidden;background:#090d14}
+#stage{position:absolute;left:0;top:0;width:941px;height:1672px;transform-origin:0 0;transform:scale(1.14772,1.14833)}
+.scene{position:absolute;inset:0;visibility:hidden;overflow:hidden;perspective:1400px}
+.shake,.cam{position:absolute;inset:0;transform-origin:50% 50%}
+.cam img,.el,.ic,.ov{position:absolute}
+.plate{left:0;top:0;width:941px;height:1672px}
+.feather{-webkit-mask-image:radial-gradient(ellipse closest-side,#000 72%,transparent 100%)}
+.ic{filter:drop-shadow(0 10px 14px rgba(0,0,0,.6))}
+.vig{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 55%,rgba(5,8,14,.55) 100%)}
+#flash{position:absolute;inset:0;background:#f4f1ea;opacity:0}
+#prog{position:absolute;left:0;bottom:0;height:5px;width:100%;background:#d92b2b;transform-origin:0 50%;transform:scaleX(0)}
+.mono{font-family:SpaceMono,monospace;font-weight:700;color:#f4f1ea;letter-spacing:2px}
+.hudbox{background:rgba(9,13,20,.88);border-left:4px solid #10b981;padding:8px 14px;font-size:20px}
+#end{position:absolute;inset:0;background:#06090f;opacity:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+#end .t{font-family:Oswald;font-size:120px;color:#f4f1ea;letter-spacing:4px;line-height:1}
+#end .s{font-size:26px;margin-top:18px;color:#d92b2b}
+</style></head><body>
+<div id="view"><div id="stage"></div></div>
+<script src="assets/gsap.min.js"></script>
+<script src="assets/config.js"></script>
+<script>
+const C = window.CFG, S = document.getElementById('stage'), tl = gsap.timeline({paused:true});
+const IN_PLACE = {spin:1,bob:1,swing:1,swingTop:1,blink:1};
+// per-scene icons: [name, x, y, width, t, move]
+const ICONS = {
+  1:[['spyglass',700,690,200,5.0,'roll']],
+  2:[['wheel',30,880,150,6.0,'spinIn']],
+  3:[['lock',785,1290,120,7.2,'popShake']],
+  4:[['magnifier',150,250,230,4.3,'sweep']],
+  5:[['crew',300,1440,340,7.4,'fog']],
+  6:[['lifebuoy',30,1330,150,6.6,'rollL'],['barrelvapor',790,850,120,3.4,'pop']],
+  7:[['gavel',730,920,190,3.3,'strike'],['hourglass',45,1080,95,6.0,'pop']],
+};
+const sc = [];
+function el(tag, cls, css, parent){const e=document.createElement(tag);e.className=cls;Object.assign(e.style,css||{});parent.appendChild(e);return e;}
+
+C.scenes.forEach((s, i) => {
+  const n=i+1, scene=el('div','scene',{},S), shake=el('div','shake',{},scene), cam=el('div','cam',{},shake);
+  const p=el('img','plate',{},cam); p.src=`assets/s${n}_plate.jpg`;
+  const t0=C.starts[i], t1=i<6?C.starts[i+1]:C.end, dur=t1-t0;
+  sc.push({scene,shake,cam,t0,t1});
+  // Ken Burns, alternating direction
+  const dir=i%2?1:-1;
+  tl.fromTo(cam,{scale:1.0,x:0,y:0},{scale:1.045,x:dir*8,y:-dir*8,duration:dur+0.6,ease:'none'},t0);
+  const shakeAt=t=>tl.fromTo(shake,{x:0,y:0},{keyframes:[{x:-9,y:6},{x:7,y:-5},{x:-4,y:3},{x:0,y:0}],duration:0.28,ease:'none'},t);
+  s.els.forEach(o=>{
+    const [x0,y0,x1,y1]=o.b, at=t0+o.t, w=x1-x0, h=y1-y0;
+    const e=el('img','el'+(IN_PLACE[o.a]?' feather':''),{left:x0+'px',top:y0+'px',width:w+'px',height:h+'px'},cam);
+    e.src=`assets/s${n}_${o.n}.webp`;
+    const hold=t1-at;
+    switch(o.a){
+      case 'slam': tl.fromTo(e,{scale:2.4,opacity:0},{scale:1,opacity:1,duration:0.3,ease:'power4.in'},at); shakeAt(at+0.3); break;
+      case 'wipe': tl.fromTo(e,{clipPath:'inset(0 100% 0 0)'},{clipPath:'inset(0 0% 0 0)',duration:0.6,ease:'power2.out'},at); break;
+      case 'wipeDown': tl.fromTo(e,{clipPath:'inset(0 0 100% 0)'},{clipPath:'inset(0 0 0% 0)',duration:1.8,ease:'steps(6)'},at); break;
+      case 'flyL': tl.fromTo(e,{x:-760,rotation:-6},{x:0,rotation:0,duration:0.75,ease:'expo.out'},at); break;
+      case 'flyR': tl.fromTo(e,{x:760,rotation:6},{x:0,rotation:0,duration:0.75,ease:'expo.out'},at); break;
+      case 'flyB': tl.fromTo(e,{y:520},{y:0,duration:0.7,ease:'power3.out'},at); break;
+      case 'drop': tl.fromTo(e,{y:-560,rotation:9},{y:0,rotation:0,duration:0.9,ease:'bounce.out'},at); break;
+      case 'pop': tl.fromTo(e,{scale:0},{scale:1,duration:0.5,ease:'back.out(2.6)'},at); break;
+      case 'flip': tl.fromTo(e,{rotationY:-95,opacity:0},{rotationY:0,opacity:1,duration:0.55,ease:'power2.out'},at); break;
+      case 'ghost': tl.to(e,{opacity:0.1,x:40,duration:6,ease:'sine.inOut'},t0+2.2); break;
+      case 'spin': tl.fromTo(e,{rotation:-120},{rotation:0,duration:2.2,ease:'elastic.out(1,0.35)'},at+0.2); break;
+      case 'bob': tl.to(e,{keyframes:[{y:-7,rotation:0.7},{y:5,rotation:-0.6},{y:-4,rotation:0.4},{y:0,rotation:0}],duration:dur,ease:'sine.inOut'},t0); break;
+      case 'swing': tl.set(e,{transformOrigin:'50% 0%'},t0); tl.to(e,{keyframes:[{rotation:9},{rotation:-7},{rotation:5},{rotation:-3},{rotation:0}],duration:dur,ease:'sine.inOut'},t0); break;
+      case 'swingTop': tl.set(e,{transformOrigin:'60% 4%'},t0); tl.to(e,{keyframes:[{rotation:6},{rotation:-5},{rotation:4},{rotation:-2},{rotation:0}],duration:dur,ease:'sine.inOut'},t0); break;
+      case 'blink': tl.to(e,{keyframes:[{filter:'brightness(2)'},{filter:'brightness(1)'},{filter:'brightness(2)'},{filter:'brightness(1)'},{filter:'brightness(2)'},{filter:'brightness(1)'}],duration:3,ease:'none'},at); break;
+    }
+    if(n===5 && o.n[0]==='c'){ // VANISHED: portraits fade out one by one after the stamp
+      tl.to(e,{opacity:0.22,filter:'grayscale(1) blur(1px)',duration:0.6,ease:'power1.in'},t0+6.0+Math.random()*1.6);
+    }
+  });
+  (ICONS[n]||[]).forEach(([nm,x,y,w,t,mv])=>{
+    const e=el('img','ic',{left:x+'px',top:y+'px',width:w+'px'},cam); e.src=`assets/i_${nm}.webp`; const at=t0+t;
+    switch(mv){
+      case 'roll': tl.fromTo(e,{x:500,rotation:200,opacity:0},{x:0,rotation:-12,opacity:1,duration:0.9,ease:'power3.out'},at); break;
+      case 'spinIn': tl.fromTo(e,{scale:0,rotation:-270},{scale:1,rotation:0,duration:1,ease:'back.out(1.6)'},at); tl.to(e,{rotation:40,duration:t1-at-1,ease:'none'},at+1); break;
+      case 'popShake': tl.fromTo(e,{scale:0},{scale:1,duration:0.4,ease:'back.out(3)'},at); tl.to(e,{keyframes:[{rotation:-14},{rotation:12},{rotation:-6},{rotation:0}],duration:0.45},at+0.4); break;
+      case 'sweep': tl.fromTo(e,{opacity:0,scale:0.6},{opacity:1,scale:1,duration:0.4},at);
+        tl.to(e,{keyframes:[{x:-40,y:480,duration:1},{x:380,y:820,duration:1}],ease:'power2.inOut'},at+0.4);
+        tl.to(e,{opacity:0,scale:0.7,duration:0.4},at+2.6); break;
+      case 'fog': tl.fromTo(e,{opacity:0,y:30},{opacity:0.95,y:0,duration:1.2},at); tl.to(e,{opacity:0,x:60,duration:1.4},at+1.4); break;
+      case 'rollL': tl.fromTo(e,{x:-400,rotation:-360},{x:0,rotation:0,duration:1,ease:'power3.out'},at); break;
+      case 'pop': tl.fromTo(e,{scale:0,rotation:-20},{scale:1,rotation:0,duration:0.5,ease:'back.out(2.6)'},at); break;
+      case 'strike': tl.set(e,{transformOrigin:'85% 85%'},t0); tl.fromTo(e,{opacity:0,rotation:-55,x:60,y:-80},{opacity:1,rotation:-35,x:0,y:0,duration:0.3},at);
+        tl.to(e,{rotation:8,duration:0.18,ease:'power4.in'},at+0.5); tl.to(e,{rotation:-4,duration:0.25},at+0.68); shakeAt(at+0.68); break;
+    }
+  });
+  el('div','vig',{},scene);
+  sc[i].ov=el('div','ov',{left:0,top:0,width:'941px',height:'1672px'},cam);
+});
+
+// ---------- overlays (SVG / typography) ----------
+const NS='http://www.w3.org/2000/svg';
+function svg(parent,html,css){const d=document.createElement('div');d.className='ov';Object.assign(d.style,css);d.innerHTML=html;parent.appendChild(d);return d;}
+// S1 radar reticle on the ship crosshair
+const r1=svg(sc[0].ov,`<svg width="260" height="260" viewBox="0 0 260 260"><circle class="rot" cx="130" cy="130" r="112" fill="none" stroke="#f4f1ea" stroke-width="3" stroke-dasharray="14 10"/>
+<circle class="ping" cx="130" cy="130" r="40" fill="none" stroke="#d92b2b" stroke-width="4"/><circle class="ping2" cx="130" cy="130" r="40" fill="none" stroke="#d92b2b" stroke-width="3"/></svg>`,{left:'345px',top:'850px',width:'260px',height:'260px'});
+tl.fromTo(r1,{scale:0,opacity:0},{scale:1,opacity:1,duration:0.5,ease:'back.out(2)'},5.4);
+tl.to(r1.querySelector('.rot'),{rotation:180,svgOrigin:'130 130',duration:3.2,ease:'none'},5.4);
+[['.ping',5.6],['.ping2',6.3],['.ping',7.0]].forEach(([c,t])=>tl.fromTo(r1.querySelector(c),{attr:{r:30},opacity:1},{attr:{r:125},opacity:0,duration:0.8,ease:'power1.out'},t));
+// S2 blueprint scan line
+const scan=svg(sc[1].ov,'',{left:'20px',top:'360px',width:'6px',height:'535px',background:'linear-gradient(#38bdf800,#38bdf8,#38bdf800)',boxShadow:'0 0 24px #38bdf8',opacity:0});
+tl.fromTo(scan,{x:0,opacity:1},{x:895,duration:1.4,ease:'power1.inOut'},C.starts[1]+1.9); tl.to(scan,{opacity:0,duration:0.2},C.starts[1]+3.3);
+// S3 manifest counter (synced to "mille sept cents barils")
+const cnt=svg(sc[2].ov,'<div class="mono hudbox">MANIFEST COUNT: <span style="color:#10b981">0000</span></div>',{left:'40px',top:'455px'});
+const cs=cnt.querySelector('span'), cobj={v:0};
+tl.fromTo(cnt,{x:-500},{x:0,duration:0.5,ease:'power3.out'},C.starts[2]+2.0);
+tl.to(cobj,{v:1701,duration:1.6,ease:'power2.out',onUpdate:()=>cs.textContent=String(Math.round(cobj.v)).padStart(4,'0')},C.starts[2]+2.3);
+// S4 red evidence circle around coins
+const ring=svg(sc[3].ov,`<svg width="460" height="300" viewBox="0 0 460 300"><ellipse cx="230" cy="150" rx="215" ry="135" fill="none" stroke="#d92b2b" stroke-width="6" stroke-dasharray="1100" stroke-dashoffset="1100"/></svg>`,{left:'440px',top:'975px'});
+tl.to(ring.querySelector('ellipse'),{attr:{'stroke-dashoffset':0},duration:0.7,ease:'power2.inOut'},C.starts[3]+5.5);
+// S6 red vapor rising from the empty barrels
+const vap=svg(sc[5].ov,`<svg width="560" height="260" viewBox="0 0 560 260">${[90,280,460].map((x,k)=>`<path class="v" d="M${x} 250 C ${x-30} 190, ${x+30} 140, ${x} 90 S ${x-25} 30, ${x+10} 0" fill="none" stroke="#ff3b3b" stroke-width="7" stroke-linecap="round" opacity="0"/>`).join('')}</svg>`,{left:'95px',top:'250px'});
+vap.querySelectorAll('.v').forEach((p,k)=>{for(let r=0;r<4;r++){const t=C.starts[5]+1.8+k*0.35+r*1.9;
+  tl.fromTo(p,{y:60,opacity:0},{keyframes:[{y:20,opacity:0.8,duration:0.6},{y:-40,opacity:0,duration:1}],ease:'sine.out'},t);}});
+// S6 rope-cut rings pulse
+[[455,1150],[530,1150]].forEach(([x,y],k)=>{const d=svg(sc[5].ov,'',{left:x-30+'px',top:y-30+'px',width:'60px',height:'60px',border:'4px solid #ff3b3b',borderRadius:'50%',opacity:0});
+  tl.fromTo(d,{scale:0.4,opacity:1},{scale:2.2,opacity:0,duration:0.9,repeat:2,ease:'power1.out'},C.starts[5]+3.1+k*0.2);});
+
+// ---------- transitions ----------
+const flash=el('div','',{},S); flash.id='flash';
+const TR=['whip','flash','zoom','slideUp','flash','whip'];
+tl.set(sc[0].scene,{visibility:'visible'},0);
+tl.fromTo(sc[0].scene,{opacity:0},{opacity:1,duration:0.5},0);
+sc.forEach((s,i)=>{ if(!i) return; const t=s.t0, prev=sc[i-1].scene, cur=s.scene, d=0.4;
+  tl.set(cur,{visibility:'visible'},t-0.2);
+  switch(TR[i-1]){
+    case 'whip': tl.fromTo(cur,{x:941},{x:0,duration:d,ease:'power3.inOut'},t-0.2); tl.to(prev,{x:-941,duration:d,ease:'power3.inOut'},t-0.2); break;
+    case 'slideUp': tl.fromTo(cur,{y:1672},{y:0,duration:d,ease:'power3.inOut'},t-0.2); tl.to(prev,{y:-500,opacity:0.3,duration:d,ease:'power3.inOut'},t-0.2); break;
+    case 'zoom': tl.fromTo(cur,{scale:1.5,opacity:0},{scale:1,opacity:1,duration:0.45,ease:'power2.out'},t-0.2); break;
+    case 'flash': tl.fromTo(cur,{opacity:0},{opacity:1,duration:0.01},t); tl.fromTo(flash,{opacity:0},{keyframes:[{opacity:0.95,duration:0.08},{opacity:0,duration:0.35}]},t-0.08); break;
+  }
+  tl.set(prev,{visibility:'hidden'},t+0.3);
+});
+
+// ---------- end card ----------
+const end=el('div','',{},S); end.id='end';
+end.innerHTML='<img src="assets/i_question.webp" style="width:230px"><div class="t">UNSOLVED</div><div class="mono s">MARY CELESTE // 1872 — 2026</div>';
+tl.to(end,{opacity:1,duration:0.6},C.end-2.6);
+tl.fromTo(end.children,{y:60,opacity:0},{y:0,opacity:1,stagger:0.18,duration:0.5,ease:'back.out(2)'},C.end-2.3);
+const prog=el('div','',{},S); prog.id='prog'; tl.to(prog,{scaleX:1,duration:C.end,ease:'none'},0);
+tl.set({}, {}, C.end);
+window.seek=t=>{tl.seek(t,false);};
+window.ready=Promise.all([...document.images].map(i=>i.decode().catch(()=>{}))).then(()=>document.fonts.ready).then(()=>1);
+</script></body></html>
