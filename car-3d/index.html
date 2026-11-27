@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>3D Car Evolution</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--amber:#ffb627;--cyan:#3fd0e0;--ink:#eaf2ff;--mut:#8aa0c2}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#060b15}
+#stage{position:relative;width:1080px;height:1920px;overflow:hidden;font-family:Cairo,sans-serif;color:var(--ink);
+ background:radial-gradient(ellipse at 50% 46%,#1d3a62 0%,#0d1a2e 48%,#060b15 100%)}
+canvas{position:absolute;inset:0;width:1080px;height:1920px}
+.ov{position:absolute;left:0;right:0;text-align:center;pointer-events:none}
+.kick{font-size:40px;font-weight:800;color:var(--cyan);letter-spacing:2px}
+.year{font-size:230px;font-weight:900;color:var(--amber);line-height:1.1;text-shadow:0 0 60px rgba(255,182,39,.45),0 10px 30px #000}
+.era{font-size:70px;font-weight:900;color:#fff;text-shadow:0 6px 30px #000}
+.chip{position:absolute;top:1540px;height:96px;border-radius:48px;display:flex;align-items:center;gap:14px;padding:0 34px;font-size:40px;font-weight:800;
+ background:rgba(10,20,36,.65);border:2px solid rgba(255,255,255,.2);white-space:nowrap}
+.chip b{color:var(--amber);font-weight:900}
+#vig{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,transparent 55%,rgba(0,0,0,.7) 100%);pointer-events:none}
+#fade{position:absolute;inset:0;background:#000;opacity:0}
+</style></head><body>
+<div id="stage">
+ <canvas id="c" width="1080" height="1920"></canvas>
+ <div id="vig"></div>
+ <div class="ov" id="title" style="top:200px"><div class="kick">من 1886 إلى 2024</div><div class="era" style="font-size:150px;margin-top:18px">تطوّر السيارات</div></div>
+ <div class="ov" id="hud" style="top:200px;opacity:0"><div class="kick" id="kicker">رحلة عبر الزمن</div><div class="year" id="year">1886</div><div class="era" id="era">أول سيارة بمحرك</div></div>
+ <div class="chip" id="chipL" style="left:110px;opacity:0"><span id="ic">⛽</span> <b id="pw">بنزين</b></div>
+ <div class="chip" id="chipR" style="right:110px;opacity:0">⚡ السرعة <b id="spd">16</b> كم/س</div>
+ <div class="ov" id="fut" style="top:1290px;opacity:0"><div class="era" style="color:var(--cyan)">المستقبل يبدأ هنا</div><div style="font-size:44px;font-weight:700;color:var(--mut);margin-top:10px">كهرباء • ذكاء • اتصال</div></div>
+ <div id="fade"></div>
+</div>
+<script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import {RoundedBoxGeometry} from './vendor/RoundedBoxGeometry.js';
+import {RoomEnvironment} from './vendor/RoomEnvironment.js';
+
+const $=id=>document.getElementById(id);
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const eio=x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2;
+const lerp=(a,b,k)=>a+(b-a)*k;
+
+/* ---------- data (approximate figures, see notes) ---------- */
+const DATA=[
+ {y:1886,t:'أول سيارة بمحرك',s:16,pw:'بنزين',ic:'⛽'},
+ {y:1908,t:'عصر الإنتاج الضخم',s:70,pw:'بنزين',ic:'⛽'},
+ {y:1955,t:'الرفاهية والتصميم',s:150,pw:'بنزين',ic:'⛽'},
+ {y:1975,t:'الأمان وكفاءة الوقود',s:180,pw:'بنزين',ic:'⛽'},
+ {y:2000,t:'الإلكترونيات والهجين',s:220,pw:'هجين',ic:'🔋'},
+ {y:2024,t:'الكهرباء والذكاء',s:250,pw:'كهرباء',ic:'⚡'}
+];
+// geometry specs: bl=length bw=width bh=body height by=body bottom cl/ch/cx=cabin
+const SPECS=[
+ {color:0x7a4e2a,bl:2.6,bw:1.05,bh:.22,by:.75,br:.08,open:true,cl:1.2,ch:.7,cx:-.2,R:.9,style:'spoke',ww:.22,wx:[-.95,.95]},
+ {color:0x2a2f3a,bl:3.2,bw:1.5,bh:.5,by:.7,br:.15,open:true,cl:1.6,ch:.6,cx:-.4,R:.72,style:'spoke',ww:.3,wx:[-1.1,1.0]},
+ {color:0xe2445c,bl:4.6,bw:1.9,bh:.5,by:.55,br:.25,cl:2.1,ch:.55,cx:-.25,R:.6,style:'chrome',ww:.42,wx:[-1.55,1.55],fins:true},
+ {color:0xf29e38,bl:4.3,bw:1.8,bh:.45,by:.5,br:.2,cl:2.3,ch:.45,cx:-.15,rot:-.14,R:.58,style:'dark',ww:.42,wx:[-1.4,1.4]},
+ {color:0x8fa2bd,bl:4.1,bw:1.75,bh:.75,by:.42,br:.3,cl:2.4,ch:.72,cx:-.2,R:.56,style:'dark',ww:.42,wx:[-1.35,1.35]},
+ {color:0x21b8b0,bl:4.6,bw:1.9,bh:.42,by:.5,br:.25,cl:2.5,ch:.55,cx:-.3,rot:-.1,R:.6,style:'aero',ww:.44,wx:[-1.55,1.55],glow:true}
+];
+
+/* ---------- renderer & scene ---------- */
+const canvas=$('c');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+renderer.setPixelRatio(1);renderer.setSize(1080,1920,false);
+renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+const scene=new THREE.Scene();
+const pmrem=new THREE.PMREMGenerator(renderer);
+scene.environment=pmrem.fromScene(new RoomEnvironment(),.04).texture;
+const camera=new THREE.PerspectiveCamera(38,1080/1920,.1,300);
+
+scene.add(new THREE.HemisphereLight(0xbfd8ff,0x101826,.5));
+const key=new THREE.DirectionalLight(0xfff1d6,2.6);
+key.position.set(7,12,8);key.castShadow=true;key.shadow.mapSize.set(2048,2048);
+Object.assign(key.shadow.camera,{left:-14,right:14,top:14,bottom:-14,near:1,far:60});key.shadow.bias=-.0008;
+scene.add(key);
+const rim=new THREE.DirectionalLight(0x3fd0e0,1.8);rim.position.set(-8,6,-10);scene.add(rim);
+
+const ground=new THREE.Mesh(new THREE.CircleGeometry(80,64),new THREE.MeshStandardMaterial({color:0x0b1626,roughness:.9}));
+ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
+const grid=new THREE.GridHelper(160,80,0x3fd0e0,0x1d3550);
+grid.material.transparent=true;grid.material.opacity=.28;grid.position.y=.01;scene.add(grid);
+
+const M={
+ glass:new THREE.MeshPhysicalMaterial({color:0x0c1f33,metalness:.2,roughness:.05,clearcoat:1}),
+ chrome:new THREE.MeshStandardMaterial({color:0xdfe7f2,metalness:1,roughness:.18}),
+ rubber:new THREE.MeshStandardMaterial({color:0x111318,roughness:.9}),
+ dark:new THREE.MeshStandardMaterial({color:0x1b2230,roughness:.6,metalness:.3}),
+ wood:new THREE.MeshStandardMaterial({color:0x7a4e2a,roughness:.7}),
+ lamp:new THREE.MeshStandardMaterial({color:0xfff2b0,emissive:0xffe27a,emissiveIntensity:2}),
+ tail:new THREE.MeshStandardMaterial({color:0x550000,emissive:0xff2a2a,emissiveIntensity:1.6}),
+ glow:new THREE.MeshBasicMaterial({color:0x3fd0e0,transparent:true,opacity:.8,blending:THREE.AdditiveBlending,depthWrite:false}),
+ pad:new THREE.MeshStandardMaterial({color:0x13233b,metalness:.4,roughness:.5})
+};
+const paintMat=hex=>new THREE.MeshPhysicalMaterial({color:hex,metalness:.55,roughness:.3,clearcoat:1,clearcoatRoughness:.08});
+
+function makeWheel(R,style,w){
+ const g=new THREE.Group(),spin=new THREE.Group();g.add(spin);
+ if(style==='spoke'){
+  spin.add(new THREE.Mesh(new THREE.TorusGeometry(R-.06,.07,12,48),M.rubber));
+  for(let i=0;i<10;i++){const s=new THREE.Mesh(new THREE.BoxGeometry(.05,2*(R-.12),.05),M.wood);s.rotation.z=i*Math.PI/10;spin.add(s)}
+  const hub=new THREE.Mesh(new THREE.CylinderGeometry(.14,.14,w,16),M.wood);hub.rotation.x=Math.PI/2;spin.add(hub);
+ }else{
+  const tire=new THREE.Mesh(new THREE.CylinderGeometry(R,R,w,36),M.rubber);tire.rotation.x=Math.PI/2;spin.add(tire);
+  const rim=new THREE.Mesh(new THREE.CylinderGeometry(R*.68,R*.68,w+.02,32),style==='chrome'?M.chrome:M.dark);rim.rotation.x=Math.PI/2;spin.add(rim);
+  const n=style==='aero'?3:5;
+  for(let i=0;i<n;i++){const s=new THREE.Mesh(new THREE.BoxGeometry(.09,R*1.1,w+.04),M.chrome);s.rotation.z=i*Math.PI*2/n;spin.add(s)}
+  const hub=new THREE.Mesh(new THREE.CylinderGeometry(R*.2,R*.2,w+.06,16),M.chrome);hub.rotation.x=Math.PI/2;spin.add(hub);
+ }
+ g.userData.spin=spin;return g;
+}
+
+function buildCar(s){
+ const root=new THREE.Group(),car=new THREE.Group();
+ root.add(car);car.rotation.y=Math.PI; // nose points toward -X (direction of travel)
+ const paint=paintMat(s.color);
+ const {bl,bw,bh,by}=s;
+ const body=new THREE.Mesh(new RoundedBoxGeometry(bl,bh,bw,4,s.br),paint);
+ body.position.set(0,by+bh/2,0);body.castShadow=true;body.receiveShadow=true;car.add(body);
+ if(!s.open){
+  const cab=new THREE.Mesh(new RoundedBoxGeometry(s.cl,s.ch,bw*.84,4,.22),paint);
+  cab.position.set(s.cx,by+bh+s.ch/2-.04,0);cab.castShadow=true;car.add(cab);
+  const win=new THREE.Mesh(new RoundedBoxGeometry(s.cl*.96,s.ch*.6,bw*.9,3,.1),M.glass);
+  win.position.set(s.cx,by+bh+s.ch*.45,0);car.add(win);
+  if(s.rot){cab.rotation.z=s.rot;win.rotation.z=s.rot}
+ }else{
+  const seat=new THREE.Mesh(new RoundedBoxGeometry(s.cl,s.ch,bw*.8,3,.12),M.dark);
+  seat.position.set(s.cx,by+bh+s.ch/2,0);car.add(seat);
+  const back=new THREE.Mesh(new RoundedBoxGeometry(.14,s.ch*2.2,bw*.8,2,.05),M.dark);
+  back.position.set(s.cx-s.cl/2,by+bh+s.ch*1.1,0);car.add(back);
+ }
+ if(s.fins){
+  for(const z of [-1,1]){const f=new THREE.Mesh(new THREE.ConeGeometry(.28,1,4),paint);
+   f.position.set(-bl/2+.25,by+bh+.45,z*bw*.28);car.add(f)}
+ }
+ for(const z of [-1,1]){
+  const hl=new THREE.Mesh(new THREE.SphereGeometry(.12,16,12),M.lamp);hl.position.set(bl/2+.02,by+bh*.55,z*bw*.3);car.add(hl);
+  const tl=new THREE.Mesh(new THREE.BoxGeometry(.06,.14,.36),M.tail);tl.position.set(-bl/2-.02,by+bh*.6,z*bw*.3);car.add(tl);
+ }
+ const spinners=[];
+ for(const x of s.wx)for(const z of [-1,1]){
+  const w=makeWheel(s.R,s.style,s.ww);w.position.set(x,s.R,z*(bw/2+.12));
+  car.add(w);spinners.push(w.userData.spin);
+ }
+ if(s.glow){const gl=new THREE.Mesh(new THREE.PlaneGeometry(bl*.85,bw*.8),M.glow);gl.rotation.x=-Math.PI/2;gl.position.y=.07;root.add(gl)}
+ const pad=new THREE.Mesh(new THREE.CylinderGeometry(3.4,3.4,.12,72),M.pad);pad.position.y=.06;pad.receiveShadow=true;root.add(pad);
+ const ring=new THREE.Mesh(new THREE.RingGeometry(3.4,3.55,96),M.glow);ring.rotation.x=-Math.PI/2;ring.position.y=.13;root.add(ring);
+ root.userData={spinners,R:s.R};
+ return root;
+}
+const cars=SPECS.map(s=>{const c=buildCar(s);scene.add(c);return c});
+
+/* ---------- timeline ---------- */
+const T0=2.4,STEP=1.5,LAST=DATA.length-1,SP=12;
+const $t=$('title'),$h=$('hud'),$f=$('fut');
+
+window.render=function(t){
+ // car progression: hold on each era, then glide to the next
+ const sc=Math.min(Math.max(0,(t-T0)/STEP),LAST);
+ const base=Math.floor(sc),f=sc-base;
+ const eased=base+(base<LAST?eio(clamp(f/.55)):0);
+ const lo=Math.floor(eased),hi=Math.min(lo+1,LAST),frac=eased-lo;
+
+ cars.forEach((c,i)=>{
+  const x=(i-eased)*SP;c.position.x=x;c.visible=Math.abs(x)<24;
+  c.userData.spinners.forEach(sp=>sp.rotation.z=-(eased*SP)/c.userData.R);
+ });
+ grid.position.x=-((eased*SP)%2);
+
+ // camera: static side three-quarter view with slow sway
+ const ang=.42*Math.sin(t*.55);
+ camera.position.set(16*Math.sin(ang),1.9+.2*Math.sin(t*.9),16*Math.cos(ang));
+ camera.lookAt(0,1.0,0);
+ renderer.render(scene,camera);
+
+ // overlays
+ $t.style.opacity=1-clamp((t-1.9)/.5);
+ const endFade=1-clamp((t-13.0)/.5);
+ $h.style.opacity=clamp((t-2.2)/.4)*endFade;
+ $('year').textContent=Math.round(lerp(DATA[lo].y,DATA[hi].y,frac));
+ $('era').textContent=frac<.5?DATA[lo].t:DATA[hi].t;
+ $('kicker').textContent=(frac<.5?DATA[lo]:DATA[hi]).y>=2024?'المستقبل':'رحلة عبر الزمن';
+ $('spd').textContent=Math.round(lerp(DATA[lo].s,DATA[hi].s,frac));
+ const cur=frac<.5?DATA[lo]:DATA[hi];
+ $('pw').textContent=cur.pw;$('ic').textContent=cur.ic;
+ $('chipL').style.opacity=clamp((t-2.2)/.4)*endFade;
+ $('chipR').style.opacity=clamp((t-2.2)/.4)*endFade;
+ $f.style.opacity=clamp((t-10.2)/.6)*endFade;
+ $('fade').style.opacity=clamp((t-14.2)/.8);
+};
+window.ready=true;
+
+if(!navigator.webdriver){
+ const t0=performance.now();
+ (function loop(){window.render(((performance.now()-t0)/1000)%15);requestAnimationFrame(loop)})();
+}
+</script></body></html>
