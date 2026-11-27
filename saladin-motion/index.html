@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8">
+<title>Saladin Motion</title>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Cairo:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#e7b84a;--gold2:#fbe39a;--red:#9c1c1c;--ink:#1d140c;--parch:#f3e3bd}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#0d0906}
+#stage{position:relative;width:1080px;height:1920px;overflow:hidden;font-family:Cairo,sans-serif}
+.bg{position:absolute;inset:-60px;background:url(assets/full.png) center/cover;filter:blur(28px) brightness(.35) saturate(1.2)}
+.vign{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,transparent 40%,rgba(0,0,0,.8) 100%);pointer-events:none;z-index:50}
+.scene{position:absolute;inset:0;opacity:0}
+.full{position:absolute;inset:0;background-size:cover;background-repeat:no-repeat}
+.card{position:absolute;left:50%;top:50%;width:960px;border:6px solid var(--gold);border-radius:14px;
+ box-shadow:0 0 0 3px #5a3b10,0 0 0 9px rgba(231,184,74,.35),0 40px 90px rgba(0,0,0,.7);overflow:hidden;background-size:cover;background-position:center}
+.badge{position:absolute;background:linear-gradient(#b32424,#7a1212);color:#fff;border:4px solid var(--gold);border-radius:12px;
+ font-weight:900;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 30px rgba(0,0,0,.5);white-space:nowrap}
+.plaque{position:absolute;background:linear-gradient(#f8ebc8,#e6cf98);color:var(--ink);border:4px solid var(--gold);border-radius:12px;
+ font-weight:900;text-align:center;display:flex;align-items:center;justify-content:center;line-height:1.25;box-shadow:0 10px 30px rgba(0,0,0,.45)}
+.title{position:absolute;left:0;right:0;text-align:center;font-family:Amiri,serif;color:var(--gold2);
+ text-shadow:0 4px 0 #5a3b10,0 0 40px rgba(231,184,74,.6),0 10px 30px #000}
+.kicker{position:absolute;left:0;right:0;text-align:center;color:#fff;font-weight:700;font-size:44px;text-shadow:0 4px 18px #000}
+.p{position:absolute;width:8px;height:8px;border-radius:50%;background:var(--gold2);box-shadow:0 0 12px var(--gold);z-index:40}
+#tl{position:absolute;left:90px;right:90px;bottom:250px;height:150px;z-index:30}
+#tl .line{position:absolute;top:44px;right:0;height:8px;background:var(--gold);border-radius:4px;box-shadow:0 0 18px var(--gold)}
+#tl .dot{position:absolute;top:28px;width:40px;height:40px;margin-right:-20px;border-radius:50%;background:var(--red);border:5px solid var(--gold)}
+#tl .lb{position:absolute;top:84px;width:240px;margin-right:-120px;text-align:center;color:#fff;font-weight:900;font-size:36px;text-shadow:0 3px 10px #000}
+#tl .lb small{display:block;font-size:26px;color:var(--gold2);font-weight:700}
+.icon{position:absolute;width:300px;text-align:center}
+.icon .im{width:300px;height:180px;border:5px solid var(--gold);border-radius:14px;background-size:cover;background-position:center;box-shadow:0 20px 40px rgba(0,0,0,.6)}
+.icon .cap{margin-top:18px;background:linear-gradient(#b32424,#7a1212);border:3px solid var(--gold);border-radius:10px;color:#fff;font-weight:900;font-size:32px;line-height:1.3;padding:10px 6px}
+.bar{position:absolute;left:0;right:0;height:14px;background:linear-gradient(90deg,#5a3b10,var(--gold),#5a3b10);z-index:45}
+</style></head><body>
+<div id="stage">
+ <div class="bg" id="bg"></div>
+
+ <!-- S1 hero -->
+ <div class="scene" id="s1">
+  <div class="full" id="hero" style="background-image:url(assets/hero.png)"></div>
+  <div class="full" style="background:linear-gradient(transparent 45%,rgba(10,6,3,.92) 80%)"></div>
+  <div class="title" id="t1" style="top:1330px;font-size:150px">صلاح الدين الأيوبي</div>
+  <div class="badge" id="d1" style="left:50%;top:1560px;width:520px;height:110px;font-size:62px;margin-left:-260px">1137 – 1193م</div>
+ </div>
+
+ <!-- S2 rule -->
+ <div class="scene" id="s2">
+  <div class="kicker" id="k2" style="top:250px">المحطة الأولى</div>
+  <div class="card" id="c2" style="height:833px;background-image:url(assets/rule.png)">
+   <div class="badge" id="b2" style="left:2%;top:2%;width:44%;height:17%;font-size:84px">1169م</div>
+   <div class="plaque" id="p2" style="left:11%;width:78%;bottom:2%;height:20%;font-size:46px">وزارة مصر وبداية الحكم<br>نحو توحيد مصر والشام</div>
+  </div>
+ </div>
+
+ <!-- S3 armor -->
+ <div class="scene" id="s3">
+  <div class="kicker" id="k3" style="top:250px">الاستعداد قبل المواجهة</div>
+  <div class="card" id="c3" style="height:848px;background-image:url(assets/armor.png)"></div>
+  <div class="title" id="t3" style="top:1440px;font-size:120px">الدرع الخفي</div>
+  <div class="kicker" id="q3" style="top:1650px;font-size:40px;color:var(--parch)">الحماية والجاهزية الدائمة</div>
+ </div>
+
+ <!-- S4 battle -->
+ <div class="scene" id="s4">
+  <div class="card" id="c4" style="height:900px;width:1000px;background-image:url(assets/battle.png);background-size:auto 100%">
+  </div>
+  <div class="badge" id="b4" style="left:50%;top:230px;width:330px;height:120px;font-size:80px;margin-left:-165px">1187م</div>
+  <div class="title" id="t4" style="top:1310px;font-size:130px">تحرير القدس</div>
+  <div id="tl">
+   <div class="line" id="tll"></div>
+   <div class="dot" style="right:0%"></div><div class="lb" style="right:0%">1137<small>المولد</small></div>
+   <div class="dot" style="right:50%"></div><div class="lb" style="right:50%">1169<small>حكم مصر</small></div>
+   <div class="dot" style="right:100%"></div><div class="lb" style="right:100%">1187<small>حطين والقدس</small></div>
+  </div>
+ </div>
+
+ <!-- S5 values -->
+ <div class="scene" id="s5">
+  <div class="title" id="t5" style="top:300px;font-size:120px">صلاح الدين</div>
+  <div class="kicker" id="k5" style="top:470px">إرثٌ يتجاوز القرون</div>
+  <div class="icon" id="i1" style="right:45px;top:760px"><div class="im" style="background-image:url(assets/scale.png)"></div><div class="cap">حكم عادل<br>ووحدة الأمة</div></div>
+  <div class="icon" id="i2" style="right:390px;top:760px"><div class="im" style="background-image:url(assets/mail.png)"></div><div class="cap">الدرع الخفي<br>الحماية والجاهزية</div></div>
+  <div class="icon" id="i3" style="right:735px;top:760px"><div class="im" style="background-image:url(assets/cal.png)"></div><div class="cap">محطات<br>رئيسية</div></div>
+  <div class="title" id="e5" style="top:1320px;font-size:84px;color:#fff">1137 – 1193م</div>
+  <div class="kicker" id="f5" style="top:1480px;font-size:40px;color:var(--parch)">قائدٌ وحّد الأمة وحرّر القدس</div>
+ </div>
+
+ <div class="bar" id="barT" style="top:0"></div><div class="bar" id="barB" style="bottom:0"></div>
+ <div id="parts"></div>
+ <div class="vign"></div>
+ <div id="flash" style="position:absolute;inset:0;background:#fff3cf;opacity:0;z-index:60"></div>
+</div>
+<script>
+const D=15, $=id=>document.getElementById(id);
+const cl=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const p=(t,s,d)=>cl((t-s)/d);
+const eo=x=>1-Math.pow(1-x,3), eio=x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2;
+const back=x=>{const c=1.70158,c3=c+1;return 1+c3*Math.pow(x-1,3)+c*Math.pow(x-1,2)};
+const S=[[0,3.6],[3.4,6.6],[6.4,9.6],[9.4,12.6],[12.4,15.2]];
+// particles (deterministic)
+const parts=[];let seed=7;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
+for(let i=0;i<40;i++){const e=document.createElement('div');e.className='p';$('parts').appendChild(e);
+ parts.push({e,x:rnd()*1080,y:rnd()*1920,v:20+rnd()*60,s:.4+rnd()*1.2,ph:rnd()*6.28})}
+function inEl(el,t,s,dy=60,d=.6,sc=false){const k=p(t,s,d),e=sc?back(k):eo(k);
+ el.style.opacity=cl(k*1.6);el.style.transform=sc?`scale(${.6+.4*e})`:`translateY(${(1-e)*dy}px)`}
+function cardT(el,t,s,z0,z1,len){const k=p(t,s,.7),e=eo(k),z=z0+(z1-z0)*eio(p(t,s,len));
+ el.style.transform=`translate(-50%,-50%) translateY(${(1-e)*140}px) scale(${z}) rotate(${(1-e)*-2}deg)`}
+window.render=function(t){
+ S.forEach(([a,b],i)=>{$('s'+(i+1)).style.opacity=Math.min(cl((t-a)/.25),cl((b-t)/.25))||(i==0&&t<.25?cl(t/.25)+.0:0)});
+ $('s1').style.opacity=Math.min(cl(t/.3),cl((3.6-t)/.25));
+ $('bg').style.transform=`scale(${1.05+t*.01}) translateX(${Math.sin(t*.4)*20}px)`;
+ // S1
+ const hz=1+.12*eio(p(t,0,3.6));
+ $('hero').style.backgroundPosition=`${8+10*p(t,0,3.6)}% 0%`;
+ $('hero').style.transform=`scale(${hz})`;$('hero').style.transformOrigin='30% 30%';
+ $('hero').style.height='1920px';$('hero').style.backgroundSize='auto 1300px';
+ inEl($('t1'),t,.6,80,.8);inEl($('d1'),t,1.2,0,.5,true);
+ // S2
+ inEl($('k2'),t,3.6,-40);cardT($('c2'),t,3.5,1,1.06,3.1);inEl($('b2'),t,4.1,0,.5,true);inEl($('p2'),t,4.5,50);
+ // S3
+ inEl($('k3'),t,6.6,-40);const k3=p(t,6.5,3);
+ $('c3').style.transform=`translate(-50%,-50%) translateY(${(1-eo(p(t,6.5,.7)))*140-80}px) scale(${1+.18*eio(k3)})`;
+ $('c3').style.transformOrigin='45% 45%';
+ inEl($('t3'),t,7.3,70);inEl($('q3'),t,7.7,40);
+ $('t3').style.textShadow=`0 4px 0 #5a3b10,0 0 ${30+30*Math.sin(t*5)**2}px rgba(231,184,74,.9),0 10px 30px #000`;
+ // S4
+ const k4=p(t,9.4,3.2);
+ $('c4').style.transform=`translate(-50%,-50%) translateY(${(1-eo(p(t,9.4,.7)))*140-150}px)`;
+ $('c4').style.backgroundPosition=`${100-100*eio(k4)}% 50%`;
+ inEl($('b4'),t,9.9,0,.5,true);inEl($('t4'),t,10.2,70);
+ $('tll').style.width=(100*eo(p(t,10.4,1.8)))+'%';inEl($('tl'),t,10.2,40);
+ // S5
+ inEl($('t5'),t,12.6,-60,.7);inEl($('k5'),t,12.9,30);
+ ['i1','i2','i3'].forEach((id,i)=>inEl($(id),t,13.1+i*.15,0,.5,true));inEl($('e5'),t,13.8,40);inEl($('f5'),t,14.1,30);
+ // bars & flash
+ const bh=14;$('barT').style.height=$('barB').style.height=bh+'px';
+ $('flash').style.opacity=Math.max(0,...[3.5,6.5,9.5,12.5].map(c=>.35*(1-Math.abs(t-c)/.18)));
+ const fo=cl((15-t)/.5);$('stage').style.filter=`brightness(${fo})`;
+ parts.forEach(q=>{const y=((q.y-q.v*t*3)%1920+1920)%1920;q.e.style.transform=`translate(${q.x+Math.sin(t+q.ph)*30}px,${y}px) scale(${q.s})`;q.e.style.opacity=.3+.5*Math.abs(Math.sin(t*1.5+q.ph))});
+};
+if(!navigator.webdriver){const t0=performance.now();(function f(){render(((performance.now()-t0)/1000)%D);requestAnimationFrame(f)})()}else render(0);
+</script></body></html>
