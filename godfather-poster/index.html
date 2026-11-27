@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Godfather Collage</title>
+<!--
+  ===========================================================================
+  AL PACINO — THE GODFATHER  ·  Editorial Mixed-Media Collage Animation
+  Single-file build: HTML5 + CSS3 + SVG + GSAP 3 (+ CustomEase)
+  ---------------------------------------------------------------------------
+  HERO IMAGE: see the `HERO_IMAGE_SRC` constant near the top of the <script>.
+  Paste a URL or a Base64 data URI of a TRANSPARENT PNG cut-out of the subject
+  (chest-up portrait). You can also drag & drop an image file onto the page,
+  or press "I" to open a file picker. Until an image is supplied, an original
+  vector engraved figure (anonymous man in a suit) renders as the fallback.
+  ---------------------------------------------------------------------------
+  Keys:  Space = play/pause · R = replay · H = hide/show controls · I = image
+  ===========================================================================
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Cinzel:wght@600;700&family=Courier+Prime:wght@400;700&family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+<style>
+  :root{
+    --paper:#ece3cf;
+    --paper-hi:#f4ecdb;
+    --paper-lo:#d8ccb1;
+    --ink:#1a1611;
+    --orange:#E85D22;
+    --black:#0A0A0A;
+    --ui-bg:rgba(14,14,14,.82);
+    --ui-fg:#f1ead8;
+    --ui-dim:rgba(241,234,216,.45);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:100%;height:100%;overflow:hidden;background:#1b1a18}
+  body{display:flex;align-items:center;justify-content:center;font-family:"Old Standard TT",Georgia,serif}
+
+  /* ---------- Stage (fixed 900x1200 = 3:4, scaled to fit by JS) ---------- */
+  #viewport{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+  #poster-stage{
+    position:relative;width:900px;height:1200px;flex:none;
+    transform-origin:50% 50%;perspective:1800px;
+  }
+  #sheet{
+    position:absolute;inset:0;overflow:hidden;background:var(--paper);
+    transform-origin:50% 0%;
+    box-shadow:0 30px 80px rgba(0,0,0,.55),0 4px 14px rgba(0,0,0,.4);
+  }
+  .layer{position:absolute;inset:0;pointer-events:none}
+
+  /* ---------- Layer 0: newspaper base ---------- */
+  #L0{
+    background:
+      radial-gradient(ellipse 120% 90% at 50% 45%, transparent 55%, rgba(90,62,28,.28) 100%),
+      radial-gradient(ellipse 60% 40% at 22% 18%, rgba(255,250,235,.55), transparent 70%),
+      radial-gradient(ellipse 50% 35% at 80% 75%, rgba(160,128,80,.12), transparent 70%),
+      linear-gradient(180deg,var(--paper-hi),var(--paper) 40%,var(--paper-lo));
+  }
+  #L0 svg{position:absolute;inset:0;width:100%;height:100%}
+  /* fold creases: vertical centre + horizontal half fold */
+  #creases{
+    background:
+      linear-gradient(90deg,transparent calc(50% - 3px),rgba(255,255,255,.35) calc(50% - 1px),rgba(70,50,25,.20) 50%,transparent calc(50% + 4px)),
+      linear-gradient(180deg,transparent calc(52% - 3px),rgba(255,255,255,.30) calc(52% - 1px),rgba(70,50,25,.18) 52%,transparent calc(52% + 4px)),
+      linear-gradient(90deg,transparent calc(25% - 1px),rgba(70,50,25,.05) 25%,transparent calc(25% + 2px)),
+      linear-gradient(90deg,transparent calc(75% - 1px),rgba(70,50,25,.05) 75%,transparent calc(75% + 2px));
+  }
+
+  /* ---------- Layer 1: technical framing ---------- */
+  #L1 svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+  .mono{font-family:"Courier Prime",monospace;fill:var(--ink)}
+  #crossWig,#crosshair{transform-box:fill-box;transform-origin:50% 50%}
+
+  /* ---------- Layer 2: newspaper columns ---------- */
+  #L2{mix-blend-mode:multiply}
+  .col{
+    position:absolute;top:96px;width:193px;height:806px;overflow:hidden;
+    color:var(--ink);font-size:10.4px;line-height:1.34;text-align:justify;
+    hyphens:auto;-webkit-hyphens:auto;letter-spacing:.005em;
+  }
+  .col .wrap{float:right;width:193px;height:806px}
+  .col.mirror .wrap{float:left}
+  .col h4{
+    font-family:"Oswald",sans-serif;font-weight:700;text-transform:uppercase;
+    font-size:15px;line-height:1.05;letter-spacing:.02em;text-align:left;margin:0 0 5px;
+  }
+  .col h5{font-family:"Old Standard TT",serif;font-style:italic;font-weight:400;font-size:11px;margin:0 0 6px;text-align:left;opacity:.85}
+  .col p{margin:0 0 6px;text-indent:1.1em}
+  .col p.lead:first-letter{float:left;font-size:34px;line-height:.86;padding:2px 3px 0 0;font-weight:700}
+  .col .rule{height:0;border-top:1px solid var(--ink);margin:6px 0 7px;opacity:.75}
+  .blk{will-change:transform,clip-path}
+
+  /* ---------- Layer 3: orange marker ---------- */
+  #L3{mix-blend-mode:multiply}
+  #patchWig{position:absolute;inset:0}
+  #patch{position:absolute;inset:0;width:100%;height:100%}
+
+  /* ---------- Layer 4: hero ---------- */
+  #heroShadow{position:absolute;inset:0;filter:drop-shadow(10px 14px 10px rgba(20,12,4,.35))}
+  #breath{position:absolute;inset:0;transform-origin:50% 92%}
+  .piece{position:absolute;inset:0}
+  .piece svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+  #torso{transform-origin:50% 85%}
+  #head{transform-origin:50% 54%}
+  /* image mode: same image in two clipped pieces so torso + head move independently */
+  .heroImg{
+    position:absolute;left:110px;top:230px;width:680px;height:690px;object-fit:contain;object-position:50% 100%;
+    filter:grayscale(1) contrast(1.45) brightness(1.04);display:none;
+  }
+  #imgTorso{clip-path:inset(46% 0 0 0)}
+  #imgHead{clip-path:inset(0 0 53.5% 0)}
+  body.has-image .heroImg{display:block}
+  body.has-image .vec{display:none}
+  #engraveLines{position:absolute;left:110px;top:230px;width:680px;height:690px;display:none;mix-blend-mode:screen;opacity:.22;
+    background:repeating-linear-gradient(-28deg,rgba(255,255,255,.0) 0 2px,rgba(240,232,214,.9) 2px 3px);
+    -webkit-mask-size:contain;mask-size:contain;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:50% 100%;mask-position:50% 100%}
+  body.has-image #engraveLines{display:block}
+  #sweep{position:absolute;left:110px;top:230px;width:680px;height:690px;mix-blend-mode:soft-light;overflow:hidden;
+    -webkit-mask-size:contain;mask-size:contain;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:50% 100%;mask-position:50% 100%}
+  #sweepBand{position:absolute;top:-10%;left:0;width:38%;height:120%;
+    background:linear-gradient(90deg,transparent,rgba(255,248,230,.85) 50%,transparent);transform:translateX(-120%) skewX(-14deg)}
+
+  /* ---------- Layer 5: footer title card ---------- */
+  #footer{
+    position:absolute;left:40px;top:908px;width:820px;height:206px;background:var(--black);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;
+  }
+  #title{display:flex;justify-content:center;font-family:"Anton","Oswald",Impact,sans-serif;font-size:124px;line-height:1;letter-spacing:.035em;height:128px;overflow:hidden}
+  #title .m{display:inline-block;overflow:hidden;height:128px}
+  #title .ch{display:inline-block}
+  #title .sp{width:.32em}
+  #divider{width:620px;height:2px;background:#fff;margin:8px 0 12px;transform-origin:50% 50%}
+  #subtitle{font-family:"Cinzel",serif;font-weight:700;font-size:25px;letter-spacing:.35em;padding-left:.35em;white-space:nowrap}
+
+  /* ---------- Layer 6: post-processing ---------- */
+  #grain{position:absolute;inset:0;width:100%;height:100%;opacity:.13;mix-blend-mode:overlay;image-rendering:pixelated}
+  #dust{position:absolute;inset:0}
+  .speck{position:absolute;border-radius:50%;background:rgba(30,22,12,.55)}
+  .hair{position:absolute;height:1px;background:rgba(30,22,12,.35);border-radius:1px}
+  #sheen{background:linear-gradient(115deg,transparent 30%,rgba(255,252,240,.10) 45%,transparent 60%);mix-blend-mode:screen}
+
+  /* ---------- Studio controls ---------- */
+  #ui{
+    position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:50;
+    display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:12px;
+    background:var(--ui-bg);color:var(--ui-fg);backdrop-filter:blur(8px);
+    font:500 12px/1 "Courier Prime",monospace;box-shadow:0 10px 30px rgba(0,0,0,.4);
+    transition:opacity .35s ease, transform .35s ease;width:min(640px,calc(100vw - 32px));
+  }
+  #ui.hidden{opacity:0;pointer-events:none;transform:translateX(-50%) translateY(14px)}
+  #ui button,#ui select{
+    background:transparent;color:var(--ui-fg);border:1px solid rgba(241,234,216,.22);border-radius:7px;
+    height:30px;min-width:30px;padding:0 9px;font:inherit;cursor:pointer;
+  }
+  #ui button:hover,#ui select:hover{border-color:var(--orange);color:#fff}
+  #ui select option{background:#151515}
+  #scrub{flex:1;min-width:60px;accent-color:var(--orange);cursor:pointer}
+  #tc{min-width:44px;text-align:right;color:var(--ui-dim)}
+  #hint{position:fixed;top:14px;right:16px;z-index:50;color:var(--ui-dim);font:12px "Courier Prime",monospace;transition:opacity .35s}
+  #hint.hidden{opacity:0}
+  #drop{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;background:rgba(232,93,34,.18);
+    border:3px dashed var(--orange);color:#fff;font:700 20px "Courier Prime",monospace}
+  body.dragging #drop{display:flex}
+  @media (max-width:520px){ #ui{gap:6px;padding:7px 8px} #tc{display:none} #ui button,#ui select{padding:0 6px} }
+</style>
+</head>
+<body>
+
+<div id="viewport">
+<div id="poster-stage">
+ <div id="sheet">
+
+  <!-- ===================== LAYER 0 — Textured newspaper base ===================== -->
+  <div id="L0" class="layer">
+    <svg viewBox="0 0 900 1200" preserveAspectRatio="none" aria-hidden="true">
+      <defs>
+        <filter id="paperGrain" x="0" y="0" width="100%" height="100%">
+          <feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="3" seed="7" result="n"/>
+          <feColorMatrix in="n" type="matrix" values="0 0 0 0 .36  0 0 0 0 .27  0 0 0 0 .15  0 0 0 .55 -.18"/>
+        </filter>
+        <filter id="paperFibre" x="0" y="0" width="100%" height="100%">
+          <feTurbulence type="fractalNoise" baseFrequency=".012 .09" numOctaves="2" seed="3" result="f"/>
+          <feColorMatrix in="f" type="matrix" values="0 0 0 0 .45  0 0 0 0 .35  0 0 0 0 .2  0 0 0 .5 -.2"/>
+        </filter>
+        <filter id="paperBlotch" x="0" y="0" width="100%" height="100%">
+          <feTurbulence type="fractalNoise" baseFrequency=".006" numOctaves="3" seed="11" result="b"/>
+          <feColorMatrix in="b" type="matrix" values="0 0 0 0 .55  0 0 0 0 .42  0 0 0 0 .22  0 0 0 .9 -.42"/>
+        </filter>
+      </defs>
+      <rect width="900" height="1200" filter="url(#paperBlotch)"/>
+      <rect width="900" height="1200" filter="url(#paperFibre)" opacity=".7"/>
+      <rect width="900" height="1200" filter="url(#paperGrain)"/>
+    </svg>
+    <div id="creases" class="layer"></div>
+  </div>
+
+  <!-- ===================== LAYER 2 — Newspaper columns (generated by JS) ===================== -->
+  <div id="L2" class="layer"></div>
+
+  <!-- ===================== LAYER 3 — Orange marker patch ===================== -->
+  <div id="L3" class="layer">
+    <div id="patchWig">
+      <svg id="patch" viewBox="0 0 900 1200" aria-hidden="true">
+        <defs>
+          <filter id="rough" x="-10%" y="-10%" width="120%" height="120%">
+            <feTurbulence type="fractalNoise" baseFrequency=".035" numOctaves="3" seed="4" result="t"/>
+            <feDisplacementMap in="SourceGraphic" in2="t" scale="16" xChannelSelector="R" yChannelSelector="G" result="d"/>
+            <feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="1" seed="9" result="g"/>
+            <feColorMatrix in="g" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -0.7 1.35" result="ga"/>
+            <feComposite in="d" in2="ga" operator="in"/>
+          </filter>
+        </defs>
+        <g filter="url(#rough)" fill="#E85D22">
+          <path d="M96,512 L208,478 L330,470 L462,452 L566,470 L548,520 L590,566 L556,628 L578,700 L520,744 L540,792 L408,810 L276,798 L168,812 L110,770 L132,712 L84,660 L118,604 Z"/>
+          <!-- dry-brush streaks off the edges -->
+          <path d="M70,560 L118,552 L114,566 L72,572 Z" opacity=".8"/>
+          <path d="M560,742 L640,736 L636,748 L562,754 Z" opacity=".7"/>
+          <path d="M180,812 L300,806 L298,818 L190,822 Z" opacity=".75"/>
+        </g>
+      </svg>
+    </div>
+  </div>
+
+  <!-- ===================== LAYER 4 — Engraved hero portrait ===================== -->
+  <div id="L4" class="layer">
+   <div id="heroShadow">
+    <div id="breath">
+
+      <!-- Torso piece -->
+      <div id="torso" class="piece">
+        <!-- IMAGE MODE: torso half of the supplied cut-out (src set by JS from HERO_IMAGE_SRC) -->
+        <img id="imgTorso" class="heroImg" alt="" />
+        <svg class="vec" viewBox="0 0 900 1200" aria-hidden="true">
+          <defs>
+            <pattern id="hatch" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(38)">
+              <line x1="0" y1="0" x2="0" y2="5" stroke="#15120e" stroke-width="1.6"/>
+            </pattern>
+            <pattern id="hatchFine" width="3.6" height="3.6" patternUnits="userSpaceOnUse" patternTransform="rotate(-30)">
+              <line x1="0" y1="0" x2="0" y2="3.6" stroke="#15120e" stroke-width="1"/>
+            </pattern>
+            <pattern id="hatchLight" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(-22)">
+              <line x1="0" y1="0" x2="0" y2="5" stroke="#efe6d2" stroke-width="1.1"/>
+            </pattern>
+            <filter id="stipple" x="0" y="0" width="100%" height="100%">
+              <feTurbulence type="fractalNoise" baseFrequency="1.4" numOctaves="1" seed="21" result="s"/>
+              <feColorMatrix in="s" type="matrix" values="0 0 0 0 .94  0 0 0 0 .9  0 0 0 0 .82  0 0 0 -9 5.2" result="dots"/>
+              <feComposite in="dots" in2="SourceGraphic" operator="in"/>
+            </filter>
+          </defs>
+          <!-- suit body (bottom hidden behind the footer) -->
+          <path d="M96,960 C108,846 158,748 246,700 C292,676 344,664 392,650 L450,712 L508,650 C556,664 608,676 654,700 C742,748 792,846 804,960 Z"
+                fill="#141210" stroke="#0a0a0a" stroke-width="3"/>
+          <!-- engraved highlight on the right shoulder + stipple texture on the cloth -->
+          <path d="M520,668 C600,684 690,724 742,800 C770,842 786,900 792,960 L700,960 C690,880 650,800 590,744 C562,718 536,700 520,668 Z" fill="url(#hatchLight)" opacity=".55"/>
+          <path d="M120,960 C130,880 170,800 230,750 C220,820 206,890 204,960 Z" fill="url(#hatchLight)" opacity=".28"/>
+          <rect x="96" y="640" width="708" height="320" fill="#000" filter="url(#stipple)" opacity=".18"
+                clip-path="path('M96,960 C108,846 158,748 246,700 C292,676 344,664 392,650 L450,712 L508,650 C556,664 608,676 654,700 C742,748 792,846 804,960 Z')"/>
+          <!-- shirt V -->
+          <path d="M396,652 L450,780 L504,652 L478,640 L450,690 L422,640 Z" fill="#efe6d2" stroke="#15120e" stroke-width="2"/>
+          <path d="M396,652 L450,780 L432,700 Z" fill="url(#hatchFine)" opacity=".7"/>
+          <!-- tie -->
+          <path d="M438,690 L462,690 L470,708 L460,722 L478,900 L450,940 L422,900 L440,722 L430,708 Z" fill="#0d0b09" stroke="#0a0a0a" stroke-width="1.5"/>
+          <path d="M455,726 L470,900 L458,914 Z" fill="url(#hatchLight)" opacity=".45"/>
+          <!-- lapels -->
+          <path d="M392,650 L450,780 L420,900 L360,760 L330,720 L372,706 Z" fill="#1c1915" stroke="#efe6d2" stroke-width="1.2" stroke-opacity=".5"/>
+          <path d="M508,650 L450,780 L480,900 L540,760 L570,720 L528,706 Z" fill="#1c1915" stroke="#efe6d2" stroke-width="1.2" stroke-opacity=".5"/>
+          <path d="M512,664 L548,724 L520,806 Z" fill="url(#hatchLight)" opacity=".5"/>
+          <!-- pocket square hint -->
+          <path d="M590,790 L640,782 L644,792 L594,800 Z" fill="#efe6d2" opacity=".8"/>
+        </svg>
+      </div>
+
+      <!-- Head piece (neck + head + hair) -->
+      <div id="head" class="piece">
+        <!-- IMAGE MODE: head half of the supplied cut-out -->
+        <img id="imgHead" class="heroImg" alt="" />
+        <svg class="vec" viewBox="0 0 900 1200" aria-hidden="true">
+          <defs>
+            <clipPath id="faceClip"><path d="M352,402 C350,320 396,286 452,286 C512,286 556,326 552,404 C550,476 532,540 494,574 C474,592 428,592 408,574 C370,540 354,474 352,402 Z"/></clipPath>
+          </defs>
+          <!-- neck -->
+          <path d="M404,548 L496,548 L506,650 L450,712 L394,650 Z" fill="#efe6d2" stroke="#15120e" stroke-width="2.2"/>
+          <path d="M404,548 L430,560 L436,660 L394,650 Z" fill="url(#hatch)" opacity=".9"/>
+          <path d="M404,600 L496,600 L500,630 L450,650 L400,630 Z" fill="url(#hatchFine)" opacity=".55"/>
+          <!-- collar -->
+          <path d="M392,636 L422,640 L450,690 L416,672 Z M508,636 L478,640 L450,690 L484,672 Z" fill="#efe6d2" stroke="#15120e" stroke-width="2"/>
+          <!-- ears -->
+          <path d="M354,410 C336,402 330,430 338,452 C344,470 356,476 362,470 Z" fill="#efe6d2" stroke="#15120e" stroke-width="2"/>
+          <path d="M548,410 C566,402 572,430 564,452 C558,470 546,476 540,470 Z" fill="#efe6d2" stroke="#15120e" stroke-width="2"/>
+          <!-- face -->
+          <path d="M352,402 C350,320 396,286 452,286 C512,286 556,326 552,404 C550,476 532,540 494,574 C474,592 428,592 408,574 C370,540 354,474 352,402 Z"
+                fill="#efe6d2" stroke="#15120e" stroke-width="2.4"/>
+          <g clip-path="url(#faceClip)">
+            <!-- dramatic side light: deep shadow on the left half -->
+            <path d="M340,280 L438,280 C420,330 410,380 418,440 C424,500 440,550 452,600 L340,600 Z" fill="url(#hatch)"/>
+            <path d="M340,280 L404,280 C392,350 388,430 404,520 L410,600 L340,600 Z" fill="url(#hatchFine)"/>
+            <!-- brow shadow band -->
+            <path d="M360,384 C400,368 500,366 548,384 L548,404 C500,392 400,394 360,406 Z" fill="url(#hatchFine)" opacity=".9"/>
+            <!-- eye sockets (abstract) -->
+            <ellipse cx="408" cy="414" rx="26" ry="11" fill="url(#hatch)"/>
+            <ellipse cx="498" cy="414" rx="24" ry="10" fill="url(#hatchFine)" opacity=".85"/>
+            <path d="M392,415 C402,410 416,410 424,415" stroke="#0e0c0a" stroke-width="2.4" fill="none"/>
+            <path d="M484,415 C494,410 506,410 514,415" stroke="#0e0c0a" stroke-width="2.4" fill="none"/>
+            <!-- nose shadow -->
+            <path d="M450,420 C446,450 438,474 440,486 C448,494 462,494 470,488" stroke="#15120e" stroke-width="2" fill="none"/>
+            <path d="M440,430 C436,456 430,476 438,490 L450,492 L446,430 Z" fill="url(#hatchFine)"/>
+            <!-- cheek hollow + mouth line -->
+            <path d="M378,470 C392,500 404,520 420,532 L404,540 C388,520 376,496 370,474 Z" fill="url(#hatch)" opacity=".7"/>
+            <path d="M424,528 C442,523 462,523 480,528" stroke="#0e0c0a" stroke-width="2.4" fill="none"/>
+            <path d="M432,546 C444,550 458,550 470,546" stroke="#15120e" stroke-width="1.2" fill="none" opacity=".7"/>
+            <!-- jaw shadow -->
+            <path d="M380,540 C410,590 490,590 524,540 L530,600 L376,600 Z" fill="url(#hatchFine)" opacity=".6"/>
+          </g>
+          <!-- hair: slicked back mass -->
+          <path d="M346,404 C334,330 366,270 424,256 C470,244 528,252 556,292 C574,318 566,370 556,404 C548,356 528,326 498,318 C470,312 440,322 412,318 C386,320 362,350 356,404 Z"
+                fill="#0f0d0b" stroke="#0a0a0a" stroke-width="2"/>
+          <path d="M420,268 C468,258 520,266 546,300 C520,286 476,280 440,286 Z" fill="url(#hatchLight)" opacity=".6"/>
+          <path d="M372,330 C384,300 404,284 428,276 C406,296 392,316 386,344 Z" fill="url(#hatchLight)" opacity=".35"/>
+        </svg>
+      </div>
+
+      <!-- slow cinematic light sweep across the face/figure -->
+      <div id="engraveLines"></div>
+      <div id="sweep"><div id="sweepBand"></div></div>
+    </div>
+   </div>
+  </div>
+
+  <!-- ===================== LAYER 1 — Technical framing (above columns, below footer) ===================== -->
+  <div id="L1" class="layer">
+    <svg viewBox="0 0 900 1200" aria-hidden="true">
+      <line id="hairTop" x1="40" y1="76" x2="860" y2="76" stroke="#1a1611" stroke-width="1.2"/>
+      <line id="hairTop2" x1="40" y1="82" x2="860" y2="82" stroke="#1a1611" stroke-width=".6"/>
+      <line id="hairBot" x1="40" y1="1134" x2="860" y2="1134" stroke="#1a1611" stroke-width="1.2"/>
+      <g id="crossWig">
+        <g id="crosshair">
+          <circle cx="450" cy="42" r="13" fill="none" stroke="#1a1611" stroke-width="1.4"/>
+          <line x1="450" y1="22" x2="450" y2="62" stroke="#1a1611" stroke-width="1.2"/>
+          <line x1="430" y1="42" x2="470" y2="42" stroke="#1a1611" stroke-width="1.2"/>
+          <circle cx="450" cy="42" r="3" fill="#1a1611"/>
+        </g>
+      </g>
+      <text id="serialTop" class="mono" x="860" y="50" text-anchor="end" font-size="15" font-weight="700" letter-spacing="1.5">SER1A367882</text>
+      <text class="mono" x="40" y="50" font-size="11" letter-spacing="2" opacity=".75" id="edition">VOL. LXXII · No. 1972</text>
+      <g id="barcode"></g>
+      <text id="serialBot" class="mono" x="860" y="1190" text-anchor="end" font-size="12" letter-spacing="2.4">5605120014003</text>
+      <text class="mono" x="40" y="1160" font-size="10.5" letter-spacing="2" opacity=".7" id="footNote">PRINTED ON NEWSPRINT · EDITION 01</text>
+    </svg>
+  </div>
+
+  <!-- ===================== LAYER 5 — Brutalist title card ===================== -->
+  <div id="footer">
+    <div id="title"></div>
+    <div id="divider"></div>
+    <div id="subtitle">THE GODFATHER</div>
+  </div>
+
+  <!-- ===================== LAYER 6 — Tactile post-processing ===================== -->
+  <div id="L6" class="layer">
+    <div id="sheen" class="layer"></div>
+    <div id="dust"></div>
+    <canvas id="grain" width="300" height="400"></canvas>
+  </div>
+
+ </div>
+</div>
+</div>
+
+<!-- ===================== Studio controls ===================== -->
+<div id="ui">
+  <button id="bPlay" title="Play / Pause (Space)">❚❚</button>
+  <button id="bReplay" title="Replay assembly (R)">↺</button>
+  <select id="speed" title="Speed">
+    <option value="0.5">0.5x</option>
+    <option value="1" selected>1x</option>
+    <option value="1.5">1.5x</option>
+  </select>
+  <input id="scrub" type="range" min="0" max="1000" value="0" step="1" title="Timeline">
+  <span id="tc">0.00s</span>
+  <button id="bImg" title="Load hero image (I)">IMG</button>
+</div>
+<div id="hint">H — hide controls · drop a PNG cut-out to replace the figure</div>
+<div id="drop">DROP THE PORTRAIT CUT-OUT</div>
+<input id="file" type="file" accept="image/*" hidden>
+
+<script>
+/* ============================================================================
+   HERO IMAGE SOURCE
+   Paste a URL or a Base64 data URI here, e.g.
+     const HERO_IMAGE_SRC = "data:image/png;base64,iVBORw0KGgo...";
+   Best result: a transparent PNG cut-out of the subject (chest-up, centred).
+   Leave empty to use the built-in vector engraved fallback figure.
+   ============================================================================ */
+const HERO_IMAGE_SRC = "";
+
+(function(){
+"use strict";
+gsap.registerPlugin(CustomEase);
+
+/* ---------- custom eases ---------- */
+CustomEase.create("slam",    "M0,0 C0.12,0.78 0.2,1.08 0.36,1.06 0.5,1.03 0.62,0.99 1,1");
+CustomEase.create("press",   "M0,0 C0.25,0 0.25,1 0.5,1 0.75,1 0.8,1 1,1");
+CustomEase.create("slash",   "M0,0 C0.08,0.6 0.18,0.92 0.36,0.98 0.6,1 0.8,1 1,1");
+
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+
+/* ---------- deterministic RNG (so every reload/seek looks identical) ---------- */
+function rng(seed){ return function(){ seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+
+/* ---------- stage fit ---------- */
+const stage = $("#poster-stage");
+function fit(){
+  const s = Math.min(window.innerWidth / 900, window.innerHeight / 1200) * 0.94;
+  stage.style.transform = `scale(${s})`;
+}
+window.addEventListener("resize", fit); fit();
+
+/* ============================ LAYER 2: columns ============================ */
+const WORDS = ("lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua enim ad minim veniam quis nostrud exercitation ullamco laboris nisi aliquip ex ea commodo consequat duis aute irure in reprehenderit voluptate velit esse cillum fugiat nulla pariatur excepteur sint occaecat cupidatat non proident sunt culpa qui officia deserunt mollit anim id est laborum curabitur pretium tincidunt lacus nulla gravida orci a odio nullam varius turpis et commodo pharetra est eros bibendum elit nec luctus magna felis sollicitudin mauris integer").split(" ");
+function sentence(r, n){
+  let s = []; for(let i=0;i<n;i++) s.push(WORDS[Math.floor(r()*WORDS.length)]);
+  s[0] = s[0][0].toUpperCase() + s[0].slice(1);
+  if(n > 9) s[Math.floor(n/2)] += ",";
+  return s.join(" ") + ".";
+}
+function para(r){ let out=[]; const k = 2 + Math.floor(r()*3); for(let i=0;i<k;i++) out.push(sentence(r, 7 + Math.floor(r()*10))); return out.join(" "); }
+
+/* Silhouette edge (stage coords) used for shape-outside wrapping.
+   Columns 2/3 hug the head + shoulders; columns 1/4 hug the outer shoulders. */
+const COLS = [
+  { x:40,  mirror:false, shape:"polygon(193px 0, 193px 806px, 92px 806px, 128px 712px, 176px 640px, 193px 616px)" },
+  { x:249, mirror:false, shape:"polygon(193px 0, 193px 806px, 0 806px, 0 680px, 48px 612px, 128px 568px, 146px 552px, 150px 486px, 118px 446px, 92px 380px, 88px 300px, 98px 214px, 128px 166px, 172px 146px, 193px 144px)" },
+  { x:458, mirror:true },
+  { x:667, mirror:true }
+];
+// mirror shapes for right-hand columns
+function mirrorPoly(p){ return p.replace(/polygon\((.*)\)/, (m, pts) => "polygon(" + pts.split(",").map(pt => { const [x,y] = pt.trim().split(/\s+/); const v = 193 - parseFloat(x); return `${v}px ${y}`; }).join(", ") + ")"); }
+COLS[2].shape = mirrorPoly(COLS[1].shape);
+COLS[3].shape = mirrorPoly(COLS[0].shape);
+
+const HEADS = [
+  ["Lorem Ipsum Dolor Sit", "Amet consectetur, from our correspondent"],
+  ["Consectetur Elit Sed", "Tempor incididunt in the old quarter"],
+  ["Magna Aliqua Veniam", "Quis nostrud exercitation, late edition"],
+  ["Duis Aute Irure Dolor", "Reprehenderit in voluptate, continued"]
+];
+const L2 = $("#L2");
+COLS.forEach((c, ci) => {
+  const r = rng(101 + ci * 17);
+  const col = document.createElement("div");
+  col.className = "col" + (c.mirror ? " mirror" : "");
+  col.style.left = c.x + "px";
+  const wrap = document.createElement("div");
+  wrap.className = "wrap"; wrap.style.shapeOutside = c.shape; wrap.style.webkitShapeOutside = c.shape;
+  col.appendChild(wrap);
+  let html = `<div class="blk"><h4>${HEADS[ci][0]}</h4><h5>${HEADS[ci][1]}</h5></div>`;
+  for(let i=0;i<14;i++){
+    if(i === 6) html += `<div class="blk"><div class="rule"></div><h4 style="font-size:12px">${sentence(r,3).replace(".","")}</h4></div>`;
+    html += `<div class="blk"><p class="${i===0?"lead":""}">${para(r)}</p></div>`;
+  }
+  col.insertAdjacentHTML("beforeend", html);
+  L2.appendChild(col);
+});
+
+/* ============================ LAYER 1: barcode ============================ */
+(function(){
+  const g = $("#barcode"), r = rng(5605120014003 % 99991);
+  let x = 760, svg = "";
+  while(x < 860){
+    const w = [1,1,1.6,2.2,3][Math.floor(r()*5)];
+    if(r() > .38) svg += `<rect x="${x.toFixed(1)}" y="1142" width="${w}" height="34" fill="#1a1611"/>`;
+    x += w + (r() > .5 ? 1 : 1.8);
+  }
+  // guard bars
+  svg += `<rect x="758" y="1142" width="1.2" height="38" fill="#1a1611"/><rect x="861" y="1142" width="1.2" height="38" fill="#1a1611"/>`;
+  g.innerHTML = svg;
+})();
+
+/* ============================ LAYER 5: title letters ============================ */
+$("#title").innerHTML = "AL PACINO".split("").map(ch =>
+  ch === " " ? `<span class="m sp"></span>` : `<span class="m"><span class="ch">${ch}</span></span>`
+).join("");
+
+/* ============================ LAYER 6: dust ============================ */
+const dust = $("#dust"), dr = rng(77), specks = [];
+for(let i=0;i<26;i++){
+  const d = document.createElement("div");
+  const isHair = dr() > .78;
+  d.className = isHair ? "hair" : "speck";
+  const s = isHair ? 8 + dr()*18 : 1 + dr()*2.6;
+  d.style.width = s + "px"; if(!isHair) d.style.height = s + "px";
+  d.style.left = (dr()*900) + "px"; d.style.top = (dr()*1200) + "px";
+  if(isHair) d.style.transform = `rotate(${dr()*180}deg)`;
+  d.style.opacity = 0;
+  dust.appendChild(d); specks.push(d);
+}
+
+/* ============================ grain (12 fps) ============================ */
+const gc = $("#grain"), gx = gc.getContext("2d"), gimg = gx.createImageData(gc.width, gc.height);
+function grain(){
+  const d = gimg.data;
+  for(let i=0;i<d.length;i+=4){ const v = Math.random()*255|0; d[i]=d[i+1]=d[i+2]=v; d[i+3]=255; }
+  gx.putImageData(gimg, 0, 0);
+}
+grain(); setInterval(grain, 1000/12);
+
+/* ============================ Hero image handling ============================ */
+function setHeroImage(src){
+  if(!src) return;
+  const a = $("#imgTorso"), b = $("#imgHead");
+  a.src = src; b.src = src;
+  const m = `url("${src}")`;
+  [$("#engraveLines"), $("#sweep")].forEach(el => { el.style.webkitMaskImage = m; el.style.maskImage = m; });
+  document.body.classList.add("has-image");
+}
+// In vector mode the sweep is masked to the figure silhouette via an inline SVG mask
+(function(){
+  const sil = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='110 230 680 690'><path d='M346,404 C334,330 366,270 424,256 C470,244 528,252 556,292 C574,318 566,370 556,404 C552,476 532,540 496,560 L506,650 C556,664 608,676 654,700 C742,748 792,846 804,960 L96,960 C108,846 158,748 246,700 C292,676 344,664 394,650 L404,560 C370,540 352,476 346,404 Z' fill='black'/></svg>`;
+  const m = `url("data:image/svg+xml;utf8,${encodeURIComponent(sil)}")`;
+  const sw = $("#sweep"); sw.style.webkitMaskImage = m; sw.style.maskImage = m;
+  sw.style.webkitMaskSize = sw.style.maskSize = "100% 100%";
+})();
+setHeroImage(HERO_IMAGE_SRC);
+
+/* ============================================================================
+   MASTER TIMELINE (4.5 s) — every tween is a fromTo, so seeking is exact.
+   ============================================================================ */
+const tl = gsap.timeline({ paused:true });
+const SCRAMBLE = "ABCDEFGHJKLMNPQRSTUVWXYZ0123456789#/";
+function scrambleTween(el, final, at, dur, seed){
+  const proxy = { p:0 };
+  tl.fromTo(proxy, { p:0 }, { p:1, duration:dur, ease:"none", onUpdate(){
+    const p = proxy.p, r = rng(seed + Math.floor(p*24)), n = final.length, lock = Math.floor(p * n * 1.1);
+    let s = ""; for(let i=0;i<n;i++) s += i < lock ? final[i] : SCRAMBLE[Math.floor(r()*SCRAMBLE.length)];
+    el.textContent = p >= 1 ? final : s;
+  }}, at);
+}
+function drawLine(sel, at, dur, ease){
+  const el = $(sel), len = el.getTotalLength ? el.getTotalLength() : 820;
+  el.style.strokeDasharray = len;
+  tl.fromTo(el, { strokeDashoffset:len }, { strokeDashoffset:0, duration:dur, ease }, at);
+}
+
+/* ---- Phase 1: paper & grid calibration (0.0 – 0.9) ---- */
+tl.fromTo("#sheet", { rotationX:6, scale:1.04, y:-18, opacity:0 }, { rotationX:0, scale:1, y:0, opacity:1, duration:0.9, ease:"power3.out" }, 0);
+tl.fromTo("#creases", { opacity:1 }, { opacity:.55, duration:0.9, ease:"power2.out" }, 0);
+drawLine("#hairTop", 0.15, 0.6, "power2.inOut");
+drawLine("#hairTop2", 0.25, 0.6, "power2.inOut");
+drawLine("#hairBot", 0.3, 0.6, "power2.inOut");
+tl.fromTo("#crosshair", { rotation:-90, scale:1.6, opacity:0 }, { rotation:0, scale:1, opacity:1, duration:0.42, ease:"steps(4)" }, 0.35);
+tl.fromTo("#crosshair", { scale:1.12 }, { scale:1, duration:0.12, ease:"power4.out" }, 0.77); // mechanical tick
+tl.fromTo(["#serialTop","#serialBot","#edition","#footNote"], { opacity:0 }, { opacity:1, duration:0.05, stagger:0.05 }, 0.3);
+scrambleTween($("#serialTop"), "SER1A367882", 0.3, 0.6, 11);
+scrambleTween($("#serialBot"), "5605120014003", 0.4, 0.55, 23);
+tl.fromTo("#barcode rect", { scaleY:0, transformOrigin:"50% 100%" }, { scaleY:1, duration:0.18, stagger:{ each:0.006, from:"random" }, ease:"power2.out" }, 0.45);
+
+/* ---- Phase 2: typewriter / column cascade (0.6 – 1.8) ---- */
+$$(".col").forEach((col, ci) => {
+  const blks = col.querySelectorAll(".blk");
+  tl.fromTo(blks,
+    { clipPath:"inset(0 0 100% 0)", y:6, opacity:0 },
+    { clipPath:"inset(0 0 0% 0)", y:0, opacity:1, duration:0.32, ease:"press", stagger:0.04 },
+    0.6 + ci * 0.06);
+});
+
+/* ---- Phase 3: aggressive marker slash (1.5 – 2.2) ---- */
+tl.fromTo("#patch", { clipPath:"polygon(0 0, 0 0, -6% 100%, -6% 100%)" },
+                    { clipPath:"polygon(0 0, 106% 0, 100% 100%, -6% 100%)", duration:0.7, ease:"expo.out" }, 1.5);
+tl.fromTo("#patchWig", { x:-14, skewX:-6 }, { x:0, skewX:0, duration:0.5, ease:"expo.out" }, 1.5);
+
+/* ---- Phase 4: collage cut-out hero assembly (1.9 – 3.2) ---- */
+tl.fromTo("#torso", { yPercent:22, rotation:-2, opacity:0 }, { yPercent:0, rotation:0, opacity:1, duration:0.8, ease:"power3.out" }, 1.9);
+tl.fromTo("#torso", { rotation:0 }, { rotation:0.6, duration:0.08, ease:"steps(1)", yoyo:true, repeat:1 }, 2.7); // paper settle jolt
+tl.fromTo("#head", { y:-46, rotation:5, opacity:0 }, { y:0, rotation:0, opacity:1, duration:0.5, ease:"steps(5)" }, 2.45);
+tl.fromTo("#heroShadow", { filter:"drop-shadow(26px 34px 18px rgba(20,12,4,.0))" },
+                         { filter:"drop-shadow(10px 14px 10px rgba(20,12,4,.35))", duration:0.5, ease:"power2.out" }, 2.7);
+
+/* ---- Phase 5: title slam & kinetic typography (2.8 – 4.2) ---- */
+tl.fromTo("#footer", { yPercent:230 }, { yPercent:0, duration:0.6, ease:"slam" }, 2.8);
+tl.fromTo("#sheet", { y:0 }, { y:3, duration:0.06, ease:"power1.out", yoyo:true, repeat:1 }, 3.2); // impact bump
+tl.fromTo("#title .ch", { yPercent:110 }, { yPercent:0, duration:0.6, ease:"power4.out", stagger:0.05 }, 3.15);
+tl.fromTo("#divider", { scaleX:0 }, { scaleX:1, duration:0.6, ease:"expo.inOut" }, 3.5);
+tl.fromTo("#subtitle", { opacity:0, letterSpacing:"0.1em", paddingLeft:"0.1em" },
+                       { opacity:1, letterSpacing:"0.35em", paddingLeft:"0.35em", duration:0.8, ease:"power3.out" }, 3.7);
+tl.fromTo("#dust", { opacity:0 }, { opacity:1, duration:0.6 }, 3.8);
+tl.fromTo(".speck,.hair", { opacity:0 }, { opacity:(i)=> .3 + (i%5)*.12, duration:.4, stagger:.01 }, 3.8);
+tl.to({}, { duration:0.0001 }, 4.5); // pin length to 4.5 s
+
+/* ============================================================================
+   PHASE 6 — ambient life-motion (starts when the assembly completes)
+   Applied to wrapper elements only, so it never fights the entrance tweens.
+   ============================================================================ */
+let amb = null, wiggleCall = null, ambientOn = false;
+function stepWiggle(){
+  if(!ambientOn) return;
+  const j = () => (Math.random()*2-1);
+  gsap.set("#patchWig", { x:j()*0.4, y:j()*0.4, rotation:j()*0.2, transformOrigin:"30% 50%" });
+  gsap.set("#crossWig", { x:j()*0.4, y:j()*0.4, rotation:j()*0.2 });
+  wiggleCall = gsap.delayedCall(1/8, stepWiggle); // 8 fps stop-motion
+}
+function startAmbient(){
+  stopAmbient();
+  ambientOn = true;
+  amb = gsap.timeline();
+  amb.add(gsap.to("#breath", { scaleY:1.008, y:-2, duration:4.5, ease:"sine.inOut", yoyo:true, repeat:-1 }), 0);
+  amb.add(gsap.to("#head", { rotation:0.5, duration:6.2, ease:"sine.inOut", yoyo:true, repeat:-1 }), 0);
+  amb.add(gsap.fromTo("#heroShadow", { filter:"drop-shadow(10px 14px 10px rgba(20,12,4,.35))" },
+                      { filter:"drop-shadow(14px 18px 16px rgba(20,12,4,.52))", duration:3.2, ease:"sine.inOut", yoyo:true, repeat:-1 }), 0);
+  amb.add(gsap.fromTo("#sweepBand", { xPercent:-120 }, { xPercent:320, duration:3.4, ease:"power1.inOut", repeat:-1, repeatDelay:3.6 }), 0.6);
+  amb.add(gsap.fromTo("#sheen", { backgroundPosition:"-900px 0" }, { backgroundPosition:"900px 0", duration:9, ease:"none", repeat:-1 }), 0);
+  specks.forEach((s, i) => {
+    amb.add(gsap.to(s, { x:"+=" + (8 + (i%4)*6), y:"-=" + (10 + (i%3)*8), duration:7 + (i%5), ease:"sine.inOut", yoyo:true, repeat:-1 }), 0);
+  });
+  amb.timeScale(tl.timeScale());
+  stepWiggle();
+}
+function stopAmbient(){
+  ambientOn = false;
+  if(wiggleCall) wiggleCall.kill();
+  if(amb){ amb.kill(); amb = null; }
+  gsap.set(["#breath","#patchWig","#crossWig"], { clearProps:"transform" });
+  gsap.set("#head", { rotation:0 });
+  gsap.set("#sweepBand", { xPercent:-120 });
+  specks.forEach(s => gsap.set(s, { x:0, y:0 }));
+}
+
+/* ============================ controls ============================ */
+const bPlay = $("#bPlay"), scrub = $("#scrub"), tc = $("#tc");
+let scrubbing = false;
+function syncPlay(){ const playing = (!tl.paused() && tl.progress() < 1) || (tl.progress() >= 1 && amb && !amb.paused()); bPlay.textContent = playing ? "❚❚" : "▶"; }
+tl.eventCallback("onUpdate", () => {
+  if(!scrubbing) scrub.value = Math.round(tl.progress() * 1000);
+  tc.textContent = tl.time().toFixed(2) + "s";
+});
+tl.eventCallback("onComplete", () => { startAmbient(); syncPlay(); });
+
+function togglePlay(){
+  if(tl.progress() >= 1){
+    if(amb){ amb.paused(!amb.paused()); ambientOn = !amb.paused(); if(ambientOn) stepWiggle(); }
+    else startAmbient();
+  } else {
+    tl.paused(!tl.paused());
+  }
+  syncPlay();
+}
+function replay(){ stopAmbient(); tl.restart(); syncPlay(); }
+bPlay.onclick = togglePlay;
+$("#bReplay").onclick = replay;
+$("#speed").onchange = e => { const v = parseFloat(e.target.value); tl.timeScale(v); if(amb) amb.timeScale(v); };
+scrub.addEventListener("input", () => {
+  scrubbing = true; stopAmbient();
+  tl.pause(); tl.progress(scrub.value / 1000);
+  tc.textContent = tl.time().toFixed(2) + "s";
+  syncPlay();
+});
+scrub.addEventListener("change", () => { scrubbing = false; if(tl.progress() >= 1) startAmbient(); syncPlay(); });
+
+/* hide / auto-hide */
+const ui = $("#ui"), hint = $("#hint");
+let forcedHidden = false, idleT = null;
+function showUI(){ if(forcedHidden) return; ui.classList.remove("hidden"); hint.classList.remove("hidden"); clearTimeout(idleT); idleT = setTimeout(() => { ui.classList.add("hidden"); hint.classList.add("hidden"); }, 2600); }
+window.addEventListener("mousemove", showUI);
+window.addEventListener("touchstart", showUI, { passive:true });
+window.addEventListener("keydown", e => {
+  const k = e.key.toLowerCase();
+  if(k === "h"){ forcedHidden = !forcedHidden; ui.classList.toggle("hidden", forcedHidden); hint.classList.toggle("hidden", forcedHidden); if(!forcedHidden) showUI(); }
+  else if(k === " "){ e.preventDefault(); togglePlay(); }
+  else if(k === "r"){ replay(); }
+  else if(k === "i"){ $("#file").click(); }
+});
+
+/* image loading: picker + drag & drop */
+function loadFile(f){ if(!f || !f.type.startsWith("image/")) return; const r = new FileReader(); r.onload = () => { setHeroImage(r.result); replay(); }; r.readAsDataURL(f); }
+$("#bImg").onclick = () => $("#file").click();
+$("#file").onchange = e => loadFile(e.target.files[0]);
+window.addEventListener("dragover", e => { e.preventDefault(); document.body.classList.add("dragging"); });
+window.addEventListener("dragleave", e => { if(e.target === $("#drop")) document.body.classList.remove("dragging"); });
+window.addEventListener("drop", e => { e.preventDefault(); document.body.classList.remove("dragging"); loadFile(e.dataTransfer.files[0]); });
+
+/* expose for debugging / frame capture */
+window.posterTL = tl;
+
+/* start once fonts are ready so the column layout is final */
+const go = () => { tl.play(0); showUI(); };
+(document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(() => setTimeout(go, 150));
+})();
+</script>
+</body>
+</html>
