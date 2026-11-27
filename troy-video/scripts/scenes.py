@@ -68,7 +68,7 @@ S.append(dict(src='s04', t0=47.6, t1=60.6, els=common([248, 10, 1402, 137], [330
    dict(k='char', n='warrior', box=[0, 92, 562, 702]),
    dict(k='char', n='book', box=[318, 138, 1162, 548]),
    dict(k='shape', n='timeline', box=[528, 528, 1515, 602]),
-   dict(k='shape', n='years', box=[522, 584, 1402, 642]),
+   dict(k='line', n='years', box=[522, 584, 1402, 642], key='cream', fill=True),
    dict(k='shape', n='y10', box=[1422, 584, 1508, 642]),
    dict(k='piece', n='callout', box=[1208, 398, 1578, 528], mask='red'),
    dict(k='text', n='callt', box=[1230, 412, 1555, 468], rm='light', s='السنة 10 من الحصار', role=L),

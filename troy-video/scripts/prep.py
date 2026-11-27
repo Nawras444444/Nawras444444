@@ -24,14 +24,14 @@ u8 = lambda m: (m > 0).astype(np.uint8) * 255
 def inpaint(img, mask):
     """LaMa per connected region, with context, at 512."""
     img = img.copy(); mask = u8(mask)
-    n, lab, st, _ = cv2.connectedComponentsWithStats(cv2.dilate(mask, k(25)))
+    n, lab, st, _ = cv2.connectedComponentsWithStats(cv2.dilate(mask, k(9)))
     for i in range(1, n):
         x, y, w, h = st[i, :4]
         reg = (lab == i) & (mask > 0)
         if not reg.any(): continue
         if reg.sum() < 2500:
             img = cv2.inpaint(img, u8(reg), 5, cv2.INPAINT_TELEA); continue
-        s = int(max(w, h) * 1.6 + 96); cx, cy = x + w // 2, y + h // 2
+        s = int(max(w, h) * 1.35 + 80); cx, cy = x + w // 2, y + h // 2
         x0, y0 = max(0, cx - s // 2), max(0, cy - s // 2); x1, y1 = min(W, x0 + s), min(H, y0 + s)
         x0, y0 = max(0, x1 - s), max(0, y1 - s)
         crop = img[y0:y1, x0:x1]; mc = u8(reg[y0:y1, x0:x1])
@@ -53,6 +53,7 @@ def boxmask(b):
 def key(img, b, kind, excl=(), fill=False):
     I = img.astype(np.int32); R, G, B = I[..., 0], I[..., 1], I[..., 2]
     if kind == 'red': m = (R > 120) & (G < 95) & (B < 95) & (R - G > 55)
+    elif kind == 'cream': m = (R > 200) & (G > 180) & (B > 130) & (R - B < 90)
     elif kind == 'redline': m = (R > 165) & (G < 60) & (B < 60)
     else: m = (I.min(axis=2) > 200) & (I.max(axis=2) - I.min(axis=2) < 45)
     m = u8(m) & boxmask(b)
@@ -129,7 +130,7 @@ def run(sc):
         if e['k'] == 'text': tm |= textmask(img, e['box'], e['rm'])
     A = inpaint(img, tm)
     # sprites from A
-    fg = np.zeros((H, W), np.uint8)
+    fg = np.zeros((H, W), np.uint8); masks = []
     for e in els:
         b = e['box']; n = e['n']
         if e['k'] in ('char', 'shape'):
@@ -144,8 +145,10 @@ def run(sc):
         elif e['k'] == 'piece' and e['mask'] == 'red':
             a = cv2.GaussianBlur(fillred(A, b), (0, 0), .8)
         else: continue
-        save(path, A, a, meta, n); fg |= u8(a > 40)
-    B = inpaint(A, cv2.dilate(fg, k(9)))
+        save(path, A, a, meta, n); fg |= u8(a > 40); masks.append(u8(a > 40))
+    B = A.copy()
+    for m in sorted(masks, key=lambda m: m.sum()):
+        B = inpaint(B, cv2.dilate(m, k(9)))
     # pieces from B
     pieces = []
     for e in els:

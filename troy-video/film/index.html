@@ -44,10 +44,10 @@ function build(sc,si){
   // 1) background: base, then each real piece, each from a new side
   const base=mkImg(cam,sc.id,'base',[0,0,1672,941]);
   S.base=add(base,NORO.pick('outside',{techs:BASE_T,ease:'quint'}),t,1.0,.9);S.baseItem=S.items[0];t+=0.55;
-  for(const e of sc.els.filter(e=>e.k==='piece')){const sp=mkImg(cam,sc.id,e.n,e.r);const sp2=NORO.pick('outside',{techs:PIECE_T});needCanvas(cam,sp,sp2);add(sp,sp2,t,0.95,.6);t+=0.38}
-  t+=0.3;
+  for(const e of sc.els.filter(e=>e.k==='piece')){const sp=mkImg(cam,sc.id,e.n,e.r);const sp2=NORO.pick('outside',{techs:PIECE_T});needCanvas(cam,sp,sp2);add(sp,sp2,t,0.85,.6);t+=0.26}
+  t+=0.12;
   // 2) characters
-  for(const e of sc.els.filter(e=>e.k==='char')){const sp=mkImg(cam,sc.id,e.n,e.r,'sh');add(sp,NORO.pick('outside',{techs:['slide','arc','slam','flip','zoom','stretch','stop']}),t,1.2,1);S.chars.push(sp);t+=0.6}
+  for(const e of sc.els.filter(e=>e.k==='char')){const sp=mkImg(cam,sc.id,e.n,e.r,'sh');add(sp,NORO.pick('outside',{techs:['slide','arc','slam','flip','zoom','stretch','stop']}),t,1.1,1);S.chars.push(sp);t+=0.4}
   t+=0.25;
   // 3) shapes & symbols: arrive / hidden-then-appear / form, rotating
   const mix=['outside','reveal','form'];let mi=0;let lastGrp=null;
