@@ -1,0 +1,65 @@
+<template>
+  <style>
+#root{position:absolute;inset:0;overflow:hidden;background:#050A14}
+.grad{position:absolute;inset:0;background:radial-gradient(ellipse 80% 45% at 50% 32%,#123058 0%,#0A1A33 45%,#050A14 80%)}
+.floorw{position:absolute;left:-540px;right:-540px;bottom:-200px;height:1100px;perspective:700px;perspective-origin:50% 0%}
+.floor{position:absolute;inset:0;transform:rotateX(72deg);transform-origin:50% 0%;background-image:linear-gradient(rgba(56,198,244,.35) 2px,transparent 2px),linear-gradient(90deg,rgba(56,198,244,.35) 2px,transparent 2px);background-size:90px 90px;-webkit-mask-image:linear-gradient(180deg,transparent,#000 35%,#000);mask-image:linear-gradient(180deg,transparent,#000 35%,#000)}
+.horizon{position:absolute;left:0;right:0;top:1150px;height:4px;background:linear-gradient(90deg,transparent,#38C6F4,#F5B544,#38C6F4,transparent);box-shadow:0 0 40px #38C6F4;opacity:.6}
+.dust{position:absolute;border-radius:50%;opacity:.7}
+.fl{position:absolute;opacity:.22;filter:blur(1.5px)}
+.fl img{width:100%;height:100%;object-fit:contain}
+.vign{position:absolute;inset:0;background:radial-gradient(ellipse 75% 60% at 50% 45%,transparent 55%,rgba(0,0,0,.75))}
+.prog{position:absolute;left:0;top:0;width:1080px;height:8px;background:linear-gradient(90deg,#38C6F4,#F5B544);transform-origin:0 50%;box-shadow:0 0 20px #38C6F4}
+.flash{position:absolute;inset:0}
+.burst{position:absolute;left:40px;top:300px;width:1000px;height:1000px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.9),rgba(56,198,244,.5) 25%,transparent 60%);opacity:0}
+.beam{position:absolute;left:0;top:780px;width:1080px;height:6px;background:linear-gradient(90deg,transparent,#fff,transparent);opacity:0}
+</style>
+  <div id="root" data-composition-id="bg" data-width="1080" data-height="1920">
+    <div class="grad"></div>
+    <div class="floorw" data-layout-allow-overflow><div class="floor" id="bg-floor"></div></div>
+    <div class="horizon" id="bg-horizon"></div>
+    <i class="dust" style="left:343px;top:801px;width:3px;height:3px;background:#F5B544;box-shadow:0 0 9px #F5B544"></i><i class="dust" style="left:470px;top:376px;width:10px;height:10px;background:#38C6F4;box-shadow:0 0 30px #38C6F4"></i><i class="dust" style="left:777px;top:483px;width:3px;height:3px;background:#38C6F4;box-shadow:0 0 9px #38C6F4"></i><i class="dust" style="left:261px;top:1843px;width:6px;height:6px;background:#F5B544;box-shadow:0 0 18px #F5B544"></i><i class="dust" style="left:715px;top:1866px;width:6px;height:6px;background:#38C6F4;box-shadow:0 0 18px #38C6F4"></i><i class="dust" style="left:214px;top:959px;width:8px;height:8px;background:#38C6F4;box-shadow:0 0 24px #38C6F4"></i><i class="dust" style="left:522px;top:341px;width:4px;height:4px;background:#F5B544;box-shadow:0 0 12px #F5B544"></i><i class="dust" style="left:861px;top:305px;width:6px;height:6px;background:#38C6F4;box-shadow:0 0 18px #38C6F4"></i><i class="dust" style="left:249px;top:931px;width:4px;height:4px;background:#38C6F4;box-shadow:0 0 12px #38C6F4"></i><i class="dust" style="left:371px;top:517px;width:10px;height:10px;background:#F5B544;box-shadow:0 0 30px #F5B544"></i><i class="dust" style="left:597px;top:1665px;width:5px;height:5px;background:#38C6F4;box-shadow:0 0 15px #38C6F4"></i><i class="dust" style="left:351px;top:79px;width:7px;height:7px;background:#38C6F4;box-shadow:0 0 21px #38C6F4"></i><i class="dust" style="left:443px;top:1805px;width:8px;height:8px;background:#F5B544;box-shadow:0 0 24px #F5B544"></i><i class="dust" style="left:914px;top:897px;width:9px;height:9px;background:#38C6F4;box-shadow:0 0 27px #38C6F4"></i><i class="dust" style="left:692px;top:1870px;width:8px;height:8px;background:#38C6F4;box-shadow:0 0 24px #38C6F4"></i><i class="dust" style="left:472px;top:1399px;width:8px;height:8px;background:#F5B544;box-shadow:0 0 24px #F5B544"></i><i class="dust" style="left:574px;top:1641px;width:7px;height:7px;background:#38C6F4;box-shadow:0 0 21px #38C6F4"></i><i class="dust" style="left:447px;top:451px;width:7px;height:7px;background:#38C6F4;box-shadow:0 0 21px #38C6F4"></i><i class="dust" style="left:507px;top:696px;width:5px;height:5px;background:#F5B544;box-shadow:0 0 15px #F5B544"></i><i class="dust" style="left:1040px;top:1414px;width:8px;height:8px;background:#38C6F4;box-shadow:0 0 24px #38C6F4"></i><i class="dust" style="left:628px;top:200px;width:5px;height:5px;background:#38C6F4;box-shadow:0 0 15px #38C6F4"></i><i class="dust" style="left:558px;top:1089px;width:8px;height:8px;background:#F5B544;box-shadow:0 0 24px #F5B544"></i><i class="dust" style="left:1042px;top:1039px;width:6px;height:6px;background:#38C6F4;box-shadow:0 0 18px #38C6F4"></i><i class="dust" style="left:942px;top:60px;width:3px;height:3px;background:#38C6F4;box-shadow:0 0 9px #38C6F4"></i><i class="dust" style="left:703px;top:1360px;width:9px;height:9px;background:#F5B544;box-shadow:0 0 27px #F5B544"></i><i class="dust" style="left:183px;top:1543px;width:4px;height:4px;background:#38C6F4;box-shadow:0 0 12px #38C6F4"></i><i class="dust" style="left:467px;top:1011px;width:8px;height:8px;background:#38C6F4;box-shadow:0 0 24px #38C6F4"></i><i class="dust" style="left:627px;top:1063px;width:8px;height:8px;background:#F5B544;box-shadow:0 0 24px #F5B544"></i><i class="dust" style="left:925px;top:962px;width:6px;height:6px;background:#38C6F4;box-shadow:0 0 18px #38C6F4"></i><i class="dust" style="left:358px;top:956px;width:4px;height:4px;background:#38C6F4;box-shadow:0 0 12px #38C6F4"></i><i class="dust" style="left:1px;top:293px;width:8px;height:8px;background:#F5B544;box-shadow:0 0 24px #F5B544"></i><i class="dust" style="left:469px;top:1807px;width:6px;height:6px;background:#38C6F4;box-shadow:0 0 18px #38C6F4"></i><i class="dust" style="left:458px;top:648px;width:7px;height:7px;background:#38C6F4;box-shadow:0 0 21px #38C6F4"></i><i class="dust" style="left:36px;top:787px;width:7px;height:7px;background:#F5B544;box-shadow:0 0 21px #F5B544"></i><i class="dust" style="left:61px;top:1326px;width:6px;height:6px;background:#38C6F4;box-shadow:0 0 18px #38C6F4"></i><i class="dust" style="left:182px;top:1514px;width:6px;height:6px;background:#38C6F4;box-shadow:0 0 18px #38C6F4"></i><i class="dust" style="left:134px;top:1757px;width:7px;height:7px;background:#F5B544;box-shadow:0 0 21px #F5B544"></i><i class="dust" style="left:385px;top:326px;width:6px;height:6px;background:#38C6F4;box-shadow:0 0 18px #38C6F4"></i><i class="dust" style="left:83px;top:294px;width:3px;height:3px;background:#38C6F4;box-shadow:0 0 9px #38C6F4"></i><i class="dust" style="left:1028px;top:1819px;width:7px;height:7px;background:#F5B544;box-shadow:0 0 21px #F5B544"></i><i class="dust" style="left:909px;top:1347px;width:5px;height:5px;background:#38C6F4;box-shadow:0 0 15px #38C6F4"></i><i class="dust" style="left:179px;top:1761px;width:5px;height:5px;background:#38C6F4;box-shadow:0 0 15px #38C6F4"></i><i class="dust" style="left:54px;top:433px;width:6px;height:6px;background:#F5B544;box-shadow:0 0 18px #F5B544"></i><i class="dust" style="left:590px;top:1230px;width:9px;height:9px;background:#38C6F4;box-shadow:0 0 27px #38C6F4"></i><i class="dust" style="left:844px;top:183px;width:7px;height:7px;background:#38C6F4;box-shadow:0 0 21px #38C6F4"></i><i class="dust" style="left:735px;top:107px;width:6px;height:6px;background:#F5B544;box-shadow:0 0 18px #F5B544"></i>
+    <div class="fl" data-layout-allow-overflow id="bg-fl0" style="left:20px;top:120px;width:220px;height:220px"><img src="assets/icons/g-atom.webp" alt=""></div><div class="fl" data-layout-allow-overflow id="bg-fl1" style="left:840px;top:160px;width:200px;height:200px"><img src="assets/icons/g-pyramid.webp" alt=""></div><div class="fl" data-layout-allow-overflow id="bg-fl2" style="left:-30px;top:1300px;width:260px;height:260px"><img src="assets/icons/g-rings.webp" alt=""></div><div class="fl" data-layout-allow-overflow id="bg-fl3" style="left:860px;top:1420px;width:180px;height:180px"><img src="assets/icons/g-plus.webp" alt=""></div><div class="fl" data-layout-allow-overflow id="bg-fl4" style="left:880px;top:900px;width:170px;height:170px"><img src="assets/icons/g-hex.webp" alt=""></div><div class="fl" data-layout-allow-overflow id="bg-fl5" style="left:10px;top:760px;width:170px;height:170px"><img src="assets/icons/g-cube.webp" alt=""></div>
+    <div class="vign"></div>
+    <div class="prog" id="bg-prog"></div>
+    
+    <div id="bg-flash1" class="flash clip" data-start="22" data-duration="1" data-track-index="1"><div class="burst"></div><div class="beam"></div></div>
+    <div id="bg-flash2" class="flash clip" data-start="78.5" data-duration="1" data-track-index="1"><div class="burst"></div><div class="beam"></div></div>
+    <div id="bg-flash3" class="flash clip" data-start="128.4" data-duration="1" data-track-index="1"><div class="burst"></div><div class="beam"></div></div>
+    <div id="bg-flash4" class="flash clip" data-start="177.4" data-duration="1" data-track-index="1"><div class="burst"></div><div class="beam"></div></div>
+  </div>
+  <script>
+  (function () {
+  
+  const E = { out: "power3.out", in: "power2.in", io: "power2.inOut", back: "back.out(1.5)", expo: "expo.out" };
+  function mulberry32(a) { return function () { a |= 0; a = (a + 0x6d2b79f5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+  // A yoyo loop that fits inside [at, at + span] with a finite repeat count.
+  function loop(tl, target, from, to, cycle, at, span, ease) {
+    const halves = Math.max(1, Math.floor(span / (cycle / 2)));
+    tl.fromTo(target, from, { ...to, duration: cycle / 2, ease: ease || "sine.inOut", yoyo: true, repeat: halves - 1 }, at);
+  }
+  const tl = gsap.timeline({ paused: true });
+  const D = 198.27;
+  tl.fromTo("#bg-floor", { backgroundPosition: "0px 0px" }, { backgroundPosition: "0px " + Math.round(D * 60) + "px", duration: D, ease: "none" }, 0);
+  loop(tl, "#bg-horizon", { opacity: 0.35 }, { opacity: 0.8 }, 4, 0, D);
+  tl.fromTo("#bg-prog", { scaleX: 0 }, { scaleX: 1, duration: D, ease: "none" }, 0);
+  const rnd = mulberry32(99);
+  document.querySelectorAll(".dust").forEach((p) => {
+    const rise = 200 + rnd() * 500;
+    tl.fromTo(p, { y: 0 }, { y: -rise, duration: D, ease: "none" }, 0);
+    loop(tl, p, { x: -12, opacity: 0.25 }, { x: 12, opacity: 0.9 }, 3 + rnd() * 4, 0, D);
+  });
+  document.querySelectorAll(".fl").forEach((f, i) => {
+    tl.fromTo(f, { rotation: 0, rotationY: 0 }, { rotation: i % 2 ? 140 : -140, rotationY: 360, transformPerspective: 800, duration: D, ease: "none" }, 0);
+    loop(tl, f, { y: 0 }, { y: -40 }, 6 + i, 0, D);
+  });
+  document.querySelectorAll(".flash").forEach((f) => {
+    const s = +f.dataset.start;
+    tl.fromTo(f.querySelector(".burst"), { opacity: 0, scale: 0.3 }, { opacity: 1, scale: 1.2, duration: 0.3, ease: E.out }, s);
+    tl.to(f.querySelector(".burst"), { opacity: 0, duration: 0.5, ease: E.in }, s + 0.35);
+    tl.fromTo(f.querySelector(".beam"), { opacity: 1, scaleX: 0 }, { scaleX: 1, opacity: 0, duration: 0.8, ease: E.out }, s + 0.1);
+  });
+  window.__timelines["bg"] = tl;
+  })();
+  </script>
+</template>

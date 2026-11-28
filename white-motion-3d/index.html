@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ar" data-resolution="portrait">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <script src="assets/lib/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { margin: 0; width: 1080px; height: 1920px; overflow: hidden; background: #050A14; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="198.27" data-width="1080" data-height="1920">
+      
+      <div id="bg" data-composition-id="bg" data-composition-src="compositions/bg.html"
+        data-start="0" data-duration="198.27" data-track-index="0" data-track-kind="graphics"
+        data-width="1080" data-height="1920" style="z-index:1"></div>
+      
+      <div id="intro" data-composition-id="intro" data-composition-src="compositions/intro.html"
+        data-start="0" data-duration="22.3" data-track-index="1" data-track-kind="graphics"
+        data-width="1080" data-height="1920" style="z-index:2"></div>
+      <div id="pixar" data-composition-id="pixar" data-composition-src="compositions/pixar.html"
+        data-start="22.3" data-duration="56.5" data-track-index="1" data-track-kind="graphics"
+        data-width="1080" data-height="1920" style="z-index:2"></div>
+      <div id="redbull" data-composition-id="redbull" data-composition-src="compositions/redbull.html"
+        data-start="78.8" data-duration="49.9" data-track-index="1" data-track-kind="graphics"
+        data-width="1080" data-height="1920" style="z-index:2"></div>
+      <div id="nokia" data-composition-id="nokia" data-composition-src="compositions/nokia.html"
+        data-start="128.7" data-duration="49" data-track-index="1" data-track-kind="graphics"
+        data-width="1080" data-height="1920" style="z-index:2"></div>
+      <div id="outro" data-composition-id="outro" data-composition-src="compositions/outro.html"
+        data-start="177.7" data-duration="20.57" data-track-index="1" data-track-kind="graphics"
+        data-width="1080" data-height="1920" style="z-index:2"></div>
+      
+      <div id="captions" data-composition-id="captions" data-composition-src="compositions/captions.html"
+        data-start="0" data-duration="198.27" data-track-index="2" data-track-kind="captions"
+        data-width="1080" data-height="1920" style="z-index:3"></div>
+      <audio id="voice" src="assets/audio/voice.mp3" data-start="0" data-duration="198.27" data-track-index="3" data-volume="1"></audio>
+    </div>
+    <script>
+      window.__timelines["main"] = gsap.timeline({ paused: true });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,143 @@
+<template>
+  <style>
+@font-face{font-family:Cairo;font-weight:700;src:url('assets/fonts/cairo-arabic-700-normal.woff2') format('woff2');unicode-range:U+0600-06FF,U+0750-077F,U+FB50-FDFF,U+FE70-FEFF,U+200C-200E}
+@font-face{font-family:Cairo;font-weight:900;src:url('assets/fonts/cairo-arabic-900-normal.woff2') format('woff2');unicode-range:U+0600-06FF,U+0750-077F,U+FB50-FDFF,U+FE70-FEFF,U+200C-200E}
+@font-face{font-family:Cairo;font-weight:700;src:url('assets/fonts/cairo-latin-700-normal.woff2') format('woff2')}
+@font-face{font-family:Cairo;font-weight:900;src:url('assets/fonts/cairo-latin-900-normal.woff2') format('woff2')}
+@font-face{font-family:Mont;font-weight:700;src:url('assets/fonts/montserrat-latin-700-normal.woff2') format('woff2')}
+@font-face{font-family:Mont;font-weight:800;src:url('assets/fonts/montserrat-latin-800-normal.woff2') format('woff2')}
+@font-face{font-family:Mont;font-weight:900;src:url('assets/fonts/montserrat-latin-900-normal.woff2') format('woff2')}
+#root{position:absolute;inset:0;--gold:#F5B544;--cyan:#38C6F4;--red:#FF4545;--lime:#D8F65A;--ink:#EAF2FF}
+.cap{position:absolute;left:120px;bottom:690px;width:660px}
+.card{padding:26px 32px;border-radius:28px;background:rgba(10,22,40,.72);border:2px solid rgba(255,255,255,.12);box-shadow:0 30px 60px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.12);text-align:center}
+.big .card{background:none;border:none;box-shadow:none}
+.warn .card{border-color:rgba(255,69,69,.7);box-shadow:0 0 50px rgba(255,69,69,.25)}
+.lesson .card{border-color:rgba(245,181,68,.7)}
+.skill .card,.save .card{background:#F4F5F0;border:none;text-align:right}
+.ar{font:900 54px/1.38 Cairo;color:var(--ink)}
+.big .ar{font-size:72px;text-shadow:0 6px 30px rgba(0,0,0,.6)}
+.skill .ar,.save .ar{color:#0B1220}
+.w{display:inline-block;margin:0 .1em;position:relative;unicode-bidi:isolate}
+.hl{color:var(--gold)}
+.skill .hl,.save .hl{color:#6B4EF6}
+.ul{position:absolute;left:0;right:0;bottom:-6px;width:100%;height:16px;overflow:visible}
+.ul path{fill:none;stroke:var(--gold);stroke-width:6;stroke-linecap:round;stroke-dasharray:100;stroke-dashoffset:100}
+.skill .ul path,.save .ul path{stroke:#6B4EF6}
+.en{font:800 28px/1.35 Mont;color:#9FB2CC;letter-spacing:2px;margin-top:12px;direction:ltr;text-transform:uppercase}
+.skill .en,.save .en{color:#4A5568;text-align:left}
+.pill{display:inline-block;direction:ltr;font:900 22px Mont;letter-spacing:3px;padding:8px 20px;border-radius:30px;margin-bottom:14px}
+.skill .pill{background:var(--lime);color:#0B1220}
+.save .pill{background:#6B4EF6;color:#fff}
+.warn .pill{background:var(--red);color:#fff}
+.lesson .pill{background:var(--gold);color:#0B1220}
+</style>
+  <div id="root" data-composition-id="captions" data-width="1080" data-height="1920">
+    <div id="cap-01" class="cap clip big" data-start="0" data-duration="6.25" data-track-index="1">
+      <div class="card"><div class="ar" dir="rtl"><span class="w">أكبر</span> <span class="w hl">3<svg class="ul" viewBox="0 0 100 14" preserveAspectRatio="none"><path d="M2 9 Q 25 3 50 8 T 98 6" pathLength="100"/></svg></span> <span class="w hl">شركات<svg class="ul" viewBox="0 0 100 14" preserveAspectRatio="none"><path d="M2 9 Q 25 3 50 8 T 98 6" pathLength="100"/></svg></span> <span class="w">في</span> <span class="w">العالم</span></div><div class="en">THE WORLD'S 3 BIGGEST COMPANIES</div></div>
+    </div>
+    <div id="cap-02" class="cap clip t" data-start="6.4" data-duration="6.35" data-track-index="1">
+      <div class="card"><div class="ar" dir="rtl"><span class="w">أخطاء</span> <span class="w hl">تنهي<svg class="ul" viewBox="0 0 100 14" preserveAspectRatio="none"><path d="M2 9 Q 25 3 50 8 T 98 6" pathLength="100"/></svg></span> <span class="w hl">الوجود..<svg class="ul" viewBox="0 0 100 14" preserveAspectRatio="none"><path d="M2 9 Q 25 3 50 8 T 98 6" pathLength="100"/></svg></span> <span class="w">أو</span> <span class="w">تصنع</span> <span class="w hl">إمبراطورية<svg class="ul" viewBox="0 0 100 14" preserveAspectRatio="none"><path d="M2 9 Q 25 3 50 8 T 98 6" pathLength="100"/></svg></span></div><div class="en">MISTAKES THAT END EVERYTHING.. OR BUILD AN EMPIRE</div></div>
+    </div>
+    <div id="cap-03" class="cap clip t" data-start="12.9" data-duration="9" data-track-index="1">
+      <div class="card"><div class="ar" dir="rtl"><span class="w">كيف</span> <span class="w">تصنع</span> <span class="w">هذا</span> <span class="w">المونتاج</span> <span class="w hl">بالذكاء<svg class="ul" viewBox="0 0 100 14" preserveAspectRatio="none"><path d="M2 9 Q 25 3 50 8 T 98 6" pathLength="100"/></svg></span> <span class="w hl">الاصطناعي؟<svg class="ul" viewBox="0 0 100 14" preserveAspectRatio="none"><path d="M2 9 Q 25 3 50 8 T 98 6" pathLength="100"/></svg></span></div><div class="en">HOW TO CREATE THIS EDIT WITH AI?</div></div>
+    </div>
+    <div id="cap-04" class="cap clip t" data-start="23.5" data-duration="6" data-track-index="1">
+      <div class="card"><div class="ar" dir="rtl"><span class="w hl">1997<svg class="ul" viewBox="0 0 100 14" preserveAspectRatio="none"><path d="M2 9 Q 25 3 50 8 T 98 6" pathLength="100"/></svg></span> <span class="w">-</span> <span class="w">شركة</span> <span class="w">بيكسار</span></div><div class="en">1997 - PIXAR ANIMATION STUDIOS</div></div>
+    </div>
+    <div id="cap-05" class="cap clip warn" data-start="30.2" data-duration="7.8" data-track-index="1">
+      <div class="card"><div class="pill">⚠ WARNING</div><div class="ar" dir="rtl"><span class="w">حذف</span> <span class="w hl">90%<svg class="ul" viewBox="0 0 100 14" preserveAspectRatio="none"><path d="M2 9 Q 25 3 50 8 T 98 6" pathLength="100"/></svg></span> <span class="w">من</span> <span class="w">فيلم</span> <span class="w">Toy Story 2</span> <span class="w">عن</span> <span class="w">طريق</span> <span class="w">الخطأ</span></div><div class="en">90% OF TOY STORY 2 ACCIDENTALLY DELETED</div></div>
+    </div>
+    <div id="cap-06" class="cap clip t" data-start="38.5" data-duration="7.55" data-track-index="1">
+      <div class="card"><div class="ar" dir="rtl"><span class="w">نسخة</span> <span class="w">احتياطية</span> <span class="w hl">واحدة<svg class="ul" viewBox="0 0 100 14" preserveAspectRatio="none"><path d="M2 9 Q 25 3 50 8 T 98 6" pathLength="100"/></svg></span> <span class="w">أنقذت</span> <span class="w">الإمبراطورية</span></div><div class="en">ONE HOME BACKUP SAVED THE ENTIRE EMPIRE</div></div>
+    </div>
+    <div id="cap-07" class="cap clip lesson" data-start="46.2" data-duration="6.5" data-track-index="1">
+      <div class="card"><div class="pill">◆ LESSON</div><div class="ar" dir="rtl"><span class="w">الدرس:</span> <span class="w">الخطة</span> <span class="w">البديلة</span> <span class="w hl">ضرورة<svg class="ul" viewBox="0 0 100 14" preserveAspectRatio="none"><path d="M2 9 Q 25 3 50 8 T 98 6" pathLength="100"/></svg></span> <span class="w">وليست</span> <span class="w">رفاهية</span></div><div class="en">LESSON: A BACKUP PLAN IS A NECESSITY</div></div>
+    </div>
+    <div id="cap-08" class="cap clip skill" data-start="57.8" data-duration="6.35" data-track-index="1">
+      <div class="card"><div class="pill">⚡ SKILL</div><div class="ar" dir="rtl"><span class="w">المهارة:</span> <span class="w">عزل</span> <span class="w">العناصر</span> <span class="w">عن</span> <span class="w">الخلفية</span></div><div class="en">SKILL: ROTOSCOPING & SUBJECT ISOLATION</div></div>
+    </div>
+    <div id="cap-09" class="cap clip skill" data-start="64.4" data-duration="9.95" data-track-index="1">
+      <div class="card"><div class="pill">⚡ SKILL</div><div class="ar" dir="rtl"><span class="w">المهارة:</span> <span class="w">التوليد</span> <span class="w">التوسعي</span> <span class="w">للمشاهد</span></div><div class="en">SKILL: GENERATIVE EXPAND & ENVIRONMENT BUILDING</div></div>
+    </div>
+    <div id="cap-10" class="cap clip t" data-start="74.5" data-duration="3.9" data-track-index="1">
+      <div class="card"><div class="ar" dir="rtl"><span class="w">الأداء</span> <span class="w">البصري:</span> <span class="w">إضاءة</span> <span class="w hl">درامية<svg class="ul" viewBox="0 0 100 14" preserveAspectRatio="none"><path d="M2 9 Q 25 3 50 8 T 98 6" pathLength="100"/></svg></span> <span class="w">وتكوين</span> <span class="w">عميق</span></div><div class="en">VISUAL PERFORMANCE: DRAMATIC LIGHTING & DEPTH</div></div>
+    </div>
+    <div id="cap-11" class="cap clip t" data-start="80" data-duration="14.2" data-track-index="1">
+      <div class="card"><div class="ar" dir="rtl"><span class="w">خدعة</span> <span class="w">ريد</span> <span class="w">بول</span> <span class="w hl">التسويقية<svg class="ul" viewBox="0 0 100 14" preserveAspectRatio="none"><path d="M2 9 Q 25 3 50 8 T 98 6" pathLength="100"/></svg></span> <span class="w">في</span> <span class="w">لندن</span></div><div class="en">RED BULL'S MARKETING TRICK IN LONDON</div></div>
+    </div>
+    <div id="cap-12" class="cap clip t" data-start="94.4" data-duration="6.4" data-track-index="1">
+      <div class="card"><div class="ar" dir="rtl"><span class="w">علب</span> <span class="w hl">فارغة<svg class="ul" viewBox="0 0 100 14" preserveAspectRatio="none"><path d="M2 9 Q 25 3 50 8 T 98 6" pathLength="100"/></svg></span> <span class="w">في</span> <span class="w">سلات</span> <span class="w">المهملات</span></div><div class="en">EMPTY CANS PLACED IN STREET TRASH BINS</div></div>
+    </div>
+    <div id="cap-13" class="cap clip t" data-start="100.95" data-duration="4.15" data-track-index="1">
+      <div class="card"><div class="ar" dir="rtl"><span class="w">وهم</span> <span class="w">الانتشار</span> <span class="w">يصنع</span> <span class="w hl">الطلب<svg class="ul" viewBox="0 0 100 14" preserveAspectRatio="none"><path d="M2 9 Q 25 3 50 8 T 98 6" pathLength="100"/></svg></span> <span class="w hl">الحقيقي<svg class="ul" viewBox="0 0 100 14" preserveAspectRatio="none"><path d="M2 9 Q 25 3 50 8 T 98 6" pathLength="100"/></svg></span></div><div class="en">THE ILLUSION OF POPULARITY CREATES REAL DEMAND</div></div>
+    </div>
+    <div id="cap-14" class="cap clip skill" data-start="105.6" data-duration="13.05" data-track-index="1">
+      <div class="card"><div class="pill">⚡ SKILL</div><div class="ar" dir="rtl"><span class="w">المهارة:</span> <span class="w">تتبع</span> <span class="w">حركة</span> <span class="w">الكاميرا</span> <span class="w">بدقة</span></div><div class="en">SKILL: CAMERA MOTION TRACKING</div></div>
+    </div>
+    <div id="cap-15" class="cap clip skill" data-start="118.8" data-duration="3.65" data-track-index="1">
+      <div class="card"><div class="pill">⚡ SKILL</div><div class="ar" dir="rtl"><span class="w">المهارة:</span> <span class="w">دمج</span> <span class="w">العناصر</span> <span class="w">ثلاثية</span> <span class="w">الأبعاد</span></div><div class="en">SKILL: 3D ELEMENT INTEGRATION</div></div>
+    </div>
+    <div id="cap-16" class="cap clip t" data-start="122.6" data-duration="5.8" data-track-index="1">
+      <div class="card"><div class="ar" dir="rtl"><span class="w">الأداء</span> <span class="w">البصري:</span> <span class="w">محاكاة</span> <span class="w hl">الظلال<svg class="ul" viewBox="0 0 100 14" preserveAspectRatio="none"><path d="M2 9 Q 25 3 50 8 T 98 6" pathLength="100"/></svg></span> <span class="w hl">والانعكاسات<svg class="ul" viewBox="0 0 100 14" preserveAspectRatio="none"><path d="M2 9 Q 25 3 50 8 T 98 6" pathLength="100"/></svg></span> <span class="w">الواقعية</span></div><div class="en">VISUAL PERFORMANCE: REALISTIC SHADOWS & REFLECTIONS</div></div>
+    </div>
+    <div id="cap-17" class="cap clip t" data-start="130.1" data-duration="4.75" data-track-index="1">
+      <div class="card"><div class="ar" dir="rtl"><span class="w">سقوط</span> <span class="w">عملاق</span> <span class="w">الهواتف:</span> <span class="w hl">نوكيا<svg class="ul" viewBox="0 0 100 14" preserveAspectRatio="none"><path d="M2 9 Q 25 3 50 8 T 98 6" pathLength="100"/></svg></span></div><div class="en">THE FALL OF A GIANT: NOKIA</div></div>
+    </div>
+    <div id="cap-18" class="cap clip t" data-start="135" data-duration="5.35" data-track-index="1">
+      <div class="card"><div class="ar" dir="rtl"><span class="w">رفض</span> <span class="w hl">التطور<svg class="ul" viewBox="0 0 100 14" preserveAspectRatio="none"><path d="M2 9 Q 25 3 50 8 T 98 6" pathLength="100"/></svg></span> <span class="w">ونظام</span> <span class="w">الأندرويد</span></div><div class="en">REFUSING INNOVATION & ANDROID OS</div></div>
+    </div>
+    <div id="cap-19" class="cap clip big" data-start="140.5" data-duration="9.05" data-track-index="1">
+      <div class="card"><div class="ar" dir="rtl"><span class="w">من</span> <span class="w">القمة</span> <span class="w">إلى</span> <span class="w hl">التاريخ<svg class="ul" viewBox="0 0 100 14" preserveAspectRatio="none"><path d="M2 9 Q 25 3 50 8 T 98 6" pathLength="100"/></svg></span> <span class="w">في</span> <span class="w">لحظة</span></div><div class="en">FROM THE TOP TO HISTORY IN A SECOND</div></div>
+    </div>
+    <div id="cap-20" class="cap clip skill" data-start="149.7" data-duration="4.25" data-track-index="1">
+      <div class="card"><div class="pill">⚡ SKILL</div><div class="ar" dir="rtl"><span class="w">المهارة:</span> <span class="w">تصحيح</span> <span class="w">الألوان</span> <span class="w">السينمائي</span></div><div class="en">SKILL: CINEMATIC COLOR GRADING</div></div>
+    </div>
+    <div id="cap-21" class="cap clip t" data-start="154.1" data-duration="10.6" data-track-index="1">
+      <div class="card"><div class="ar" dir="rtl"><span class="w">الأداء</span> <span class="w">البصري:</span> <span class="w">الانتقال</span> <span class="w">من</span> <span class="w hl">الدفء<svg class="ul" viewBox="0 0 100 14" preserveAspectRatio="none"><path d="M2 9 Q 25 3 50 8 T 98 6" pathLength="100"/></svg></span> <span class="w">إلى</span> <span class="w hl">البرودة<svg class="ul" viewBox="0 0 100 14" preserveAspectRatio="none"><path d="M2 9 Q 25 3 50 8 T 98 6" pathLength="100"/></svg></span></div><div class="en">VISUAL PERFORMANCE: WARM-TO-COLD MOOD SHIFT</div></div>
+    </div>
+    <div id="cap-22" class="cap clip skill" data-start="165.4" data-duration="7.25" data-track-index="1">
+      <div class="card"><div class="pill">⚡ SKILL</div><div class="ar" dir="rtl"><span class="w">المهارة:</span> <span class="w">التباطؤ</span> <span class="w">الزمني</span> <span class="w">بالذكاء</span> <span class="w">الاصطناعي</span></div><div class="en">SKILL: AI FRAME INTERPOLATION & SLOW MOTION</div></div>
+    </div>
+    <div id="cap-23" class="cap clip skill" data-start="172.8" data-duration="4.6" data-track-index="1">
+      <div class="card"><div class="pill">⚡ SKILL</div><div class="ar" dir="rtl"><span class="w">المهارة:</span> <span class="w">هندسة</span> <span class="w">الصوت</span> <span class="w">والمؤثرات</span></div><div class="en">SKILL: SOUND DESIGN & SPATIAL AUDIO</div></div>
+    </div>
+    <div id="cap-24" class="cap clip big" data-start="178.4" data-duration="2.65" data-track-index="1">
+      <div class="card"><div class="ar" dir="rtl"><span class="w">القصة</span> <span class="w">القوية</span> <span class="w">هي</span> <span class="w hl">الأساس<svg class="ul" viewBox="0 0 100 14" preserveAspectRatio="none"><path d="M2 9 Q 25 3 50 8 T 98 6" pathLength="100"/></svg></span></div><div class="en">A STRONG STORY IS THE FOUNDATION</div></div>
+    </div>
+    <div id="cap-25" class="cap clip t" data-start="181.2" data-duration="9.65" data-track-index="1">
+      <div class="card"><div class="ar" dir="rtl"><span class="w">الذكاء</span> <span class="w">الاصطناعي</span> <span class="w">والمونتاج</span> <span class="w hl">يصنعان<svg class="ul" viewBox="0 0 100 14" preserveAspectRatio="none"><path d="M2 9 Q 25 3 50 8 T 98 6" pathLength="100"/></svg></span> <span class="w hl">التجربة<svg class="ul" viewBox="0 0 100 14" preserveAspectRatio="none"><path d="M2 9 Q 25 3 50 8 T 98 6" pathLength="100"/></svg></span></div><div class="en">AI & EDITING CREATE THE EXPERIENCE</div></div>
+    </div>
+    <div id="cap-26" class="cap clip save" data-start="191" data-duration="7.2" data-track-index="1">
+      <div class="card"><div class="pill">★ SAVE</div><div class="ar" dir="rtl"><span class="w">احفظ</span> <span class="w">الفيديو</span> <span class="w">وطبق</span> <span class="w">تقنية</span> <span class="w hl">واحدة<svg class="ul" viewBox="0 0 100 14" preserveAspectRatio="none"><path d="M2 9 Q 25 3 50 8 T 98 6" pathLength="100"/></svg></span> <span class="w">اليوم</span></div><div class="en">SAVE THIS VIDEO & APPLY ONE TECHNIQUE TODAY</div></div>
+    </div>
+  </div>
+  <script>
+  (function () {
+  
+  const E = { out: "power3.out", in: "power2.in", io: "power2.inOut", back: "back.out(1.5)", expo: "expo.out" };
+  function mulberry32(a) { return function () { a |= 0; a = (a + 0x6d2b79f5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+  // A yoyo loop that fits inside [at, at + span] with a finite repeat count.
+  function loop(tl, target, from, to, cycle, at, span, ease) {
+    const halves = Math.max(1, Math.floor(span / (cycle / 2)));
+    tl.fromTo(target, from, { ...to, duration: cycle / 2, ease: ease || "sine.inOut", yoyo: true, repeat: halves - 1 }, at);
+  }
+  const tl = gsap.timeline({ paused: true });
+  document.querySelectorAll(".cap[id^='cap-']").forEach((c) => {
+    const s = +c.dataset.start, e = s + +c.dataset.duration;
+    const card = c.querySelector(".card"), ws = c.querySelectorAll(".w"), en = c.querySelector(".en"), pill = c.querySelector(".pill");
+    const side = c.classList.contains("skill") || c.classList.contains("save");
+    if (s < 0.05) { tl.set([card, ...ws, en], { opacity: 1 }, 0); tl.to(card, { opacity: 0, y: -16, duration: 0.28, ease: E.in }, e - 0.3); return; }
+    tl.fromTo(card, side ? { opacity: 0, x: 80, rotationY: -25 } : { opacity: 0, y: 40, scale: 0.94 },
+      { opacity: 1, x: 0, y: 0, scale: 1, rotationY: 0, transformPerspective: 900, duration: 0.5, ease: E.out }, s);
+    if (pill) tl.fromTo(pill, { scale: 0.3, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.45, ease: E.back }, s + 0.1);
+    tl.fromTo(ws, { opacity: 0, y: 24, filter: "blur(8px)" }, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.4, ease: E.out, stagger: Math.min(0.08, 0.5 / ws.length) }, s + 0.15);
+    tl.fromTo(en, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.35, ease: "power2.out" }, s + 0.4);
+    c.querySelectorAll(".ul path").forEach((p) => tl.fromTo(p, { strokeDashoffset: 100 }, { strokeDashoffset: 0, duration: 0.5, ease: E.io }, s + 0.75));
+    c.querySelectorAll(".hl").forEach((h) => tl.fromTo(h, { scale: 1 }, { scale: 1.1, duration: 0.18, yoyo: true, repeat: 1, ease: "sine.inOut" }, s + 0.7));
+    tl.to(card, { opacity: 0, y: -16, duration: 0.28, ease: E.in }, e - 0.3);
+  });
+  tl.to({}, { duration: 0.01 }, 198.27);
+  window.__timelines["captions"] = tl;
+  })();
+  </script>
+</template>

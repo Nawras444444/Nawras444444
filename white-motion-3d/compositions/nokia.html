@@ -1,0 +1,334 @@
+<template>
+  <style>
+
+@font-face{font-family:Cairo;font-weight:700;src:url('assets/fonts/cairo-arabic-700-normal.woff2') format('woff2');unicode-range:U+0600-06FF,U+0750-077F,U+FB50-FDFF,U+FE70-FEFF,U+200C-200E}
+@font-face{font-family:Cairo;font-weight:900;src:url('assets/fonts/cairo-arabic-900-normal.woff2') format('woff2');unicode-range:U+0600-06FF,U+0750-077F,U+FB50-FDFF,U+FE70-FEFF,U+200C-200E}
+@font-face{font-family:Cairo;font-weight:700;src:url('assets/fonts/cairo-latin-700-normal.woff2') format('woff2')}
+@font-face{font-family:Cairo;font-weight:900;src:url('assets/fonts/cairo-latin-900-normal.woff2') format('woff2')}
+@font-face{font-family:Mont;font-weight:700;src:url('assets/fonts/montserrat-latin-700-normal.woff2') format('woff2')}
+@font-face{font-family:Mont;font-weight:800;src:url('assets/fonts/montserrat-latin-800-normal.woff2') format('woff2')}
+@font-face{font-family:Mont;font-weight:900;src:url('assets/fonts/montserrat-latin-900-normal.woff2') format('woff2')}
+#root{position:absolute;inset:0;overflow:hidden;--gold:#F5B544;--cyan:#38C6F4;--red:#FF4545;--ink:#EAF2FF}
+.badge{position:absolute;left:184px;top:296px;width:640px;height:60px;z-index:5}
+.badge .b-in{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font:800 28px Mont;letter-spacing:4px;border:2px solid;border-radius:40px;background:rgba(6,14,28,.72);white-space:nowrap}
+.chap{position:absolute;left:120px;top:400px;width:768px;height:420px;z-index:6}
+.chap .c-in{position:absolute;inset:0;text-align:center}
+.chap .num{font:900 300px/1 Mont;color:transparent;-webkit-text-stroke:5px var(--gold);text-shadow:0 0 60px rgba(245,181,68,.35)}
+.chap .nm{font:900 52px Mont;letter-spacing:18px;color:var(--ink);margin-top:10px}
+.chap svg{position:absolute;left:84px;top:330px;width:600px;height:40px;overflow:visible}
+.chap svg path{fill:none;stroke:var(--gold);stroke-width:6;stroke-linecap:round;stroke-dasharray:100;stroke-dashoffset:100}
+.vis{position:absolute;left:144px;top:370px;width:720px;height:470px;perspective:1400px;z-index:3}
+.v-in,.v-float{position:absolute;inset:0;transform-style:preserve-3d}
+.v-glow{position:absolute;left:110px;top:-10px;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(56,198,244,.34),rgba(245,181,68,.12) 45%,transparent 70%)}
+.v-icon,.v-refl{position:absolute;left:160px;top:20px;width:400px;height:400px}
+.v-icon img,.v-refl img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+.v-icon .v-img2{opacity:0}
+.v-refl{top:400px;height:180px;overflow:hidden;opacity:.28;-webkit-mask-image:linear-gradient(180deg,#000,transparent 80%);mask-image:linear-gradient(180deg,#000,transparent 80%)}
+.v-refl img{height:400px;top:auto;bottom:0;transform:scaleY(-1);transform-origin:50% 50%;top:-220px}
+.v-orbit,.v-spark,.draw{position:absolute;left:0;top:0;width:720px;height:470px;overflow:visible}
+.v-orbit ellipse{fill:none;stroke:url(#none);stroke:rgba(56,198,244,.55);stroke-width:2.5;stroke-dasharray:100;stroke-dashoffset:100}
+.v-spark line{stroke:var(--gold);stroke-width:5;stroke-linecap:round;stroke-dasharray:100;stroke-dashoffset:100}
+.draw path,.draw polygon{fill:none;stroke:var(--gold);stroke-width:5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:100;stroke-dashoffset:100}
+.draw.roto polygon{stroke:var(--cyan);fill:rgba(56,198,244,.08);stroke-dasharray:100}
+.draw.xmark path{stroke:var(--red);stroke-width:16}
+.draw.trail path{stroke:var(--cyan);stroke-width:4}
+.draw.route path{stroke:var(--gold);stroke-width:5}
+.draw.route circle{fill:var(--red);opacity:0}
+.mini{position:absolute;width:150px;height:150px}
+.mini img{width:100%;height:100%;object-fit:contain}
+.gl{position:absolute;left:160px;top:20px;width:400px;height:400px;opacity:0}
+.gl img{width:100%;height:100%;object-fit:contain}
+.gl-r img{filter:sepia(1) saturate(8) hue-rotate(-40deg)}
+.gl-c img{filter:sepia(1) saturate(8) hue-rotate(160deg)}
+.redflash{position:absolute;inset:-200px;background:radial-gradient(circle,rgba(255,69,69,.45),transparent 60%);opacity:0}
+.cube-wrap{position:absolute;left:250px;top:110px;width:220px;height:220px;perspective:900px}
+.cube{position:absolute;inset:0;transform-style:preserve-3d}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border:3px solid rgba(56,198,244,.9);background:linear-gradient(135deg,rgba(56,198,244,.22),rgba(245,181,68,.18));box-shadow:inset 0 0 40px rgba(56,198,244,.35);display:flex;align-items:center;justify-content:center;font:900 54px Mont;color:#fff;text-shadow:0 0 20px rgba(56,198,244,.9)}
+.f0{transform:translateZ(110px)}.f1{transform:rotateY(180deg) translateZ(110px)}.f2{transform:rotateY(90deg) translateZ(110px)}
+.f3{transform:rotateY(-90deg) translateZ(110px)}.f4{transform:rotateX(90deg) translateZ(110px);border-color:rgba(245,181,68,.9)}.f5{transform:rotateX(-90deg) translateZ(110px);border-color:rgba(245,181,68,.9)}
+.tagp{position:absolute;font:800 28px Mont;letter-spacing:3px;color:var(--ink);padding:8px 18px;border-radius:30px;border:2px solid var(--cyan);background:rgba(6,14,28,.8);white-space:nowrap}
+.tag0{left:20px;top:40px}.tag1{left:530px;top:30px;border-color:var(--gold)}.tag2{left:0;top:230px;border-color:var(--gold)}
+.tag3{left:580px;top:220px}.tag4{left:60px;top:390px}.tag5{left:520px;top:400px;border-color:var(--gold)}
+.lbl{position:absolute;font:800 28px Mont;letter-spacing:3px;color:var(--cyan);background:rgba(6,14,28,.85);padding:8px 14px;border:2px solid var(--cyan);white-space:nowrap;opacity:0}
+.dash{position:absolute;left:120px;top:0;width:480px;height:440px;border:4px dashed var(--cyan);border-radius:12px}
+.cnt,.fps,.pct{position:absolute;left:150px;top:30px;font:900 76px/1 Mont;color:var(--gold);text-shadow:0 0 30px rgba(245,181,68,.5)}
+.cnt small,.fps small{font-size:32px;color:var(--cyan);letter-spacing:3px}
+.pct{left:280px;top:330px;font-size:64px}
+.pbar{position:absolute;left:160px;top:420px;width:400px;height:14px;border-radius:8px;background:rgba(255,255,255,.1);overflow:hidden}
+.pbar i{position:absolute;inset:0;background:linear-gradient(90deg,var(--cyan),var(--gold));transform-origin:0 50%}
+.sweep{position:absolute;left:160px;top:20px;width:160px;height:400px;background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);mix-blend-mode:overlay;opacity:0}
+.slider{position:absolute;left:60px;top:370px;width:600px;padding:16px 22px;border-radius:18px;background:rgba(6,14,28,.85);border:2px solid rgba(255,255,255,.14)}
+.slider .row{display:flex;align-items:center;gap:16px;margin:8px 0;font:800 28px Mont;color:var(--ink);letter-spacing:2px}
+.slider .t{width:96px}.slider .v{width:80px;text-align:right}
+.slider .bar{flex:1;height:10px;border-radius:6px;position:relative}
+.slider .temp{background:linear-gradient(90deg,#3A8DFF,#ddd,#FF8A2A)}
+.slider .sat{background:linear-gradient(90deg,#777,var(--gold))}
+.slider .knob{position:absolute;right:-11px;top:50%;width:22px;height:22px;margin-top:-11px;border-radius:50%;background:#fff;border:3px solid #0B1A2E}
+.eq{position:absolute;left:150px;top:400px;width:420px;height:80px;display:flex;align-items:flex-end;justify-content:center;gap:7px}
+.eq b{width:10px;height:100%;border-radius:5px;background:linear-gradient(180deg,var(--cyan),var(--gold));transform-origin:50% 100%}
+.savepill{position:absolute;left:270px;top:20px;font:900 28px Mont;letter-spacing:4px;color:#0B1A2E;background:#D8F65A;padding:12px 28px;border-radius:40px;box-shadow:0 0 40px rgba(216,246,90,.45)}
+</style>
+  <div id="root" data-composition-id="nokia" data-width="1080" data-height="1920">
+    <div id="nokia-badge" class="badge clip" data-start="1.4" data-duration="47.5" data-track-index="3">
+      <div class="b-in" style="color:#F5B544;border-color:#F5B544">CASE 03 • NOKIA</div>
+    </div>
+    <div id="nokia-chap" class="chap clip" data-start="0" data-duration="1.95" data-track-index="2" data-layout-allow-overlap>
+      <div class="c-in">
+        <div class="num" style="-webkit-text-stroke-color:#F5B544">03</div>
+        <div class="nm">NOKIA</div>
+        <svg viewBox="0 0 600 40"><path d="M10 25 Q 150 5 300 22 T 590 15" pathLength="100" style="stroke:#F5B544"/></svg>
+      </div>
+    </div>
+    
+    <div id="nokia-v1" class="vis clip" data-start="1.3" data-duration="5" data-track-index="1" data-fx="light" data-layout-allow-overlap>
+      <div class="v-in">
+        <div class="v-float">
+          <div class="v-glow"></div>
+          <svg class="v-orbit" viewBox="0 0 720 470"><ellipse cx="360" cy="250" rx="320" ry="110" pathLength="100"/></svg>
+          <div class="v-refl"><img src="assets/icons/nokia-warm.webp" alt=""></div>
+          <div class="v-icon"><img class="v-img" src="assets/icons/nokia-warm.webp" alt=""></div>
+          <svg class="v-spark" viewBox="0 0 720 470"><line x1="360" y1="40" x2="360" y2="0" pathLength="100"/><line x1="520" y1="90" x2="548" y2="62" pathLength="100"/><line x1="200" y1="90" x2="172" y2="62" pathLength="100"/><line x1="610" y1="230" x2="650" y2="230" pathLength="100"/><line x1="110" y1="230" x2="70" y2="230" pathLength="100"/></svg>
+          <div class="sweep"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="nokia-v2" class="vis clip" data-start="6.3" data-duration="5.4" data-track-index="1" data-fx="reject" data-layout-allow-overlap>
+      <div class="v-in">
+        <div class="v-float">
+          <div class="v-glow"></div>
+          <svg class="v-orbit" viewBox="0 0 720 470"><ellipse cx="360" cy="250" rx="320" ry="110" pathLength="100"/></svg>
+          <div class="v-refl"><img src="assets/icons/gear-sync.webp" alt=""></div>
+          <div class="v-icon"><img class="v-img" src="assets/icons/gear-sync.webp" alt=""></div>
+          <svg class="v-spark" viewBox="0 0 720 470"><line x1="360" y1="40" x2="360" y2="0" pathLength="100"/><line x1="520" y1="90" x2="548" y2="62" pathLength="100"/><line x1="200" y1="90" x2="172" y2="62" pathLength="100"/><line x1="610" y1="230" x2="650" y2="230" pathLength="100"/><line x1="110" y1="230" x2="70" y2="230" pathLength="100"/></svg>
+          <svg class="draw xmark" viewBox="0 0 720 470"><path d="M220 80 L 500 380" pathLength="100"/><path d="M500 80 L 220 380" pathLength="100"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <div id="nokia-v3" class="vis clip" data-start="11.7" data-duration="9.2" data-track-index="1" data-fx="fall" data-layout-allow-overlap>
+      <div class="v-in">
+        <div class="v-float">
+          <div class="v-glow"></div>
+          <svg class="v-orbit" viewBox="0 0 720 470"><ellipse cx="360" cy="250" rx="320" ry="110" pathLength="100"/></svg>
+          <div class="v-refl"><img src="assets/icons/crown.webp" alt=""></div>
+          <div class="v-icon"><img class="v-img" src="assets/icons/crown.webp" alt=""></div>
+          <svg class="v-spark" viewBox="0 0 720 470"><line x1="360" y1="40" x2="360" y2="0" pathLength="100"/><line x1="520" y1="90" x2="548" y2="62" pathLength="100"/><line x1="200" y1="90" x2="172" y2="62" pathLength="100"/><line x1="610" y1="230" x2="650" y2="230" pathLength="100"/><line x1="110" y1="230" x2="70" y2="230" pathLength="100"/></svg>
+          
+        </div>
+      </div>
+    </div>
+
+    <div id="nokia-v4" class="vis clip" data-start="20.9" data-duration="15.2" data-track-index="1" data-fx="grade" data-layout-allow-overlap>
+      <div class="v-in">
+        <div class="v-float">
+          <div class="v-glow"></div>
+          <svg class="v-orbit" viewBox="0 0 720 470"><ellipse cx="360" cy="250" rx="320" ry="110" pathLength="100"/></svg>
+          <div class="v-refl"><img src="assets/icons/nokia-warm.webp" alt=""></div>
+          <div class="v-icon"><img class="v-img" src="assets/icons/nokia-warm.webp" alt=""><img class="v-img2" src="assets/icons/nokia-frozen.webp" alt=""></div>
+          <svg class="v-spark" viewBox="0 0 720 470"><line x1="360" y1="40" x2="360" y2="0" pathLength="100"/><line x1="520" y1="90" x2="548" y2="62" pathLength="100"/><line x1="200" y1="90" x2="172" y2="62" pathLength="100"/><line x1="610" y1="230" x2="650" y2="230" pathLength="100"/><line x1="110" y1="230" x2="70" y2="230" pathLength="100"/></svg>
+          <div class="slider">
+          <div class="row"><span class="t">TEMP</span><div class="bar temp"><i class="knob k1"></i></div><span class="v v1">+30</span></div>
+          <div class="row"><span class="t">SAT</span><div class="bar sat"><i class="knob k2"></i></div><span class="v v2">100</span></div>
+        </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="nokia-v5" class="vis clip" data-start="36.1" data-duration="7.9" data-track-index="1" data-fx="fps" data-layout-allow-overlap>
+      <div class="v-in">
+        <div class="v-float">
+          <div class="v-glow"></div>
+          <svg class="v-orbit" viewBox="0 0 720 470"><ellipse cx="360" cy="250" rx="320" ry="110" pathLength="100"/></svg>
+          <div class="v-refl glyph"><img src="assets/icons/g-lightning.webp" alt=""></div>
+          <div class="v-icon glyph"><img class="v-img" src="assets/icons/g-lightning.webp" alt=""></div>
+          <svg class="v-spark" viewBox="0 0 720 470"><line x1="360" y1="40" x2="360" y2="0" pathLength="100"/><line x1="520" y1="90" x2="548" y2="62" pathLength="100"/><line x1="200" y1="90" x2="172" y2="62" pathLength="100"/><line x1="610" y1="230" x2="650" y2="230" pathLength="100"/><line x1="110" y1="230" x2="70" y2="230" pathLength="100"/></svg>
+          <div class="fps"><span>24</span> <small>FPS</small></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="nokia-v6" class="vis clip" data-start="44" data-duration="4.9" data-track-index="1" data-fx="wave" data-layout-allow-overlap>
+      <div class="v-in">
+        <div class="v-float">
+          <div class="v-glow"></div>
+          <svg class="v-orbit" viewBox="0 0 720 470"><ellipse cx="360" cy="250" rx="320" ry="110" pathLength="100"/></svg>
+          <div class="v-refl"><img src="assets/icons/waveform.webp" alt=""></div>
+          <div class="v-icon"><img class="v-img" src="assets/icons/waveform.webp" alt=""></div>
+          <svg class="v-spark" viewBox="0 0 720 470"><line x1="360" y1="40" x2="360" y2="0" pathLength="100"/><line x1="520" y1="90" x2="548" y2="62" pathLength="100"/><line x1="200" y1="90" x2="172" y2="62" pathLength="100"/><line x1="610" y1="230" x2="650" y2="230" pathLength="100"/><line x1="110" y1="230" x2="70" y2="230" pathLength="100"/></svg>
+          <div class="eq"><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+  (function () {
+  
+  const E = { out: "power3.out", in: "power2.in", io: "power2.inOut", back: "back.out(1.5)", expo: "expo.out" };
+  function mulberry32(a) { return function () { a |= 0; a = (a + 0x6d2b79f5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+  // A yoyo loop that fits inside [at, at + span] with a finite repeat count.
+  function loop(tl, target, from, to, cycle, at, span, ease) {
+    const halves = Math.max(1, Math.floor(span / (cycle / 2)));
+    tl.fromTo(target, from, { ...to, duration: cycle / 2, ease: ease || "sine.inOut", yoyo: true, repeat: halves - 1 }, at);
+  }
+  const tl = gsap.timeline({ paused: true });
+  
+  const FX = {
+    trio(el, s, d) {
+      const minis = el.querySelectorAll(".mini");
+      tl.fromTo(minis, { scale: 0, opacity: 0, rotationY: -90 }, { scale: 1, opacity: 1, rotationY: 0, duration: 0.6, ease: E.back, stagger: 0.25 }, s + 0.9);
+      tl.fromTo(el.querySelectorAll(".draw path"), { strokeDashoffset: 100 }, { strokeDashoffset: 0, duration: 0.6, ease: E.io, stagger: 0.25 }, s + 0.7);
+      minis.forEach((m, i) => loop(tl, m, { y: 0 }, { y: -14 }, 2 + i * 0.3, s + 1.6, d - 2.2));
+    },
+    glitch(el, s, d) {
+      const src = el.querySelector(".v-img").getAttribute("src");
+      el.querySelectorAll(".gl img").forEach((g) => g.setAttribute("src", src));
+      const ic = el.querySelector(".v-icon"), r = el.querySelector(".gl-r"), c = el.querySelector(".gl-c"), f = el.querySelector(".redflash");
+      const rnd = mulberry32(7);
+      for (let k = 0; k < 2; k++) {
+        const t0 = s + 0.7 + k * 1.3;
+        tl.fromTo(f, { opacity: 0 }, { opacity: 1, duration: 0.08, yoyo: true, repeat: 1 }, t0);
+        tl.fromTo([r, c], { opacity: 0 }, { opacity: 0.7, duration: 0.05 }, t0);
+        for (let j = 0; j < 6; j++) {
+          const dx = (rnd() - 0.5) * 40;
+          tl.to(ic, { x: dx, duration: 0.04, ease: "none" }, t0 + j * 0.05);
+          tl.to(r, { x: dx - 14, duration: 0.04, ease: "none" }, t0 + j * 0.05);
+          tl.to(c, { x: dx + 14, duration: 0.04, ease: "none" }, t0 + j * 0.05);
+        }
+        tl.to([ic, r, c], { x: 0, duration: 0.05 }, t0 + 0.32);
+        tl.to([r, c], { opacity: 0, duration: 0.1 }, t0 + 0.34);
+      }
+    },
+    cube3d(el, s, d) {
+      const cube = el.querySelector(".cube"), ic = el.querySelector(".v-icon"), tags = el.querySelectorAll(".tagp");
+      tl.fromTo(ic, { opacity: 1, scale: 1 }, { opacity: 0.45, scale: 1.18, duration: 0.8, ease: E.out }, s + 0.6);
+      tl.fromTo(cube, { rotationX: -25, rotationY: -40, scale: 0 }, { scale: 1, duration: 0.8, ease: E.back }, s + 0.5);
+      tl.to(cube, { rotationY: 320, rotationX: 335, duration: d - 1.3, ease: "power1.inOut" }, s + 0.6);
+      tl.fromTo(tags, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.45, ease: E.back, stagger: 0.35 }, s + 1.2);
+      tags.forEach((t, i) => loop(tl, t, { y: 0 }, { y: i % 2 ? 12 : -12 }, 2.4 + i * 0.2, s + 3.5, d - 4));
+    },
+    roto(el, s) {
+      tl.fromTo(el.querySelector(".roto polygon"), { strokeDashoffset: 100 }, { strokeDashoffset: 0, duration: 1.6, ease: E.io }, s + 0.7);
+      tl.fromTo(el.querySelector(".lbl"), { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.35 }, s + 2.2);
+    },
+    expand(el, s) {
+      const img = el.querySelector(".v-img"), o = { v: 0 }, cnt = el.querySelector(".cnt span");
+      tl.fromTo(img, { scale: 0.5, filter: "blur(10px)" }, { scale: 1, filter: "blur(0px)", duration: 2.2, ease: "power3.inOut" }, s + 0.5);
+      tl.fromTo(el.querySelector(".dash"), { scale: 0.5, opacity: 1 }, { scale: 1.05, opacity: 0, duration: 2.6, ease: "power3.inOut" }, s + 0.5);
+      tl.fromTo(o, { v: 0 }, { v: 100, duration: 3, ease: "power1.out", onUpdate: () => { cnt.textContent = Math.round(o.v); } }, s + 0.4);
+      tl.fromTo(el.querySelector(".lbl"), { opacity: 0 }, { opacity: 1, duration: 0.3 }, s + 1);
+    },
+    light(el, s, d) {
+      const sw = el.querySelector(".sweep");
+      tl.fromTo(sw, { x: -160, opacity: 0 }, { x: 400, opacity: 1, duration: 1.1, ease: E.io }, s + 0.9);
+      if (d > 4) tl.fromTo(sw, { x: -160 }, { x: 400, duration: 1.1, ease: E.io, immediateRender: false }, s + d - 2);
+    },
+    dissolve(el, s, d) {
+      tl.fromTo(el.querySelector(".v-icon"), { x: 0, scale: 1, opacity: 1 }, { x: 60, scale: 1.12, opacity: 0.35, filter: "blur(4px)", duration: d - 0.8, ease: "power1.in" }, s + 0.6);
+    },
+    restore(el, s) {
+      const u = el.querySelector(".mini-undo");
+      tl.fromTo(u, { scale: 0, rotation: 0 }, { scale: 1, rotation: -360, duration: 1.2, ease: E.out }, s + 1);
+    },
+    progress(el, s, d) {
+      const o = { v: 0 }, p = el.querySelector(".pct span");
+      tl.fromTo(el.querySelector(".pbar i"), { scaleX: 0 }, { scaleX: 1, duration: d - 1.4, ease: "power2.inOut" }, s + 0.6);
+      tl.fromTo(o, { v: 0 }, { v: 100, duration: d - 1.4, ease: "power2.inOut", onUpdate: () => { p.textContent = Math.round(o.v); } }, s + 0.6);
+      tl.fromTo(el.querySelector(".lbl"), { opacity: 0 }, { opacity: 1, duration: 0.3 }, s + 0.8);
+    },
+    track(el, s, d) {
+      const ic = el.querySelector(".v-icon");
+      tl.fromTo(el.querySelector(".trail path"), { strokeDashoffset: 100 }, { strokeDashoffset: 0, duration: d - 1.5, ease: "sine.inOut" }, s + 0.6);
+      tl.fromTo(ic, { x: -150, y: 90, rotation: -6 }, { x: 150, y: -80, rotation: 6, duration: d - 1.5, ease: "sine.inOut" }, s + 0.6);
+    },
+    lock(el, s, d) {
+      const ic = el.querySelector(".v-icon");
+      tl.fromTo(ic, { scale: 1.6, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.6, ease: E.expo }, s + 0.3);
+      loop(tl, ic, { scale: 1 }, { scale: 1.06 }, 0.9, s + 1, d - 1.6);
+      tl.fromTo(el.querySelector(".lbl"), { opacity: 0 }, { opacity: 1, duration: 0.3 }, s + 1);
+    },
+    spin3d(el, s, d) {
+      tl.fromTo(el.querySelector(".v-icon"), { rotationY: 0 }, { rotationY: 720, duration: d - 0.8, ease: "power2.inOut" }, s + 0.3);
+    },
+    reject(el, s) {
+      tl.fromTo(el.querySelectorAll(".xmark path"), { strokeDashoffset: 100 }, { strokeDashoffset: 0, duration: 0.35, ease: E.out, stagger: 0.25 }, s + 1.4);
+      tl.fromTo(el.querySelector(".v-img"), { filter: "grayscale(0)" }, { filter: "grayscale(0.85)", duration: 0.6 }, s + 1.4);
+    },
+    fall(el, s, d) {
+      const ic = el.querySelector(".v-icon");
+      tl.fromTo(ic, { rotation: 0, y: 0 }, { rotation: -22, y: 70, duration: 1.4, ease: "bounce.out" }, s + 2.2);
+      tl.fromTo(el.querySelector(".v-img"), { filter: "grayscale(0) sepia(0)" }, { filter: "grayscale(0.7) sepia(0.6)", duration: 2.5 }, s + 3.4);
+    },
+    grade(el, s, d) {
+      const g = { v: 0 }, v1 = el.querySelector(".v1"), v2 = el.querySelector(".v2");
+      const a0 = s + 1.2, len = Math.min(8, d - 3);
+      tl.fromTo(el.querySelector(".v-img2"), { opacity: 0 }, { opacity: 1, duration: len, ease: E.io }, a0);
+      tl.fromTo(el.querySelector(".k1"), { x: 0 }, { x: -340, duration: len, ease: E.io }, a0);
+      tl.fromTo(el.querySelector(".k2"), { x: 0 }, { x: -190, duration: len, ease: E.io }, a0);
+      tl.fromTo(g, { v: 0 }, { v: 1, duration: len, ease: E.io, onUpdate: () => {
+        const t = Math.round(30 - 70 * g.v); v1.textContent = (t > 0 ? "+" : "") + t; v2.textContent = Math.round(100 - 55 * g.v);
+      } }, a0);
+      tl.fromTo(el.querySelector(".slider"), { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5, ease: E.out }, s + 0.7);
+    },
+    fps(el, s, d) {
+      const o = { v: 24 }, n = el.querySelector(".fps span");
+      tl.fromTo(o, { v: 24 }, { v: 120, duration: 2.4, ease: E.out, onUpdate: () => { n.textContent = Math.round(o.v); } }, s + 0.8);
+      tl.fromTo(el.querySelector(".fps"), { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.4 }, s + 0.6);
+      loop(tl, el.querySelector(".v-icon"), { y: -10 }, { y: 10 }, 0.5, s + 1, d - 1.6);
+    },
+    wave(el, s, d) {
+      const rnd = mulberry32(42);
+      el.querySelectorAll(".eq b").forEach((b, i) => loop(tl, b, { scaleY: 0.15 }, { scaleY: 0.35 + rnd() * 0.65 }, 0.36 + rnd() * 0.3, s + 0.4 + i * 0.02, d - 1));
+    },
+    rise(el, s) {
+      tl.fromTo(el.querySelector(".mini-arrow"), { x: -260, y: 260, opacity: 0, scale: 0.6 }, { x: 0, y: 0, opacity: 1, scale: 1, duration: 0.9, ease: E.expo }, s + 0.8);
+    },
+    orbit(el, s, d) {
+      tl.fromTo(el.querySelector(".route path"), { strokeDashoffset: 100 }, { strokeDashoffset: 0, duration: 1.6, ease: E.io }, s + 1);
+      tl.fromTo(el.querySelector(".route circle"), { opacity: 0, scale: 0 }, { opacity: 1, scale: 1, transformOrigin: "50% 50%", duration: 0.4, ease: E.back }, s + 2.5);
+      tl.fromTo(el.querySelector(".lbl"), { opacity: 0 }, { opacity: 1, duration: 0.3 }, s + 2.7);
+    },
+    scan(el, s, d) {
+      loop(tl, el.querySelector(".v-icon"), { x: -140, rotation: -8 }, { x: 140, rotation: 8 }, 2.4, s + 0.6, d - 1.2);
+    },
+    drop(el, s) {
+      tl.fromTo(el.querySelector(".v-icon"), { y: -320 }, { y: 0, duration: 1.1, ease: "bounce.out" }, s + 0.2);
+    },
+    save(el, s, d) {
+      const p = el.querySelector(".savepill");
+      tl.fromTo(p, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5, ease: E.back }, s + 0.8);
+      loop(tl, p, { scale: 1 }, { scale: 1.1 }, 1, s + 1.4, d - 2);
+    },
+  };
+
+  function vis(el) {
+    const s = +el.dataset.start, d = +el.dataset.duration, e = s + d;
+    const q = (c) => el.querySelector(c);
+    if (s < 0.05) tl.set(q(".v-in"), { opacity: 1, rotationY: 0, scale: 1, y: 0 }, 0); else tl.fromTo(q(".v-in"), { opacity: 0, rotationY: -75, scale: 0.6, y: 60 }, { opacity: 1, rotationY: 0, scale: 1, y: 0, duration: 0.8, ease: E.back }, s);
+    tl.fromTo(q(".v-glow"), { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 1, ease: E.out }, s + 0.1);
+    tl.fromTo(q(".v-orbit ellipse"), { strokeDashoffset: 100 }, { strokeDashoffset: 0, duration: 1.3, ease: E.io }, s + 0.3);
+    tl.fromTo(q(".v-orbit"), { rotation: -12 }, { rotation: 12, duration: d, ease: "none" }, s);
+    const sp = el.querySelectorAll(".v-spark line");
+    tl.fromTo(sp, { strokeDashoffset: 100, opacity: 1 }, { strokeDashoffset: 0, duration: 0.45, ease: E.out, stagger: 0.06 }, s + 0.55);
+    tl.to(sp, { opacity: 0, duration: 0.4 }, s + 1.25);
+    loop(tl, q(".v-float"), { y: 0, rotationY: -9 }, { y: -18, rotationY: 9 }, 3.4, s + 0.8, d - 1.4);
+    const f = FX[el.dataset.fx];
+    if (f) f(el, s, d, e);
+    tl.to(q(".v-in"), { opacity: 0, rotationY: 65, scale: 0.8, y: -40, duration: 0.45, ease: E.in }, e - 0.5);
+  }
+  document.querySelectorAll('.vis[id^="nokia-v"]').forEach(vis);
+  const badge = document.querySelector("#nokia-badge .b-in");
+  tl.fromTo(badge, { opacity: 0, y: -16, scale: 0.8 }, { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: E.back }, 1.4);
+  tl.to(badge, { opacity: 0, y: -12, duration: 0.3, ease: E.in }, 48.5);
+  const chap = document.querySelector("#nokia-chap .c-in");
+  if (chap) {
+    tl.fromTo(chap.querySelector(".num"), { x: 220, opacity: 0, scale: 1.25 }, { x: 0, opacity: 1, scale: 1, duration: 0.6, ease: E.expo }, 0.05);
+    tl.fromTo(chap.querySelector(".nm"), { y: 30, opacity: 0, scale: 1.3 }, { y: 0, opacity: 1, scale: 1, duration: 0.6, ease: E.out }, 0.25);
+    tl.fromTo(chap.querySelector("path"), { strokeDashoffset: 100 }, { strokeDashoffset: 0, duration: 0.7, ease: E.io }, 0.45);
+    tl.to(chap, { opacity: 0, scale: 0.9, duration: 0.35, ease: E.in }, 1.5);
+  }
+  tl.to({}, { duration: 0.01 }, 49);
+  window.__timelines["nokia"] = tl;
+  })();
+  </script>
+</template>
